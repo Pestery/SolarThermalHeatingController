@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\cr851\\source\\repos\\Project39\\WebAPI\\WebAPIPrototype\\WebApiPrototype\\WebApiPrototype.csproj": {}
+    "C:\\Users\\cr851\\source\\repos\\Project39g\\SolarThermalHeatingController\\Server\\WebApiPrototype\\WebApiPrototype\\WebApiPrototype.csproj": {}
   },
   "projects": {
-    "C:\\Users\\cr851\\source\\repos\\Project39\\WebAPI\\WebAPIPrototype\\WebApiPrototype\\WebApiPrototype.csproj": {
+    "C:\\Users\\cr851\\source\\repos\\Project39g\\SolarThermalHeatingController\\Server\\WebApiPrototype\\WebApiPrototype\\WebApiPrototype.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cr851\\source\\repos\\Project39\\WebAPI\\WebAPIPrototype\\WebApiPrototype\\WebApiPrototype.csproj",
+        "projectUniqueName": "C:\\Users\\cr851\\source\\repos\\Project39g\\SolarThermalHeatingController\\Server\\WebApiPrototype\\WebApiPrototype\\WebApiPrototype.csproj",
         "projectName": "WebApiPrototype",
-        "projectPath": "C:\\Users\\cr851\\source\\repos\\Project39\\WebAPI\\WebAPIPrototype\\WebApiPrototype\\WebApiPrototype.csproj",
+        "projectPath": "C:\\Users\\cr851\\source\\repos\\Project39g\\SolarThermalHeatingController\\Server\\WebApiPrototype\\WebApiPrototype\\WebApiPrototype.csproj",
         "packagesPath": "C:\\Users\\cr851\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cr851\\source\\repos\\Project39\\WebAPI\\WebAPIPrototype\\WebApiPrototype\\obj\\",
+        "outputPath": "C:\\Users\\cr851\\source\\repos\\Project39g\\SolarThermalHeatingController\\Server\\WebApiPrototype\\WebApiPrototype\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\cr851\\AppData\\Roaming\\NuGet\\NuGet.Config",

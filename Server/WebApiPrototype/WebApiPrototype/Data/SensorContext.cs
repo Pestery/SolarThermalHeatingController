@@ -13,7 +13,6 @@ namespace WebApiPrototype.Data
             {
             }
 
-            public DbSet<TodoItem> TodoItems { get; set; }
             public DbSet<TemperatureSensor> TemperatureSensor { get; set; }
       }
    

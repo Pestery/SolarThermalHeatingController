@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tRClG5FKHDLYgq2QRA2mgi7lJIt4jh9xNzFlS3wK4Xx0+biPdn+bzyW/rUB2dv8+PVF0rIakHU9gsDMSMY9YSg==",
+  "dgSpecHash": "n7OlKXejNO7SYYDEd4RYxWDbI5ZVA1U/F2dfNtdGVVKR/0Hlay37uI3wiJlc9v3D0JD4UMr0EV4GbYVmNAMghg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\cr851\\source\\repos\\Project39\\WebAPI\\WebAPIPrototype\\WebApiPrototype\\WebApiPrototype.csproj",
+  "projectFilePath": "C:\\Users\\cr851\\source\\repos\\Project39g\\SolarThermalHeatingController\\Server\\WebApiPrototype\\WebApiPrototype\\WebApiPrototype.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cr851\\.nuget\\packages\\bouncycastle.netcore\\1.8.5\\bouncycastle.netcore.1.8.5.nupkg.sha512",
     "C:\\Users\\cr851\\.nuget\\packages\\google.protobuf\\3.14.0\\google.protobuf.3.14.0.nupkg.sha512",
