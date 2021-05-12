@@ -3,8 +3,8 @@
 int temperaturePin = A0; // Analog pin which the sensor is connected to
 
 void setup() {
-  Serial.begin(74880); // For PC connection
-  Serial3.begin(74880); // For ESP8266 connection
+  Serial.begin(9600); // For PC connection
+  Serial3.begin(9600); // For ESP8266 connection
 }
 
 void loop() {

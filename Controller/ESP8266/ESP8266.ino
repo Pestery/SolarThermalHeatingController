@@ -1,18 +1,19 @@
 #include <ESP8266WiFi.h>
+#include "connection_info.h"
 
 #ifndef STASSID
-#define STASSID "TelstraD13601"
-#define STAPSK  "hftrjwfh43"
+#define STASSID "wifi-network-name"
+#define STAPSK  "wifi-network-password"
 #endif
 
 const char* ssid     = STASSID;
 const char* password = STAPSK;
 
-const char* host = "192.168.0.156";
-const uint16_t port = 27015;
+const char* host = "server-address"; // Server address where the data is sent
+const uint16_t port = 80;
 
 void setup() {
-  Serial.begin(74880);
+  Serial.begin(9600);
 
   // We start by connecting to a WiFi network
 
