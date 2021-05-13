@@ -9,14 +9,15 @@ Mobile app folder
 
 # What you will require 
 1. Android studio (needed for SDK and android virtual device)
-2. Chocolaty (their recommendation and works well for dowloading dependences) 
+2. Chocolaty (their recommendation and works well for dowloading dependences)
+3. vs code (optional) 
 
 # Installation process (can be found in https://docs.nativescript.org/environment-setup.html#windows-android)
 1. Install chocolatey
 2. open cmd in administrator and run --> choco install -y nodejs.install openjdk8
 3. Install Android studio
-*3a. When installing android studio, AVD must be install with it, not after, this will cause issues. see comment by voigtd --> https://github.com/NativeScript/nativescript-cli/issues/4596
-4. Set enviroment variables (better explain in native script documentation)
+*3a. When installing android studio, AVD MUST be install with it, not after, this will cause issues. see comment by voigtd --> https://github.com/NativeScript/nativescript-cli/issues/4596
+4. Set enviroment variables (better explained in native script documentation)
 *5. Also add three new additions to path they are
 *5a. ~/android/sdk/tools
 *5b. ~/android/sdk/tools/bin
@@ -38,19 +39,23 @@ Mobile app folder
 *9. To see if device is successfully added, go to cmd and type -->ns device android --available devices
 10. device should show up, if not something was done incorrectly
 
-# To run app, there are two options
+# nativescript for vs code
+1. download vs code
+2. go to extenstions and install nativescript
+3. follow instructions on the extenstion 
+
+# To run app
 1. Open AVD manager in android studio
 2. run a device
 3. open vs code
-4. Instal nativescript plugin
-5. launch on android 
+4. go to run and debug
+4. launch on android 
 
 System should be ready to go, if any issues contact Jack
 
 IF you get the following errors contact jack, i have gone through them all
 1. missing-emulator-engine-program-for-x86-cpu
 2. Emulator start failed with: No emulator image available for device identifier 'undefined'.
-3. cannot add library vulkan-1.dll: failed --> follow this link: https://professnow.com/blog/solved-emulator-cannot-add-library-vulkan-1-dll-failed/
 
 Useful commands
 - ns device android
