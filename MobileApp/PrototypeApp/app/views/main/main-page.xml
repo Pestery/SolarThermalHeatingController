@@ -1,0 +1,13 @@
+<!--
+    navigatingTo will run the function in main-page.js called navigatingTo
+    to get a objects value, use {{ }}, in this case its getRequest and message (found in user-view-model)
+--> 
+<Page navigatingTo="onNavigatingTo">
+    <ActionBar title="My App" icon="" />
+
+    <StackLayout class="p-20">
+        <Label text="Tap the button" class="h1 text-center" />
+        <Button text="GET Json" tap="{{ getRequest }}" class="-primary" />
+        <Label text="{{ message }}" class="h2 text-center" textWrap="true" />
+    </StackLayout>
+</Page>

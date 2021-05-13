@@ -1,1 +1,70 @@
 Mobile app folder
+* Denotes that step is not in nativescript documents
+# This will roughly take 30-60 minutes to setup
+
+# Installation process of nativescript
+# Documentation can be found here --> https://docs.nativescript.org/environment-setup.html#windows-android
+# Please follow the steps in the link above, the steps to instal are found in --> environment setup --> you setup (mine was windows + Android)
+# Read instrcutions carefully
+
+# What you will require 
+1. Android studio (needed for SDK and android virtual device)
+2. Chocolaty (their recommendation and works well for dowloading dependences)
+3. vs code (optional) 
+
+# Installation process (can be found in https://docs.nativescript.org/environment-setup.html#windows-android)
+1. Install chocolatey
+2. open cmd in administrator and run --> choco install -y nodejs.install openjdk8
+3. Install Android studio
+*3a. When installing android studio, AVD MUST be install with it, not after, this will cause issues. see comment by voigtd --> https://github.com/NativeScript/nativescript-cli/issues/4596
+4. Set enviroment variables (better explained in native script documentation)
+*5. Also add three new additions to path they are
+*5a. ~/android/sdk/tools
+*5b. ~/android/sdk/tools/bin
+*5c. ~/android/sdk/emulator
+*6. emulator must be higher on the list than tools and tools/bin
+7. open new cmd in administrator and run --> npm install -g nativescript
+*8. check if correctly installed by running --> ns doctor
+9. Make a new AVD in the next section
+
+# setting up a Android virtual Device (AVD)
+1. Open android studio 
+2. create new project (empty)
+3. Should download more stuff by default
+4. go to AVD Manager
+5. create new virtual device
+6. select whatever device and click next
+*7. go to x86 images and download the version that says "Q" for android 10.0. MUST BE x86_64 (as far as i can tell for my PC and laptop, may be ok for others)
+8. click finish
+*9. To see if device is successfully added, go to cmd and type -->ns device android --available devices
+10. device should show up, if not something was done incorrectly
+
+# nativescript for vs code
+1. download vs code
+2. go to extenstions and install nativescript
+3. follow instructions on the extenstion 
+
+# To run app
+1. Open AVD manager in android studio
+2. run a device
+3. open vs code
+4. go to run and debug
+4. launch on android 
+
+System should be ready to go, if any issues contact Jack
+
+IF you get the following errors contact jack, i have gone through them all
+1. missing-emulator-engine-program-for-x86-cpu
+2. Emulator start failed with: No emulator image available for device identifier 'undefined'.
+
+Useful commands
+- ns device android
+- ns run android
+- ns run android --log trace
+- ns doctor 
+- emulator -list-avds
+- emulator -avd (device)
+- emulator -avd PixelXL -no-snapshot-load
+- tns device <Platform> --available-devices
+- ns help
+- tns platform add android

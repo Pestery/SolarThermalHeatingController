@@ -1,1 +1,56 @@
 Server folder
+# Please messege jack if you have troubles 
+
+# Pre-requisites 
+1. install virtualbox by oracle version 6.1 --> https://www.virtualbox.org/ (needed for virtual machine)
+2. install vagrant --> https://www.vagrantup.com/ (Needed to run vagrant file)
+3. Install Postman --> https://www.postman.com/downloads/ (for sending json for testing)
+4. Visual studio 2019 version 16.9.4 or greater --> https://visualstudio.microsoft.com/ (for web api)
+
+# To run vagrant file for db and phpmyadmin
+# Information on this section --> https://www.yourtechy.com/technology/mysql-server-vagrant-virtualbox/
+1. install virtualbox 
+2. install vagrant 
+3. open git bash or cmd and go to directory with vagrant file (e.g ~SolarThermalHeatingController/Server)
+4. type "vagrant up"
+5. should startup a virtual machine and download stuff, will take a few minutes
+6. once done, go to a web browser and enter localhost:8306/phpmyadmin
+7. Username and password will be "dbuser" and "userpass". These can be found in the vagrant file
+8. if all succesful then it is done! You will be able to connect to it. A test can be done in the webAPI section below
+
+# WebAPI 
+1. install visual studio 2019 16.9.4 or greater
+2. open sln in WepApiPrototype folder
+3. run iis express (run button)
+4. should lunch smoothly, may say security risk will sll cert, just click continue
+5. Web API will seed database with 5 different rows, these can be found in the class "DBInitialiser"
+6. will not work if build errors, if build errors i can be the following issues 
+6a. NUGET packages are not installed, go to the right of screen under "solution explorer", go to "dependencies" and right click on "Packages" and click update. Yellow triangles should disapear
+6b. could be connection string
+6c. Virtual machine may not be running
+6d. Contact Jack if none of the above
+7. Web page should open with 5 json values, these are found from the database
+8. Go to the next Postman section below to test webAPI and db
+9. If you would like to learn about the webAPI and how to make once, use the following link (also includes postman steps) --> https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-web-api?view=aspnetcore-5.0&tabs=visual-studio
+
+#Postman
+# The visual steps for this section can be found here (halfway down the document)--> https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-web-api?view=aspnetcore-5.0&tabs=visual-studio
+# Follow the visual steps in conjuction with these notes if notes arent helpful
+1. Install postman
+2. No need to create an account, just continue
+3. have web API running and virtual machine
+4. Open postman, go to collections--> new --> request (create a basic request)
+5. Name request to whatever you like, you will also need to create a collection (its just a folder)
+6. This will be a GET request, enter "https://localhost:44393/api/TemperatureSensors/1" into the url and have it set to GET
+7. press send and should return a json from the db
+8. Next we will make a post, create another request and call it whatever you like
+9. Add "https://localhost:44393/api/TemperatureSensors" to the url and select post
+10. go to body --> raw and select json as your type
+11. Add this to the json 
+{
+    "id": 6,
+    "value": 18.11,
+    "readDate": "2005-09-01T13:00:00"
+}
+12. press the send button and check to database to see if it was successful 
+
