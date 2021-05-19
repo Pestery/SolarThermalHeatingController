@@ -17,6 +17,26 @@ namespace WebApiPrototype.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
                 .HasAnnotation("ProductVersion", "5.0.5");
 
+            modelBuilder.Entity("WebApiPrototype.Models.Temperature", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReadDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("double");
+
+                    b.Property<double>("valueer")
+                        .HasColumnType("double");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Temperature");
+                });
+
             modelBuilder.Entity("WebApiPrototype.Models.TemperatureSensor", b =>
                 {
                     b.Property<int>("Id")
@@ -32,23 +52,6 @@ namespace WebApiPrototype.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TemperatureSensor");
-                });
-
-            modelBuilder.Entity("WebApiPrototype.Models.TodoItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsComplete")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TodoItems");
                 });
 #pragma warning restore 612, 618
         }

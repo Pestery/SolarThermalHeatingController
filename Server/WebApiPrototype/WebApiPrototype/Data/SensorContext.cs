@@ -14,6 +14,7 @@ namespace WebApiPrototype.Data
             }
 
             public DbSet<TemperatureSensor> TemperatureSensor { get; set; }
-      }
+            public DbSet<Temperature> Temperature { get; set; }
+    }
    
 }
