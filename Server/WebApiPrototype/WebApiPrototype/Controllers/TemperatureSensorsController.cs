@@ -78,6 +78,7 @@ namespace WebApiPrototype.Controllers
         [HttpPost]
         public async Task<ActionResult<TemperatureSensor>> PostTemperatureSensor(TemperatureSensor temperatureSensor)
         {
+            System.Diagnostics.Debug.Print("POST request: id=" + temperatureSensor.Id + ", value=" + temperatureSensor.Value);
             _context.TemperatureSensor.Add(temperatureSensor);
             await _context.SaveChangesAsync();
 
