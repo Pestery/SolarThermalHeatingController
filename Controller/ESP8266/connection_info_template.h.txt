@@ -1,0 +1,12 @@
+#ifndef CONNECTION_INFO_H
+#define CONNECTION_INFO_H
+
+// The name and password of the wifi network which the Arduino should connect to
+#define WIFI_SSID "TelstraD13601"
+#define WIFI_PASSWORD  "hftrjwfh43"
+
+// The address and port number of the server to send data to
+#define DATABASE_ADDRESS = 192.168.0.156
+#define DATABASE_PORT = 44393
+
+#endif
