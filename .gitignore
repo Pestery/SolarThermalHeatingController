@@ -60,3 +60,6 @@ typings/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Arduino ignore
+connection_info.h
