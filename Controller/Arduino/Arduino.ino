@@ -21,33 +21,14 @@ void loop() {
 
   // Send to ESP8266
   Serial3.write(0); // Send an end character to reset the serial timeout and make sure the ESP8266 gets the whole message
-  Serial3.println("POST /api/TemperatureSensors HTTP/1.1");
-  Serial3.println("Content-Type: application/json");
   String body;
-  body = "{\"id\":";
-  body += ++sentRequests;
-  body += ", \"value\":";
-  body += temperature;
-  body += ", \"readDate\":\"2005-09-01T13:00:00\"}";
-  Serial3.print("Content-Length: ");
-  Serial3.println(body.length());
-  Serial3.println();
-  Serial3.println(body);
+  body = "{\"id\":" + String(++sentRequests);
+  body += ",\"value\":" + String(temperature);
+  body += ",\"readDate\":\"2005-09-01T13:00:00\"}";
+  String request = buildHttpPostRequest(body);
+  Serial3.print(request);
   Serial3.write(0); // Signal to the ESP8266 that this is the end of the transmission (a zero/null character)
 
-/***** Example POST request *******
-POST /echo/post/json HTTP/1.1
-Host: website.com
-Accept: application/json
-Content-Type: application/json
-Content-Length: 81
-
-{
-    "id":9,
-    "value":50.0,
-    "readDate":"2005-09-01T13:00:20"
-}
-***********************/
 
   delay(2000);
 }
@@ -66,4 +47,30 @@ float readThermistor(int analogPin) {
 
   // Return the temperature in Celcuis
   return temp - 273.15;
+}
+
+// Build a HTTP POST request string which contains JSON data
+// TODO: Once better communication between Arduino and ESP8266 is done, this method should be moved to the ESP8266
+String buildHttpPostRequest(String jsonData) {
+
+  /***** Example POST request *******
+  POST /some/page/address HTTP/1.1
+  Host: website.com:80
+  Accept: application/json
+  Content-Type: application/json
+  Content-Length: 10
+  
+  {"id":123}
+  ****************************
+  * Don't need Accept header *
+  * Do need Host header      *
+  * Line ending must be \r\n *
+  ***************************/
+  
+  String request = "POST /api/TemperatureSensors/ HTTP/1.1\r\n";
+    request += "Host: localhost:5000\r\n"; // TODO: Need to change this line to list the actual server address and port
+    request += "Content-Type: application/json\r\n";
+    request += "Content-Length: " + String(jsonData.length()) + "\r\n";
+    request += "\r\n" + jsonData;
+  return request;
 }
