@@ -30,7 +30,7 @@ void loop() {
   Serial3.write(0); // Signal to the ESP8266 that this is the end of the transmission (a zero/null character)
 
 
-  delay(2000);
+  delay(5000);
 }
 
 // Convert the raw analog input from a thermistor temperature sensor to a temperature (C) value

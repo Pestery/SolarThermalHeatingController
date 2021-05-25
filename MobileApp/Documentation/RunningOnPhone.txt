@@ -1,0 +1,10 @@
+Running app on mobile device
+
+- You can only build project for android if you own a windows computer, you will require a mac to be able to build a iphone app, something to do with xcode
+- you can still test and run code on an emulator, see "documentation.txt"
+
+# Running app on phone
+1. Watch this video --> https://www.youtube.com/watch?v=B5MP6xTedtQ
+2. All steps in video worked for me, using a oneplus 5 android phone
+
+If you want to borrow phone, message jack
