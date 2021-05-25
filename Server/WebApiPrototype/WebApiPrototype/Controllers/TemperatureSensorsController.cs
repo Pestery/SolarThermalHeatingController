@@ -42,6 +42,24 @@ namespace WebApiPrototype.Controllers
             return temperatureSensor;
         }
 
+        // Added by jack, used for prototype demo, just grabs the latest temp value from db for phone to display
+        // is called by http://localhost:5000/api/TemperatureSensors/GetLatest
+        [Route("[action]")]
+        [HttpGet]
+        public async Task<ActionResult<TemperatureSensor>> GetLatest()
+        {
+            // orders then finds first id (max), there is another method to do this which is .Max(), but both work fine
+            // and are just as fast as each other
+            var temperatureSensor = await _context.TemperatureSensor.OrderByDescending(p => p.Id).FirstOrDefaultAsync();
+
+            if (temperatureSensor == null)
+            {
+                return NotFound();
+            }
+
+            return temperatureSensor;
+        }
+
         // PUT: api/TemperatureSensors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
