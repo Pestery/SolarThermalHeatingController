@@ -1,0 +1,16 @@
+<Page xmlns:comps="./components" navigatingTo="onNavigatingTo" actionBarHidden="true">
+    <GridLayout columns="*" rows="*, auto" width="100%">
+        <StackLayout row="0">
+            <comps:header/>
+        </StackLayout>
+        <StackLayout row="1" height="80%">
+            <ListView items="{{ items }}" itemTap="onItemTap">
+                <ListView.itemTemplate>
+                    <StackLayout orientation="vertical">
+                        <Label text="{{ name }}" textWrap="true" />
+                    </StackLayout>
+                </ListView.itemTemplate>
+            </ListView>
+        </StackLayout>
+    </GridLayout>
+</Page>

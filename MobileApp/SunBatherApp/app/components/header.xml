@@ -1,0 +1,22 @@
+<!--
+    Notes
+    ~ must be used for images
+-->
+
+<StackLayout>
+    <StackLayout>
+        <GridLayout rows="auto" columns="*,*" >
+            <Label col="0" text="SunBather" /> 
+            <Image col="1" width="50" height="50" src="~/img/pete.jpg" />
+        </GridLayout>
+    </StackLayout>
+    <StackLayout>
+        <GridLayout columns="*,*,*,*" width="100%" height="40">
+            <Button class="active" text="Home" row="0" col="0" />
+            <Button text="Graphs" row="0" col="1" />
+            <Button text="Controller" row="0" col="2" />
+            <Button text="Connect" row="0" col="3" />
+        </GridLayout>
+    </StackLayout>
+</StackLayout>
+
