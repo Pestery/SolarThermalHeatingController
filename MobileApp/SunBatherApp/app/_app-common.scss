@@ -1,0 +1,115 @@
+@import '@nativescript/theme/core';
+@import '@nativescript/theme/default';
+
+// Place any CSS rules you want to apply on both iOS and Android here.
+// This is where the vast majority of your CSS code goes.
+
+// Font icon class
+.fab {
+  font-family: 'Font Awesome 5 Brands', 'fa-brands-400';
+  font-weight: 400;
+}
+
+.fas {
+  font-family: 'Font Awesome 5 Free', 'fa-solid-900';
+  font-weight: 900;
+}
+
+.far {
+  font-family: 'Font Awesome 5 Free', 'fa-regular-400';
+  font-weight: 400;
+}
+
+// Custom tabstrip item class
+.navigation__item {
+  &:active,
+  &:active Label {
+    @include colorize($contrasted-color: complementary background 20% 0%);
+  }
+}
+
+.home-page {
+  background-color:#FFF;
+}        
+
+.system-data-header {
+  width: 92%; 
+  font-size: 18;
+  padding-top: 14;
+  background-color: #1E90FF;
+  height: 45;
+  text-align: center; 
+  //border-radius: 6; soft edges
+}
+
+.system-datafield {
+  width: 92%;
+  font-size: 15;
+  height: 90; 
+  background-color: #bcff1e;
+  text-align: center; 
+}
+
+.system-data-sub {
+  padding-top: 14;
+  background-color:#00CED1;
+}
+
+.system-data-field {
+
+}
+
+.graph-data {
+  width: 92%;
+  background-color:#B8860B;
+  padding-top:5;
+  height: 225;
+}
+
+.view-other {
+  background-color:#FF4500;
+  height: 60;
+}
+
+.toolbar-header {
+  font-size: 20;
+  width: 100%;
+  margin-top: 2;
+  background-color: #1E90FF;
+  height: 80;
+  padding-top: 30;
+  padding-left: 20;
+}
+
+.toolbar-button {
+  font-size: 20;
+  width: 100%;
+  margin-top: 2;
+  background-color:#FFF;
+  text-align: center;
+  height: 40;
+  border-bottom-color: #ED2567;
+  border-bottom-width: 1;
+}
+
+.toolbar-button Label{
+  border: #bcff1e;
+  border-width: 5;
+}
+
+// Common page class
+.page__content {
+  &-icon,
+  &-placeholder {
+    color: const(grey);
+    font-size: 20;
+    vertical-align: center;
+    horizontal-align: center;
+  }
+
+  &-icon {
+    font-size: 72;
+    vertical-align: top;
+    margin-top: 20%;
+  }
+}
