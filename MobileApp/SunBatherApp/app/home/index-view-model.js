@@ -4,7 +4,7 @@ var config = require("../shared/config");
 var commonFunction = require("../shared/commonFunctions");
 
 export function UserViewModel() {
-  const viewModel = new Observable()
+  const viewModel = new Observable();
 
   // finds getJSON from API
   viewModel.getRequest = () => {
@@ -17,7 +17,7 @@ export function UserViewModel() {
     });
 
     Http.getJSON(config.apiGetRecordEventLatest).then(result => {
-     // console.log(result);
+      //console.log(result);
       viewModel.set('poolTemp', commonFunction.addCelcius(result.temperatureValueInput));
       viewModel.set('roofTemp', commonFunction.addCelcius(result.temperatureValueRoof));
       viewModel.set('currentUV', commonFunction.addUV(result.solarIrradiance));
@@ -32,8 +32,10 @@ export function UserViewModel() {
       console.log(error);
     });
 
+    console.log('Perhaops');
     viewModel.set('currentUV', "perhaps");
-  };
 
+  };
+  
   return viewModel
 }

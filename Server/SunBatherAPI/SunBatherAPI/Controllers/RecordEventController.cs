@@ -22,7 +22,7 @@ namespace SunBatherAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<RecordEvent>>> GetRecordEventList(Guid id)
+        public async Task<ActionResult<IEnumerable<RecordEvent>>> GetRecordEventList(int id)
         {
             var recordEvent = await _context.RecordEvent.Where(p => p.SystemIdentityID == id).ToListAsync();
 
@@ -36,7 +36,7 @@ namespace SunBatherAPI.Controllers
 
         [Route("[action]/{id}")]
         [HttpGet]
-        public async Task<ActionResult<RecordEvent>> GetRecordEventLatest(Guid id)
+        public async Task<ActionResult<RecordEvent>> GetRecordEventLatest(int id)
         {
             // orders then finds first id (max), there is another method to do this which is .Max(), but both work fine
             // and are just as fast as each other

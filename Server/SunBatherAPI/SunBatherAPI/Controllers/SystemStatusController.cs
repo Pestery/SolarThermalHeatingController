@@ -22,7 +22,7 @@ namespace SunBatherAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<SystemStatus>> GetSystemStatus(Guid? id)
+        public async Task<ActionResult<SystemStatus>> GetSystemStatus(int? id)
         {
             var test = await _context.SystemStatus.FirstOrDefaultAsync();
             var systemStatus = await _context.SystemStatus.FirstOrDefaultAsync(p => p.SystemIdentityID == id);

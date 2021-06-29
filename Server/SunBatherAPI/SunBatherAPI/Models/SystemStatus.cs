@@ -11,10 +11,11 @@ namespace SunBatherAPI.Models
     public class SystemStatus
     {
         public int Id { get; set; }
-        public Guid SystemIdentityID { get; set; }
+        public int SystemIdentityID { get; set; }
         public bool PumpMode { get; set; }
         public double SetTemperature { get; set; }
         public bool PumpStatus { get; set; } 
         public SystemIdentity SystemIdentity { get; set; }
+
     }
 }

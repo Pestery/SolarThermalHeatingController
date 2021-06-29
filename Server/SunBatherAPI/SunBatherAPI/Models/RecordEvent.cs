@@ -9,7 +9,7 @@ namespace SunBatherAPI.Models
     public class RecordEvent
     {
         public int Id { get; set; }
-        public Guid SystemIdentityID { get; set; }
+        public int SystemIdentityID { get; set; }
         public double TemperatureValueInput { get; set; }
         public double TemperatureValueOutput { get; set; }
         public double TemperatureValueRoof { get; set; }

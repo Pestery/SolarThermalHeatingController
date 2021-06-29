@@ -1,6 +1,6 @@
 import { fromObject } from '@nativescript/core'
 
-export function BrowseViewModel() {
+export function ContollerViewModel() {
   const viewModel = fromObject({
     /* Add your view model properties here */
   })

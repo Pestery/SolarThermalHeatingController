@@ -1,12 +1,12 @@
-<StackLayout rows="auto">
-    <GridLayout rows="auto" columns="*,*" width="100%" class="toolbar-header" >
-        <Label col="0" text="Sunbather" ></Label>
-        <Label col="1" horizontalAlignment="right" text="logo" ></Label>
+<StackLayout rows="auto" class="header">
+    <GridLayout rows="auto" columns="*,*" width="100%" class="header-top" >
+        <Label col="0" text="SunBather" />
+        <Label col="1" horizontalAlignment="right" text="logo" />
     </GridLayout>
-    <GridLayout rows="auto" columns="*,*,*,*" width="100%" class="toolbar-button" >
-        <Label col="0" text="Home"></Label>
-        <Label col="1" text="Graphs"></Label>
-        <Label col="2" text="Controller"></Label>
-        <Label col="3" text="Connect"></Label>
+    <GridLayout rows="auto" columns="*,*,*,*" width="100%" class="header-buttons" >
+        <Label col="0" text="Home" class="active" tap="onNavigateHome" />
+        <Label col="1" text="Graphs" tap="onNavigateGraphs" />
+        <Label col="2" text="Controller" tap="onNavigateController" />
+        <Label col="3" text="Connect" tap="onNavigateConnect" />
     </GridLayout>
 </StackLayout>

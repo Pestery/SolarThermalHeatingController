@@ -2,8 +2,12 @@
 // 10.0.2.2 is used FOR EMULATOR
 // 192.168.0.17 is used for MOBILE PHONE or for talking to another PC/Laptop in emulator
 // JACK TODO, work out how to make a config file to change depending on phone or emulator
+// JACK TODO make ignore for this file
 
-var guidKey = "48b25e0d-a114-4bc5-b707-72ff67a98ce7";
+
+var guidKey = "268dccb9-8af2-4943-af79-72e168b6af3e";
+var localAPIIP = "192.168.0.17";
+var localAPIPort = "5001";
 
 module.exports = {
   // Local only example
@@ -12,13 +16,13 @@ module.exports = {
   
   // Mobile phone or local example
   // Get temperature only (example)
-  apiGetTemp: "http://192.168.68.110:5001/api/TemperatureSensors/1", 
-  apiGetTempLatest: "http://192.168.68.110:5001/api/TemperatureSensors/GetLatest",
+  apiGetTemp: "http://" + localAPIIP + ":" + localAPIPort + "/api/TemperatureSensors/1", 
+  apiGetTempLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/TemperatureSensors/GetLatest",
 
   // Get system status
-  apiGetSystemStatus: "http://192.168.68.110:5001/api/SystemStatus/" + guidKey,
+  apiGetSystemStatus: "http://" + localAPIIP + ":" + localAPIPort + "/api/SystemStatus/" + guidKey,
 
   // Get record event
-  apiGetRecordEvent: "http://192.168.68.110:5001/api/RecordEvent/" + guidKey,
-  apiGetRecordEventLatest: "http://192.168.68.110:5001/api/RecordEvent/GetRecordEventLatest/" + guidKey,
+  apiGetRecordEvent: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/" + guidKey,
+  apiGetRecordEventLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventLatest/" + guidKey,
 };
