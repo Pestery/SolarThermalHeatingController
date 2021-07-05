@@ -1,6 +1,6 @@
 import { Http } from '@nativescript/core';
 import { Observable } from '@nativescript/core'
-var config = require("../shared/config");
+var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 
 export function UserViewModel() {
@@ -8,15 +8,15 @@ export function UserViewModel() {
 
   // finds getJSON from API
   viewModel.getRequest = () => {
-    Http.getJSON(config.apiGetSystemStatus).then(result => {
+    Http.getJSON(apiCall.GetSystemStatus).then(result => {
       //console.log(result);
-      viewModel.set('pumpStatus', commonFunction.convertBool(result.pumpStatus));
+      viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
     }, error => {
       console.log(error);
     });
 
-    Http.getJSON(config.apiGetRecordEventLatest).then(result => {
+    Http.getJSON(apiCall.GetRecordEventLatest).then(result => {
       //console.log(result);
       viewModel.set('poolTemp', commonFunction.addCelcius(result.temperatureValueInput));
       viewModel.set('roofTemp', commonFunction.addCelcius(result.temperatureValueRoof));
@@ -25,9 +25,9 @@ export function UserViewModel() {
       console.log(error);
     });
 
-    Http.getJSON(config.apiGetRecordEvent).then(result => {
+    Http.getJSON(apiCall.GetRecordEvent).then(result => {
       console.log(result);
-      viewModel.set('categoricalSource', commonFunction.convertDateTime(result));
+      viewModel.set('tempGraph', commonFunction.convertDateTime(result));
     }, error => {
       console.log(error);
     });
@@ -38,4 +38,4 @@ export function UserViewModel() {
   };
   
   return viewModel
-}
+} 

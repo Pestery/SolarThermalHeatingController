@@ -1,5 +1,10 @@
 export function onNavigateHome(args) {
     console.log("home");
+    const view = args.object;
+    const page = view.page;
+    //const tappedItem = view.bindingContext -- can add context
+  
+    page.frame.navigate("home/index");
 }
 
 export function onNavigateGraphs(args) {

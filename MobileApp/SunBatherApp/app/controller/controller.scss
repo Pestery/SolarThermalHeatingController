@@ -1,21 +1,45 @@
-.system-datafield-smaller {
-    font-size: 16;
+.field-header {
+    font-size: 18;
     padding-top: 6;
-    height: 42; 
-    background-color: #00BFFF;
+    height: 42;
+}
+
+.system-id {
+    @extend .field-header;
+    margin-top: 10;
+    background-color: #0032f8;
 }
 
 .system-settings {
-    font-size: 18;
-    margin-top: 4;
-    padding-top: 6;
-    height: 42;
+    @extend .field-header;
+    margin-top: 7;
     background-color: #CD5C5C;
 }
 
-.system-settings-data {
+.system-status {
+    @extend .field-header;
+    margin-top: 7;
+    background-color: #6b5ccd;
+}
+
+.system-datafield-controller {
     font-size: 16;
-    padding-top: 6;
-    height: 120;
-    background-color: #00BFFF;
+    padding-top: 7;
+    background-color: #1E90FF;
+}
+
+.system-datafield-controller-id {
+    @extend .system-datafield-controller;
+    height: 42;
+}
+
+.system-datafield-controller-settings {
+    @extend .system-datafield-controller;
+    height: 126;
+}
+
+.system-datafield-controller-status {
+    @extend .system-datafield-controller;
+    height: 84;
+    margin-bottom: 106;
 }

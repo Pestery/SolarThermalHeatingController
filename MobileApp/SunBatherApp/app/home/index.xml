@@ -42,7 +42,7 @@
                             <chart:LinearAxis/>
                         </chart:RadCartesianChart.verticalAxis>
                         <chart:RadCartesianChart.series>
-                            <chart:LineSeries items="{{ categoricalSource }}" categoryProperty="readDateTime" valueProperty="temperatureValueRoof">
+                            <chart:LineSeries items="{{ tempGraph }}" categoryProperty="readDateTime" valueProperty="temperatureValueRoof">
                             </chart:LineSeries>
                         </chart:RadCartesianChart.series>
                         <chart:RadCartesianChart.palettes>

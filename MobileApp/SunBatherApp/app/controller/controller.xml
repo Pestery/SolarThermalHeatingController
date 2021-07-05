@@ -5,37 +5,37 @@
         </StackLayout>
         <StackLayout row="1" height="82%">
             <StackLayout tap="{{ getRequest }}" class="system-data">
-                <GridLayout rows="*" columns="*" class="system-data-header-status">
+                <GridLayout rows="*" columns="*" class="system-id">
                     <Label col="0" text="Controller ID" textWrap="true"/>
                 </GridLayout>
-                <GridLayout rows="*" columns="*" class="system-datafield-smaller">
-                    <Label col="0" text="Sample ID" textWrap="true"/>
+                <GridLayout rows="*" columns="*" class="system-datafield-controller-id">
+                    <Label col="0" text="{{ systemID }}" textWrap="true"/>
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="system-settings">
                     <Label col="0" text="System Settings" textWrap="true"/>
                 </GridLayout>
-                <GridLayout rows="*,*,*" columns="*,*" class="system-settings-data">
-                    <Label col="0" row="0" text="System Set Temperature:" textWrap="true"/>
-                    <Label col="1" row="0" text="23 C" textWrap="true"/>
+                <GridLayout rows="*,*,*" columns="*,*" class="system-datafield-controller-settings">
+                    <Label col="0" row="0" text="Set Temperature:" textWrap="true"/>
+                    <Label col="1" row="0" text="{{ setTemp }}" textWrap="true"/>
 
-                    <Label col="0" row="1" text="Current Mode:" textWrap="true"/>
-                    <Label col="1" row="1" text="Auto" textWrap="true"/>
+                    <Label col="0" row="1" text="Set Mode:" textWrap="true"/>
+                    <Label col="1" row="1" text="{{ pumpMode }}" textWrap="true"/>
 
-                    <Label col="0" row="2" text="Manual Pump Control" textWrap="true"/>
-                    <Label col="1" row="2" text="On" textWrap="true"/>
+                    <Label col="0" row="2" text="Manual Pump Control:" textWrap="true"/>
+                    <Label col="1" row="2" text="{{ pumpStatus }}" textWrap="true"/>
                 </GridLayout>
-                <GridLayout rows="*" columns="*" class="system-settings">
+                <GridLayout rows="*" columns="*" class="system-status">
                     <Label col="0" text="System Status" textWrap="true"/>
                 </GridLayout>
-                <GridLayout rows="*,*" columns="*,*,*" class="system-datafield">
-                    <Label col="0" row="0" text="Pump Status" textWrap="true" class="system-data-sub-header"/>
-                    <Label col="0" row="1" text="{{ pumpStatus }}" textWrap="true" class="system-data-sub-field"/> 
-                    
-                    <Label col="1" row="0" text="Set Temperature" textWrap="true" class="system-data-sub-header"/>
-                    <Label col="1" row="1" text="{{ setTemp }}" textWrap="true" class="system-data-sub-field"/>
+                <GridLayout rows="*,*" columns="*,*" class="system-datafield-controller-status">
+                    <Label col="0" row="0" text="Pool Temperature" textWrap="true"/>
+                    <Label col="1" row="0" text="{{ livePoolTemp }}" textWrap="true" />                
                 
-                    <Label col="2" row="0" text="Pool Temperature" textWrap="true" class="system-data-sub-header"/>
-                    <Label col="2" row="1" text="{{ poolTemp }}" textWrap="true" class="system-data-sub-field"/>
+                    <Label col="0" row="1" text="Pump Status" textWrap="true"/>
+                    <Label col="1" row="1" text="{{ pumpStatus }}" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" visibility="{{ showDetails ? 'visible' : 'collapse'}}" columns="*" class="system-status">
+                    <Label col="0" text="System Status" textWrap="true"/>
                 </GridLayout>
             </StackLayout>
             <StackLayout class="view-other">

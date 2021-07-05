@@ -1,12 +1,22 @@
 // File contains all common functions used by most classes
 
 // convers true/false to on/off
-export function convertBool(message) {
+export function convertOnOff(message) {
     var sentence;
     if (message == true){
       sentence = "On";
     } else{
       sentence = "Off";
+    }
+    return sentence;
+}
+
+export function convertAutoManual(message) {
+    var sentence;
+    if (message == true){
+      sentence = "Auto";
+    } else{
+      sentence = "Manual";
     }
     return sentence;
 }
