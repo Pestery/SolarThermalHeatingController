@@ -16,6 +16,5 @@ namespace SunBatherAPI.Models
         public double SetTemperature { get; set; }
         public bool PumpStatus { get; set; } 
         public SystemIdentity SystemIdentity { get; set; }
-
     }
 }

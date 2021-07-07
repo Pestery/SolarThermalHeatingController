@@ -60,8 +60,8 @@ namespace SunBatherAPI.Data
             // pump true/false auto/manual on/off
             var systemStatus = new SystemStatus[]{
                 new SystemStatus{Id=1,SystemIdentityID=1,PumpMode=true,SetTemperature=27,PumpStatus=true},
-                new SystemStatus{Id=2,SystemIdentityID=1,PumpMode=true,SetTemperature=22,PumpStatus=false},
-                new SystemStatus{Id=3,SystemIdentityID=1,PumpMode=true,SetTemperature=20,PumpStatus=false}
+                new SystemStatus{Id=2,SystemIdentityID=2,PumpMode=true,SetTemperature=22,PumpStatus=false},
+                new SystemStatus{Id=3,SystemIdentityID=3,PumpMode=true,SetTemperature=20,PumpStatus=false}
             };
             foreach (SystemStatus ss in systemStatus)
             {

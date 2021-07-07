@@ -24,7 +24,6 @@ namespace SunBatherAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<SystemStatus>> GetSystemStatus(int? id)
         {
-            var test = await _context.SystemStatus.FirstOrDefaultAsync();
             var systemStatus = await _context.SystemStatus.FirstOrDefaultAsync(p => p.SystemIdentityID == id);
 
             if (systemStatus == null)
@@ -35,5 +34,38 @@ namespace SunBatherAPI.Controllers
             return systemStatus;
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutSystemStatus(int id, SystemStatus systemStatus)
+        {
+            if (id != systemStatus.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(systemStatus).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!SystemStatusExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        private bool SystemStatusExists(int id)
+        {
+            return _context.SystemStatus.Any(e => e.Id == id);
+        }
     }
 }

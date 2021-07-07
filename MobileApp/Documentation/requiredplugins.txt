@@ -1,0 +1,2 @@
+DATETIME PICKER: tns plugin add nativescript-datetimepicker
+GRAPH PLUGUN:

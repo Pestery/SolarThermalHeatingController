@@ -1,0 +1,61 @@
+<Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:chart="nativescript-ui-chart" >
+    <GridLayout columns="*" rows="*,auto" width="100%"  >
+        <StackLayout row="0" >
+            <comps:header />
+        </StackLayout>
+        <StackLayout row="1" height="82%" class="layout-scheme">
+            <StackLayout class="graph-data-page">
+                <StackLayout class="graph-header">
+                    <Label text="Energy Adsorbed" textWrap="true" />
+                </StackLayout>
+                <GridLayout rows="*" class="graph-data-info">
+                    <chart:RadCartesianChart id="cartesianChart">
+                        <chart:RadCartesianChart.horizontalAxis>
+                            <chart:CategoricalAxis/>
+                        </chart:RadCartesianChart.horizontalAxis>
+                        <chart:RadCartesianChart.verticalAxis>
+                            <chart:LinearAxis/>
+                        </chart:RadCartesianChart.verticalAxis>
+                        <chart:RadCartesianChart.series>
+                            <chart:LineSeries items="{{ tempGraph }}" categoryProperty="readDateTime" valueProperty="temperatureValueRoof">
+                            </chart:LineSeries>
+                        </chart:RadCartesianChart.series>
+                        <chart:RadCartesianChart.palettes>
+                            <chart:Palette >
+                                <chart:Palette.entries>
+                                    <chart:PaletteEntry  strokeColor="#FFF" />
+                                </chart:Palette.entries>
+                            </chart:Palette>
+                        </chart:RadCartesianChart.palettes>
+                    </chart:RadCartesianChart>
+                </GridLayout>
+            </StackLayout>
+            <StackLayout>
+                <DatePicker dayChange="{{ dateChanged }}" loaded="{{ onLoad }}"/>             
+                <GridLayout rows="*" columns="*,*,*" class="graph-stats-header">
+                    <Label col="0" row="0" text="Min" textWrap="true" />
+                    <Label col="1" row="0" text="Max" textWrap="true" />
+                    <Label col="2" row="0" text="Average" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*" class="graph-stats-data">
+                    <Label col="0" row="0" text="10" textWrap="true" />
+                    <Label col="1" row="0" text="20" textWrap="true" />
+                    <Label col="2" row="0" text="15" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*" class="options-header">
+                    <Label col="0" row="0" text="Graph Type" textWrap="true" />
+                    <Label col="1" row="0" text="Date From" textWrap="true" />
+                    <Label col="2" row="0" text="Date To" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*" class="options-data">
+                    <TextField col="0" row="0" text="Graph type" textWrap="true" keyboardType="datetime"/>
+                    <TextField col="1" row="0" text="Datefrom" textWrap="true" />
+                    <TextField col="2" row="0" text="Dateto" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="submit-button">
+                    <Label col="0" text="Update Graph" textWrap="true"/>
+                </GridLayout>
+            </StackLayout>
+        </StackLayout>
+    </GridLayout>
+</Page>

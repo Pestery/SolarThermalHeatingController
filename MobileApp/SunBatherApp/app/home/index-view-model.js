@@ -5,11 +5,11 @@ var commonFunction = require("../shared/commonFunctions");
 
 export function UserViewModel() {
   const viewModel = new Observable();
+  viewModel.set('headerSelected', 0); // needed for underline in header
 
   // finds getJSON from API
   viewModel.getRequest = () => {
     Http.getJSON(apiCall.GetSystemStatus).then(result => {
-      //console.log(result);
       viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
     }, error => {
@@ -17,7 +17,6 @@ export function UserViewModel() {
     });
 
     Http.getJSON(apiCall.GetRecordEventLatest).then(result => {
-      //console.log(result);
       viewModel.set('poolTemp', commonFunction.addCelcius(result.temperatureValueInput));
       viewModel.set('roofTemp', commonFunction.addCelcius(result.temperatureValueRoof));
       viewModel.set('currentUV', commonFunction.addUV(result.solarIrradiance));

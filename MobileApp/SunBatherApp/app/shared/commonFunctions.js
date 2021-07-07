@@ -1,11 +1,19 @@
 // File contains all common functions used by most classes
 
+// converts string to bool
+export function convertToBool(message) {
+    if (message.toLowerCase() == "auto" || message.toLowerCase() == "on") {
+      return true;
+    }
+    return false;
+}
+
 // convers true/false to on/off
 export function convertOnOff(message) {
     var sentence;
-    if (message == true){
+    if (message) {
       sentence = "On";
-    } else{
+    } else {
       sentence = "Off";
     }
     return sentence;
@@ -13,9 +21,9 @@ export function convertOnOff(message) {
 
 export function convertAutoManual(message) {
     var sentence;
-    if (message == true){
-      sentence = "Auto";
-    } else{
+    if (message) {
+      sentence = "Auto"; 
+    } else {
       sentence = "Manual";
     }
     return sentence;
