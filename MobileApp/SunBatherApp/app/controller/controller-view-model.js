@@ -1,12 +1,11 @@
-import { Http } from '@nativescript/core';
-import { Observable } from '@nativescript/core'
+import { Http, Observable } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 
 // peforms put requests for the database
 function putRequest(updatedPumpMode, updatePumpStatus, updateSetTemperature) {
   Http.request({
-    url: apiCall.PutSystemStatus,
+    url: apiCall.putSystemStatus,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     content: JSON.stringify({
@@ -28,10 +27,9 @@ function putRequest(updatedPumpMode, updatePumpStatus, updateSetTemperature) {
 export function ContollerViewModel() {
   const viewModel = new Observable();
   viewModel.set('headerSelected', 2); // needed for underline in header
-
   viewModel.set('systemID', apiCall.SystemID);
 
-  Http.getJSON(apiCall.GetSystemStatus).then(result => {
+  Http.getJSON(apiCall.getSystemStatus).then(result => {
     //console.log(result);
     viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
     viewModel.set('setTemp', result.setTemperature);       
@@ -41,7 +39,7 @@ export function ContollerViewModel() {
     console.log(error);
   });
 
-  Http.getJSON(apiCall.GetRecordEventLatest).then(result => {
+  Http.getJSON(apiCall.getRecordEventLatest).then(result => {
     //console.log(result);
     viewModel.set('livePoolTemp', commonFunction.addCelcius(result.temperatureValueInput));
   }, error => {

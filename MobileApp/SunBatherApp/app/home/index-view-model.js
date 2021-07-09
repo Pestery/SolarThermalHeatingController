@@ -1,5 +1,4 @@
-import { Http } from '@nativescript/core';
-import { Observable } from '@nativescript/core'
+import { Http, Observable } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 
@@ -9,14 +8,14 @@ export function UserViewModel() {
 
   // finds getJSON from API
   viewModel.getRequest = () => {
-    Http.getJSON(apiCall.GetSystemStatus).then(result => {
+    Http.getJSON(apiCall.getSystemStatus).then(result => {
       viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
     }, error => {
       console.log(error);
     });
 
-    Http.getJSON(apiCall.GetRecordEventLatest).then(result => {
+    Http.getJSON(apiCall.getRecordEventLatest).then(result => {
       viewModel.set('poolTemp', commonFunction.addCelcius(result.temperatureValueInput));
       viewModel.set('roofTemp', commonFunction.addCelcius(result.temperatureValueRoof));
       viewModel.set('currentUV', commonFunction.addUV(result.solarIrradiance));
@@ -24,8 +23,7 @@ export function UserViewModel() {
       console.log(error);
     });
 
-    Http.getJSON(apiCall.GetRecordEvent).then(result => {
-      console.log(result);
+    Http.getJSON(apiCall.getRecordEventList).then(result => {
       viewModel.set('tempGraph', commonFunction.convertDateTime(result));
     }, error => {
       console.log(error);

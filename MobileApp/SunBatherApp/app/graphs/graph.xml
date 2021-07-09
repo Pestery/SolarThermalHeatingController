@@ -4,7 +4,7 @@
             <comps:header />
         </StackLayout>
         <StackLayout row="1" height="82%" class="layout-scheme">
-            <StackLayout class="graph-data-page">
+            <StackLayout class="{{ showPicker ? 'graph-data-page-selected' : 'graph-data-page'}}">
                 <StackLayout class="graph-header">
                     <Label text="Energy Adsorbed" textWrap="true" />
                 </StackLayout>
@@ -30,8 +30,17 @@
                     </chart:RadCartesianChart>
                 </GridLayout>
             </StackLayout>
-            <StackLayout>
-                <DatePicker dayChange="{{ dateChanged }}" loaded="{{ onLoad }}"/>             
+            <!-- is invisible until date picker clicked -->
+            <StackLayout visibility="{{ showPicker ? 'visible' : 'collapse'}}">
+                <StackLayout>
+                    <DatePicker loaded="{{ onDatePickerLoaded }}" minDate="{{ minDate }}" maxDate="{{ maxDate }}" tap="{{ test }}"/>
+                </StackLayout>
+                <StackLayout class="graph-stats-header">
+                    <Label text="Date Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                </StackLayout>
+            </StackLayout>
+            <!-- is invisible when date picker clicked -->
+            <StackLayout visibility="{{ showPicker ? 'collapse' : 'visible'}}">
                 <GridLayout rows="*" columns="*,*,*" class="graph-stats-header">
                     <Label col="0" row="0" text="Min" textWrap="true" />
                     <Label col="1" row="0" text="Max" textWrap="true" />
@@ -49,11 +58,11 @@
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="options-data">
                     <TextField col="0" row="0" text="Graph type" textWrap="true" keyboardType="datetime"/>
-                    <TextField col="1" row="0" text="Datefrom" textWrap="true" />
-                    <TextField col="2" row="0" text="Dateto" textWrap="true" />
+                    <TextField col="1" row="0" text="Datefrom" textWrap="true" tap="{{ dateFromClicked }}"/>
+                    <TextField col="2" row="0" text="Dateto" textWrap="true" tap="{{ dateToClicked }}"/>
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="submit-button">
-                    <Label col="0" text="Update Graph" textWrap="true"/>
+                    <Label col="0" text="Update Graph" textWrap="true" tap="{{ updateGraph }}"/>
                 </GridLayout>
             </StackLayout>
         </StackLayout>

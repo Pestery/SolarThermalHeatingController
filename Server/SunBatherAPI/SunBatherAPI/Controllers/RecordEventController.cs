@@ -49,5 +49,22 @@ namespace SunBatherAPI.Controllers
 
             return recordEvent;
         }
+
+        [Route("[action]/{id}/{dateFrom}/{dateTo}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<RecordEvent>>> GetRecordEventDateToFrom(int id, long dateFrom, long dateTo)
+        {
+            DateTime dateFromExample = new DateTime(1970, 1, 1) + new TimeSpan(dateFrom * 10000);
+            DateTime dateToExample = new DateTime(1970, 1, 1) + new TimeSpan(dateTo * 10000);
+            // still need to make it request to db the times
+            var recordEvent = await _context.RecordEvent.Where(p => p.SystemIdentityID == id).ToListAsync();
+
+            if (recordEvent == null)
+            {
+                return NotFound();
+            }
+
+            return recordEvent;
+        }
     }
 }
