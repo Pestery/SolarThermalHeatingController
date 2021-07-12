@@ -32,4 +32,7 @@ export function onNavigateController(args) {
  
 export function onNavigateConnect(args) {
     console.log("Connect"); 
+    const view = args.object;
+    const page = view.page;
+    page.frame.navigate("connect/connect");
 }

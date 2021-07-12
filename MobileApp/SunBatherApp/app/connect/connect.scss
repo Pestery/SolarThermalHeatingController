@@ -1,0 +1,10 @@
+.field-header {
+    font-size: 18;
+    padding-top: 5;
+    height: 40;
+}
+
+.graph-header {
+    @extend .field-header;
+    background-color: #0032f8;
+}

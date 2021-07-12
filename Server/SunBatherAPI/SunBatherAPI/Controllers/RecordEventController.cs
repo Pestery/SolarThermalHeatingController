@@ -50,14 +50,30 @@ namespace SunBatherAPI.Controllers
             return recordEvent;
         }
 
+        [Route("[action]/{id}")]
+        [HttpGet]
+        public async Task<ActionResult<RecordEvent>> GetRecordEventEarliest(int id)
+        {
+            // orders then finds first id (min), there is another method to do this which is .min(), but both work fine
+            // and are just as fast as each other
+            var recordEvent = await _context.RecordEvent.OrderBy(p => p.Id).FirstOrDefaultAsync(p => p.SystemIdentityID == id);
+
+            if (recordEvent == null)
+            {
+                return NotFound();
+            }
+
+            return recordEvent;
+        }
+
         [Route("[action]/{id}/{dateFrom}/{dateTo}")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RecordEvent>>> GetRecordEventDateToFrom(int id, long dateFrom, long dateTo)
+        public async Task<ActionResult<IEnumerable<RecordEvent>>> GetRecordEventDateToFrom(int id, string dateFrom, string dateTo)
         {
-            DateTime dateFromExample = new DateTime(1970, 1, 1) + new TimeSpan(dateFrom * 10000);
-            DateTime dateToExample = new DateTime(1970, 1, 1) + new TimeSpan(dateTo * 10000);
-            // still need to make it request to db the times
-            var recordEvent = await _context.RecordEvent.Where(p => p.SystemIdentityID == id).ToListAsync();
+            DateTime dateFromTime = DateTime.Parse(dateFrom);
+            DateTime dateToTime = DateTime.Parse(dateTo);
+
+            var recordEvent = await _context.RecordEvent.Where(p => p.SystemIdentityID == id && ((p.ReadDateTime > dateFromTime) && (p.ReadDateTime < dateToTime))).ToListAsync();
 
             if (recordEvent == null)
             {

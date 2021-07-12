@@ -12,9 +12,6 @@ namespace SunBatherAPI.Data
         {
             context.Database.EnsureCreated();
 
-            Guid[] GuidsArray;
-            GuidsArray = GenerateGuidArray();
-
             if (context.TemperatureSensor.Any())
             {
                 return; // DB has already been seeded
@@ -33,6 +30,9 @@ namespace SunBatherAPI.Data
             }
             context.SaveChanges();
 
+            Guid[] GuidsArray;
+            GuidsArray = GenerateGuidArray();
+
             var systemID = new SystemIdentity[]{
                 new SystemIdentity{Id=1,ProductId=GuidsArray[0]},
                 new SystemIdentity{Id=2,ProductId=GuidsArray[1]},
@@ -44,13 +44,20 @@ namespace SunBatherAPI.Data
             }
             context.SaveChanges();
 
-            var recordEvent = new RecordEvent[]{
-                new RecordEvent{Id=1,SystemIdentityID=1,TemperatureValueInput=15.11,TemperatureValueOutput=19.20,TemperatureValueRoof=30.79,SolarIrradiance=1010,Emissions=100,Cost=0.25,EnergyAdsorbed=700,ReadDateTime=DateTime.Parse("2005-09-01 12:10")},
-                new RecordEvent{Id=2,SystemIdentityID=1,TemperatureValueInput=15.49,TemperatureValueOutput=20.21,TemperatureValueRoof=30.23,SolarIrradiance=1021,Emissions=100,Cost=0.25,EnergyAdsorbed=723,ReadDateTime=DateTime.Parse("2005-09-01 12:20")},
-                new RecordEvent{Id=3,SystemIdentityID=1,TemperatureValueInput=17.12,TemperatureValueOutput=22.22,TemperatureValueRoof=31.22,SolarIrradiance=1102,Emissions=50,Cost=0.12,EnergyAdsorbed=550,ReadDateTime=DateTime.Parse("2005-09-01 12:30")},
-                new RecordEvent{Id=4,SystemIdentityID=1,TemperatureValueInput=19.33,TemperatureValueOutput=24.43,TemperatureValueRoof=32.71,SolarIrradiance=1107,Emissions=100,Cost=0.25,EnergyAdsorbed=751,ReadDateTime=DateTime.Parse("2005-09-01 12:40")},
-                new RecordEvent{Id=5,SystemIdentityID=1,TemperatureValueInput=21.47,TemperatureValueOutput=25.67,TemperatureValueRoof=32.73,SolarIrradiance=1101,Emissions=100,Cost=0.25,EnergyAdsorbed=749,ReadDateTime=DateTime.Parse("2005-09-01 12:50")}
-            };
+            RecordEvent[] recordEvent;
+            int numberOfRecords = 50;
+            int timeInterval = 15; // in minutes 
+            bool dateTimeNow = false;
+            DateTime testingTime;
+
+            // can go to live times or a set time, set time is useful for testing on the mobile app, production will have live
+            if (dateTimeNow) {
+                testingTime = DateTime.Now;
+            } else {
+                testingTime = DateTime.Parse("07/11/2021 12:00");
+            }
+
+            recordEvent = RecordEventArrayGenerator(numberOfRecords, timeInterval, testingTime);
             foreach (RecordEvent re in recordEvent)
             {
                 context.RecordEvent.Add(re);
@@ -70,7 +77,7 @@ namespace SunBatherAPI.Data
             context.SaveChanges();
         }
 
-        // generates guids
+        // generates guids 
         public static Guid[] GenerateGuidArray()
         {
             int NumberOfGuids = 5;
@@ -80,6 +87,63 @@ namespace SunBatherAPI.Data
             }
 
             return GuidArray;
+        }
+
+        // cost cant be negative so this is used to prevent it, example max cost of running system is $2
+        public static double CostData(double cost, double minimum, double maximum, Random rnd)
+        {
+            cost = Math.Round(cost + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+
+            if (cost < 0) {
+                cost = 0;
+            } else if (cost > 2) {
+                cost = 2;
+            }
+
+            return cost; 
+        }
+
+        // generates data (only for one customer)
+        // functions works by counting back from the current time NOW, in intervals of the time you set (eg. 20 minutes)
+        public static RecordEvent[] RecordEventArrayGenerator(int samplesGenerated, int timeInterval, DateTime dateTime)
+        {
+            // initialise values
+            RecordEvent[] RecordEventArray = new RecordEvent[samplesGenerated];
+            Random rnd = new Random();
+            double maximum = 1;
+            double minimum = -1;
+            double temperatureInChange = 15;
+            double temperatureOutChange = 20;
+            double temperatureRoofChange = 30;
+            double solarIrradianceChange = 1000;
+            double emissions = 100;
+            double cost = 0.25;
+            double energyAdsorbed = 700;
+
+            for (int i = samplesGenerated; i > 0; i--) {
+                RecordEventArray[i - 1] = new RecordEvent{ 
+                    Id = i, 
+                    SystemIdentityID = 1, 
+                    TemperatureValueInput = temperatureInChange, 
+                    TemperatureValueOutput = temperatureOutChange, 
+                    TemperatureValueRoof = temperatureRoofChange, 
+                    SolarIrradiance = solarIrradianceChange, 
+                    Emissions = emissions, 
+                    Cost = cost, 
+                    EnergyAdsorbed = energyAdsorbed, 
+                    ReadDateTime = dateTime };
+
+                temperatureInChange = Math.Round(temperatureInChange + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+                temperatureOutChange = Math.Round(temperatureOutChange + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+                temperatureRoofChange = Math.Round(temperatureRoofChange + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+                solarIrradianceChange = Math.Round(solarIrradianceChange + (rnd.NextDouble() * ((maximum * 10) - (minimum * 10)) + (minimum * 10)), 1);
+                emissions = Math.Round(emissions + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+                cost = CostData(cost, minimum, maximum, rnd);
+                energyAdsorbed = Math.Round(energyAdsorbed + (rnd.NextDouble() * ((maximum * 10 ) - (minimum * 10)) + (minimum * 10)), 1);
+                dateTime = dateTime.AddMinutes(-timeInterval);
+            }
+
+            return RecordEventArray;
         }
     }
 }

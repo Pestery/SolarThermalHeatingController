@@ -27,10 +27,9 @@ function putRequest(updatedPumpMode, updatePumpStatus, updateSetTemperature) {
 export function ContollerViewModel() {
   const viewModel = new Observable();
   viewModel.set('headerSelected', 2); // needed for underline in header
-  viewModel.set('systemID', apiCall.SystemID);
+  viewModel.set('systemID', apiCall.systemID);
 
   Http.getJSON(apiCall.getSystemStatus).then(result => {
-    //console.log(result);
     viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
     viewModel.set('setTemp', result.setTemperature);       
     viewModel.set('pumpMode', commonFunction.convertAutoManual(result.pumpMode));
@@ -40,7 +39,6 @@ export function ContollerViewModel() {
   });
 
   Http.getJSON(apiCall.getRecordEventLatest).then(result => {
-    //console.log(result);
     viewModel.set('livePoolTemp', commonFunction.addCelcius(result.temperatureValueInput));
   }, error => {
     console.log(error);

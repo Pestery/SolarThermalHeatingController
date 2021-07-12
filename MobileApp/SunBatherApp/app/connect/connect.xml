@@ -1,0 +1,21 @@
+<Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:dd="nativescript-drop-down" >
+    <GridLayout columns="*" rows="*,auto" width="100%"  >
+        <StackLayout row="0" >
+            <comps:header />
+        </StackLayout>
+        <StackLayout row="1" height="82%" class="layout-scheme">
+            <StackLayout >
+               <StackLayout class="graph-header">
+                    <GridLayout rows="auto, auto, *" columns="auto, *">
+                        <dd:DropDown items="{{ items }}" selectedIndex="{{ selectedIndex }}" 
+                                    opened="dropDownOpened" closed="dropDownClosed" 
+                                    selectedIndexChanged="dropDownSelectedIndexChanged"
+                                    row="0" colSpan="2" />
+                           <Label text="Selected Index:" row="1" col="0" fontSize="18" verticalAlignment="bottom"/>
+                        <TextField text="{{ selectedIndex }}" row="1" col="1" />
+                    </GridLayout>
+                </StackLayout>
+            </StackLayout>
+        </StackLayout>
+    </GridLayout>
+</Page> 
