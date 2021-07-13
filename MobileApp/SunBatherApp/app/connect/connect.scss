@@ -3,8 +3,8 @@
     padding-top: 5;
     height: 40;
 }
-
-.graph-header {
+.options-header {
     @extend .field-header;
-    background-color: #0032f8;
+    margin-top: 6;
+    background-color: #f82500;
 }

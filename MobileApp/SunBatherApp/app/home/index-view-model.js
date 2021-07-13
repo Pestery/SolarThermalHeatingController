@@ -33,6 +33,7 @@ export function UserViewModel() {
     viewModel.set('currentUV', "perhaps");
 
   };
-  
+  viewModel.set('currentUV', 'pehaps');
+  console.log('loasded')
   return viewModel
 } 

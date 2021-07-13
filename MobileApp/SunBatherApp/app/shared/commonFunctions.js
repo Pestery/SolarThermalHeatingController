@@ -43,6 +43,7 @@ export function addUV(message) {
   return sentence;
 }
 
+// TO DO, MAKE IT PARSE INTO DATE TIME - JACK
 // used by convertDateTime functions, trims datetime
 function trimDateTime(readTimeValue) {
   readTimeValue = readTimeValue.slice(-8); // removes date
@@ -54,10 +55,10 @@ function trimDateTime(readTimeValue) {
 export function findGraphData(graphData) {
   var i; 
   const graphDataInfo = {};
-  var min = graphData[0].temperatureValueRoof;
-  var max = graphData[0].temperatureValueRoof;
-  var average = graphData[0].temperatureValueRoof;
+  var min, max, average;
+  min = max = average = graphData[0].temperatureValueRoof;
 
+  // trim date to be presentable, find min, max and average total
   for (i = 0; i < graphData.length; i++){
     graphData[i].readDateTime = trimDateTime(graphData[i].readDateTime);
 
@@ -72,6 +73,7 @@ export function findGraphData(graphData) {
     average = average + graphData[i].temperatureValueRoof;
   }
 
+  // find average
   average = average / graphData.length;
 
   graphDataInfo.graphDataArray = graphData;
@@ -82,3 +84,16 @@ export function findGraphData(graphData) {
   return graphDataInfo;
 }
 
+export function graphOptions() {
+  var graphOptionsList = [
+    { name: "Temperature Value In", nameAbbreviated: "Temp In", databaseField: "temperatureValueInput" },
+    { name: "Temperature Value Out", nameAbbreviated: "Temp Out", databaseField: "temperatureValueOutput" },
+    { name: "Temperature Value Roof", nameAbbreviated: "Temp Roof", databaseField: "temperatureValueRoof" },
+    { name: "Solar Irradiance", nameAbbreviated: "Solar Energy", databaseField: "solarIrradiance" },
+    { name: "Cost", nameAbbreviated: "Cost", databaseField: "cost" },
+    { name: "Emissions", nameAbbreviated: "Emissions", databaseField: "emissions" },
+    { name: "Energy Adsorbed", nameAbbreviated: "Energy", databaseField: "energyAdsorbed"},
+  ];
+
+  return graphOptionsList;
+}

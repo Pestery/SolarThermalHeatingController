@@ -1,24 +1,37 @@
-import { Http, Observable, ObservableArray } from '@nativescript/core'
+import { Http, Observable } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 
 export function ConnectViewModel() {
     const viewModel = new Observable();
-    const items = new ObservableArray();
     viewModel.set('headerSelected', 3); // needed for underline in header
     //var items = {};
-    
-    for (var loop = 0; loop < 20; loop++) {
-        items.push("Item " + loop.toString());
-    }
+    var countries = [
+        { name: "Australia" },
+        { name: "Belgium" },
+        { name: "Bulgaria" },
+        { name: "Canada" },
+        { name: "Switzerland" },
+        { name: "China" },
+        { name: "Czech Republic" },
+        { name: "Germany" },
+        { name: "Spain" },
+        { name: "Ethiopia" },
+        { name: "Croatia" },
+        { name: "Hungary" },
+        { name: "Italy" },
+        { name: "Jamaica" },
+        { name: "Romania" },
+        { name: "Russia" },
+        { name: "United States" },
+      ];
 
-    console.log(items)
+      viewModel.set('countries', countries)
+  
+      viewModel.onItemTap = (args) => {
+        console.log('Item with index: ' + args.index + ' tapped');
+      }
+  
 
-    viewModel.set("items", items);
-    viewModel.set("selectedIndex", 15);
-
-    viewModel.openDropDown = () => {
-        console.log('I was tapped'); //this works
-    }
     return viewModel
 }

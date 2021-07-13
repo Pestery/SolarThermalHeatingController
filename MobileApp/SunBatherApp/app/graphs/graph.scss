@@ -4,6 +4,11 @@
     height: 336; 
 }
 
+.graph-data-info {
+    font-size: 12;
+    background-color: #00BFFF;
+}
+
 .graph-data-page-selected {
     font-size: 18;
     margin-top: 2;
@@ -30,7 +35,7 @@
 .graph-stats-header {
     @extend .field-header;
     margin-top: 6;
-    background-color: #f80074;
+    background-color: #f82500;
 }
 
 .graph-stats-data {
@@ -62,3 +67,9 @@
     background-color: #0032f8;
 }
 
+.list-data {
+    font-size: 15;
+    margin-top: 6;
+    background-color: #1E90FF;
+
+}

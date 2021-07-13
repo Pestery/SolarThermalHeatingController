@@ -14,6 +14,7 @@ export function UserViewModel() {
    
   // finds getJSON from API
   viewModel.getRequest = () => {
+    console.log("hhhhh")
     Http.getJSON(config.apiMobileUrlGetLatest).then(result => {
       console.log(result);
       viewModel.set('message', getMessage(result));

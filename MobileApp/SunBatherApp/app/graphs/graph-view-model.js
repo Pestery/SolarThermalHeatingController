@@ -1,5 +1,4 @@
 import { Http, Observable } from '@nativescript/core'
-import { convertHSLToRGBColor } from '@nativescript/core/css/parser';
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 var apiRequests = require("../shared/apiRequests");
@@ -18,7 +17,15 @@ function pickerFunction(data, viewModel) {
 function graphPageIntialize(viewModel) {
   // needed for underline in header
   viewModel.set('headerSelected', 1); 
-  viewModel.set('showPicker', false);
+  viewModel.set('showDatePicker', false);
+  viewModel.set('showData', true);
+  viewModel.set('showGraphPicker', false);
+
+  // graph options list, default value loaded in screen is roof temp
+  var graphOptionList = commonFunction.graphOptions()
+  viewModel.set('graphOptions', graphOptionList);
+  viewModel.set('graphHeader', graphOptionList[2].name);
+  viewModel.set('displayGraph', graphOptionList[3].nameAbbreviated)
 
   // turn live data to true when testing live data, else it uses sample data from API 
   var liveData = false;
@@ -61,17 +68,26 @@ export function GraphViewModel() {
   }
 
   viewModel.dateFromClicked = () => {
-    viewModel.set('showPicker', true);
+    viewModel.set('showDatePicker', true);
+    viewModel.set('showData', false);
     viewModel.set('dateFromClicked', true);
   }
 
   viewModel.dateToClicked = () => { 
     viewModel.set('showPicker', true);
+    viewModel.set('showData', false);
     viewModel.set('dateFromClicked', false);
   }
 
   viewModel.hidePicker = () => {
-    viewModel.set('showPicker', false);
+    viewModel.set('showDatePicker', false);
+    viewModel.set('showData', true);
+    viewModel.set('showGraphPicker', false);
+  }
+
+  viewModel.graphPickerClicked = () => {
+    viewModel.set('showData', false);
+    viewModel.set('showGraphPicker', true);
   }
 
   viewModel.updateGraph = () => {
@@ -81,5 +97,10 @@ export function GraphViewModel() {
       console.log(error);
     });
   }
+
+  viewModel.onItemTap = (args) => {
+    console.log('Item with index: ' + args.index + ' tapped');
+  }
+
   return viewModel
 }

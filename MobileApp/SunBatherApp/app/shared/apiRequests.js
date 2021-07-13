@@ -3,7 +3,7 @@ var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 
 export function getRecordEventList(dateFrom, dateTo, viewModel) {
-    var dataArray;
+    // console.log(Object.keys(result[0])) can be used to find array property names, could be useful in future for decoupling option data from database - JACK
     Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
         const graphDataInfo = commonFunction.findGraphData(result);
         viewModel.set('graphData', graphDataInfo.graphDataArray);

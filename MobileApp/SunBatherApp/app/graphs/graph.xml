@@ -4,9 +4,9 @@
             <comps:header />
         </StackLayout>
         <StackLayout row="1" height="82%" class="layout-scheme">
-            <StackLayout class="{{ showPicker ? 'graph-data-page-selected' : 'graph-data-page'}}">
+            <StackLayout class="{{ showDatePicker ? 'graph-data-page-selected' : 'graph-data-page'}}">
                 <StackLayout class="graph-header">
-                    <Label text="Energy Adsorbed" textWrap="true" />
+                    <Label text="{{ graphHeader }}" textWrap="true" />
                 </StackLayout>
                 <GridLayout rows="*, 30" columns="*" class="graph-data-info">
                     <chart:RadCartesianChart row="0" id="cartesianChart">
@@ -32,7 +32,7 @@
                 </GridLayout>
             </StackLayout>
             <!-- is invisible until date picker clicked -->
-            <StackLayout visibility="{{ showPicker ? 'visible' : 'collapse'}}">
+            <StackLayout visibility="{{ showDatePicker ? 'visible' : 'collapse'}}" >
                 <StackLayout>
                     <DatePicker loaded="{{ onDatePickerLoaded }}" minDate="{{ minDate }}" maxDate="{{ maxDate }}" tap="{{ test }}"/>
                 </StackLayout>
@@ -40,8 +40,22 @@
                     <Label text="Date Submit" textWrap="true" tap='{{ hidePicker }}'/> 
                 </StackLayout>
             </StackLayout>
+            <StackLayout visibility="{{ showGraphPicker ? 'visible' : 'collapse'}}">
+                <StackLayout class="list-data">
+                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:575px">
+                        <ListView.itemTemplate>
+                            <FlexboxLayout flexDirection="row">
+                                <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" />
+                            </FlexboxLayout>
+                        </ListView.itemTemplate>
+                    </ListView>
+                </StackLayout>
+                <StackLayout class="graph-stats-header">
+                    <Label text="Graph Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                </StackLayout>
+            </StackLayout>
             <!-- is invisible when date picker clicked -->
-            <StackLayout visibility="{{ showPicker ? 'collapse' : 'visible'}}">
+            <StackLayout visibility="{{ showData ? 'visible' : 'collapse'}}">
                 <GridLayout rows="*" columns="*,*,*" class="graph-stats-header">
                     <Label col="0" row="0" text="Min" textWrap="true" />
                     <Label col="1" row="0" text="Max" textWrap="true" />
@@ -57,13 +71,13 @@
                     <Label col="1" row="0" text="Date From" textWrap="true" />
                     <Label col="2" row="0" text="Date To" textWrap="true" />
                 </GridLayout>
-                <GridLayout rows="*" columns="*,*,*" class="options-data">
-                    <TextField col="0" row="0" text="Graph type" textWrap="true" keyboardType="datetime"/>
-                    <TextField col="1" row="0" text="{{ displayDateFrom }}" textWrap="true" tap="{{ dateFromClicked }}"/>
-                    <TextField col="2" row="0" text="{{ displayDateTo }}" textWrap="true" tap="{{ dateToClicked }}"/>
+                <GridLayout rows="*" columns="*,*,*" class="options-data" >
+                    <TextField col="0" row="0" text="{{ displayGraph }}" textWrap="true" keyboardType="datetime" tap="{{ graphPickerClicked }}"/>
+                    <TextField col="1" row="0" text="{{ displayDateFrom }}" textWrap="true" tap="{{ dateFromClicked }}" />
+                    <TextField col="2" row="0" text="{{ displayDateTo }}" textWrap="true" tap="{{ dateToClicked }}" />
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="submit-button">
-                    <Label col="0" text="Update Graph" textWrap="true" tap="{{ updateGraph }}"/>
+                    <Label col="0" text="Update Graph" textWrap="true" tap="{{ updateGraph }}" />
                 </GridLayout>
             </StackLayout>
         </StackLayout>
