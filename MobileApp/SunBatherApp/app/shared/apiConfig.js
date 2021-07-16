@@ -5,7 +5,7 @@
 // JACK TODO make ignore for this file
 
 var guidKey = "1"; // need to make work for guid, just using int for now for testing -jack
-var localAPIIP = "192.168.0.17"; // need input
+var localAPIIP = "192.168.32.1"; // need input
 var localAPIPort = "5001";
 
 module.exports = {

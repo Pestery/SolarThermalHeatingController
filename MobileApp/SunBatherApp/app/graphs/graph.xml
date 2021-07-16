@@ -14,7 +14,7 @@
                             <chart:CategoricalAxis majorTickInterval="16" lastLabelVisibility="Visible" />
                         </chart:RadCartesianChart.horizontalAxis>
                         <chart:RadCartesianChart.verticalAxis>
-                            <chart:LinearAxis labelLayoutMode="Outer"/>
+                            <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}"/>
                         </chart:RadCartesianChart.verticalAxis>
                         <chart:RadCartesianChart.series>
                             <chart:LineSeries items="{{ graphData }}" categoryProperty="{{ xAxisData }}" valueProperty="{{ yAxisData }}">
@@ -42,10 +42,10 @@
             </StackLayout>
             <StackLayout visibility="{{ showGraphPicker ? 'visible' : 'collapse'}}">
                 <StackLayout class="list-data">
-                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:575px">
+                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:575px" >
                         <ListView.itemTemplate>
                             <FlexboxLayout flexDirection="row">
-                                <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" />
+                                <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>
                             </FlexboxLayout>
                         </ListView.itemTemplate>
                     </ListView>
@@ -72,7 +72,7 @@
                     <Label col="2" row="0" text="Date To" textWrap="true" />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="options-data" >
-                    <TextField col="0" row="0" text="{{ displayGraph }}" textWrap="true" keyboardType="datetime" tap="{{ graphPickerClicked }}"/>
+                    <TextField col="0" row="0" text="{{ graphSelected }}" textWrap="true" keyboardType="datetime" tap="{{ graphPickerClicked }}"/>
                     <TextField col="1" row="0" text="{{ displayDateFrom }}" textWrap="true" tap="{{ dateFromClicked }}" />
                     <TextField col="2" row="0" text="{{ displayDateTo }}" textWrap="true" tap="{{ dateToClicked }}" />
                 </GridLayout>

@@ -1,4 +1,4 @@
-import { Http, Observable } from '@nativescript/core'
+import { Http, Observable, ObservableArray } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 var apiRequests = require("../shared/apiRequests");
@@ -22,10 +22,10 @@ function graphPageIntialize(viewModel) {
   viewModel.set('showGraphPicker', false);
 
   // graph options list, default value loaded in screen is roof temp
-  var graphOptionList = commonFunction.graphOptions()
+  viewModel.set('graphOptionSelected', 1)
+  var graphOptionList = commonFunction.graphOptions();
+  graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
   viewModel.set('graphOptions', graphOptionList);
-  viewModel.set('graphHeader', graphOptionList[2].name);
-  viewModel.set('displayGraph', graphOptionList[3].nameAbbreviated)
 
   // turn live data to true when testing live data, else it uses sample data from API 
   var liveData = false;
@@ -56,7 +56,7 @@ function graphPageIntialize(viewModel) {
   viewModel.set('displayDateTo', dateNowConvert.getDate() + '/' + (dateNowConvert.getMonth() + 1) + '/' + dateNowConvert.getFullYear());
 
   // populates data on graph
-  apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel);
+  apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')]);
 }
 
 export function GraphViewModel() {
@@ -79,27 +79,34 @@ export function GraphViewModel() {
     viewModel.set('dateFromClicked', false);
   }
 
-  viewModel.hidePicker = () => {
-    viewModel.set('showDatePicker', false);
-    viewModel.set('showData', true);
-    viewModel.set('showGraphPicker', false);
-  }
-
   viewModel.graphPickerClicked = () => {
     viewModel.set('showData', false);
     viewModel.set('showGraphPicker', true);
   }
 
-  viewModel.updateGraph = () => {
-    Http.getJSON(apiCall.getRecordEventListToFrom + '/' + viewModel.get('storedDateFrom') + '/' + viewModel.get('storedDateTo')).then(result => {
-      //console.log(result);
-    }, error => {
-      console.log(error);
-    });
+  viewModel.hidePicker = () => {
+    var graphOptionList = commonFunction.graphOptions();
+    viewModel.set('showDatePicker', false);
+    viewModel.set('showData', true);
+    viewModel.set('showGraphPicker', false);
+    viewModel.set('graphSelected', graphOptionList[viewModel.get('graphOptionSelected')].nameAbbreviated);
   }
 
+  viewModel.updateGraph = () => {
+    var graphOptionList = commonFunction.graphOptions();
+    var getDateFrom = viewModel.get('storedDateFrom')
+    var getDateTo = viewModel.get('storedDateTo')
+    viewModel.set('min', 0);
+    viewModel.set('max', 5000);
+    apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')]);
+  }
+
+  // creates a new object everytime, but its the only way, obervable array is not good - jack 
   viewModel.onItemTap = (args) => {
-    console.log('Item with index: ' + args.index + ' tapped');
+    var graphOptionList = commonFunction.graphOptions();
+    graphOptionList[args.index].isSelected = true;
+    viewModel.set('graphOptions', graphOptionList);
+    viewModel.set('graphOptionSelected', args.index);
   }
 
   return viewModel

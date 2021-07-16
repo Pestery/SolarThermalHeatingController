@@ -22,7 +22,7 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "api/TemperatureSensors",
-      "applicationUrl": "http://localhost:5000;http://192.168.0.17:5001",
+      "applicationUrl": "http://localhost:5000;http://192.168.32.1:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
