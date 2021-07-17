@@ -45,7 +45,7 @@ namespace SunBatherAPI.Data
             context.SaveChanges();
 
             RecordEvent[] recordEvent;
-            int numberOfRecords = 50;
+            int numberOfRecords = 200;
             int timeInterval = 15; // in minutes 
             bool dateTimeNow = false;
             DateTime testingTime;
@@ -54,7 +54,7 @@ namespace SunBatherAPI.Data
             if (dateTimeNow) {
                 testingTime = DateTime.Now;
             } else {
-                testingTime = DateTime.Parse("11/07/2021 12:00");
+                testingTime = DateTime.Parse("07/11/2021 12:00");
             }
 
             recordEvent = RecordEventArrayGenerator(numberOfRecords, timeInterval, testingTime);

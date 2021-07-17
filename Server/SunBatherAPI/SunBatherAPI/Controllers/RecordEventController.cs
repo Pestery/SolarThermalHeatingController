@@ -73,7 +73,7 @@ namespace SunBatherAPI.Controllers
             DateTime dateFromTime = DateTime.Parse(dateFrom);
             DateTime dateToTime = DateTime.Parse(dateTo);
 
-            var recordEvent = await _context.RecordEvent.Where(p => p.SystemIdentityID == id && ((p.ReadDateTime > dateFromTime) && (p.ReadDateTime < dateToTime))).ToListAsync();
+            var recordEvent = await _context.RecordEvent.Where(p => p.SystemIdentityID == id && ((p.ReadDateTime >= dateFromTime) && (p.ReadDateTime <= dateToTime))).ToListAsync();
 
             if (recordEvent == null)
             {

@@ -1,4 +1,4 @@
-import { Http, Observable, ObservableArray } from '@nativescript/core'
+import { Observable } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 var apiRequests = require("../shared/apiRequests");
@@ -6,10 +6,15 @@ var apiRequests = require("../shared/apiRequests");
 function pickerFunction(data, viewModel) {
   const datePicker = data.object
   datePicker.on('dateChange', args => {
+    var updatedTimeISO = new Date(args.value).toISOString();
+    var updatedTime = new Date(args.value);
     if (viewModel.get('dateFromClicked')) {
-      viewModel.set('storedDateFrom', new Date(args.value).toISOString());
+      viewModel.set('storedDateFrom', updatedTimeISO);
+      viewModel.set('displayDateFrom', updatedTime.getDate() + '/' + (updatedTime.getMonth() + 1) + '/' + updatedTime.getFullYear());
+
     } else {
-      viewModel.set('storedDateTo', new Date(args.value).toISOString());
+      viewModel.set('storedDateTo', updatedTimeISO);
+      viewModel.set('displayDateTo', updatedTime.getDate() + '/' + (updatedTime.getMonth() + 1) + '/' + updatedTime.getFullYear());
     }
   })
 }
@@ -94,10 +99,9 @@ export function GraphViewModel() {
 
   viewModel.updateGraph = () => {
     var graphOptionList = commonFunction.graphOptions();
-    var getDateFrom = viewModel.get('storedDateFrom')
-    var getDateTo = viewModel.get('storedDateTo')
-    viewModel.set('min', 0);
-    viewModel.set('max', 5000);
+    var getDateFrom = viewModel.get('storedDateFrom');
+    var getDateTo = viewModel.get('storedDateTo');
+    console.log(getDateFrom);
     apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')]);
   }
 

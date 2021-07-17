@@ -11,7 +11,7 @@
                 <GridLayout rows="*, 30" columns="*" class="graph-data-info">
                     <chart:RadCartesianChart row="0" id="cartesianChart">
                         <chart:RadCartesianChart.horizontalAxis>
-                            <chart:CategoricalAxis majorTickInterval="16" lastLabelVisibility="Visible" />
+                            <chart:DateTimeContinuousAxis  majorStep="{{ graphXAxisInterval }}" majorStepUnit="{{ graphXAxisUnit }}" dateFormat="{{ graphFormat }}" plotMode="OnTicks"/>
                         </chart:RadCartesianChart.horizontalAxis>
                         <chart:RadCartesianChart.verticalAxis>
                             <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}"/>

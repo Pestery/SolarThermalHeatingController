@@ -43,31 +43,49 @@ export function addUV(message) {
   return sentence;
 }
 
-// TO DO, MAKE IT PARSE INTO DATE TIME - JACK
-// used by convertDateTime functions, trims datetime
-function trimDateTime(readTimeValue) {
-  readTimeValue = readTimeValue.slice(-8); // removes date
-  readTimeValue = readTimeValue.slice(0,-3); // removes seconds
-  return readTimeValue;
-}
-
 // finds average and rounds it to 1 decimal place
 function averageRound(average, count) {
   average = average / count;
   return average.toFixed(0);
 }
 
+function timePeriod(dateFrom, dateTo, graphDataInfo) {
+  var dateFromConverted = new Date(dateFrom);
+  var dateToConvert = new Date(dateTo);
+  var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate() 
+
+  if (dateDifference <= 1) {
+    graphDataInfo.xAxisInterval = 6;
+    graphDataInfo.xAxisUnit = "Hour";
+    graphDataInfo.xAxisFormat = "HH:mm";
+  } else if (dateDifference > 1 && dateDifference <= 3) {
+    graphDataInfo.xAxisInterval = 12;
+    graphDataInfo.xAxisUnit = "Hour";
+    graphDataInfo.xAxisFormat = "dd/MM HH:mm";
+  } else if (dateDifference > 3 && dateDifference <= 31){
+    graphDataInfo.xAxisInterval = 2;
+    graphDataInfo.xAxisUnit = "Day";
+    graphDataInfo.xAxisFormat = "dd/MM";
+  } else {
+    graphDataInfo.xAxisInterval = 1;
+    graphDataInfo.xAxisUnit = "Month";
+    graphDataInfo.xAxisFormat = "dd/MM";
+  }
+
+  console.log(graphDataInfo.xAxisInterval)
+  return graphDataInfo;
+}
+
 // converts datetime to time
-export function findGraphData(graphData, graphOption) {
+export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   var i; 
-  const graphDataInfo = {};
+  var graphDataInfo = {};
   var min, max, average;
   min = max = average = graphData[0][graphOption.databaseField];
 
-  //console.log(graphData[0][graphOption.databaseField])
   // trim date to be presentable, find min, max and average total
   for (i = 0; i < graphData.length; i++){
-    graphData[i].readDateTime = trimDateTime(graphData[i].readDateTime);
+    graphData[i].readDateTime = new Date(graphData[i].readDateTime).getTime();
 
     if (graphData[i][graphOption.databaseField] < min) {
       min = graphData[i][graphOption.databaseField];
@@ -88,7 +106,8 @@ export function findGraphData(graphData, graphOption) {
   graphDataInfo.min = min;
   graphDataInfo.max = max;
   graphDataInfo.average = average;
-  graphDataInfo.yAxisInterval = ((max - min) / 3).toFixed(0)
+  graphDataInfo.yAxisInterval = ((max - min) / 3).toFixed(0);
+  graphDataInfo = timePeriod(dateFrom, dateTo, graphDataInfo);
 
   return graphDataInfo;
 }
