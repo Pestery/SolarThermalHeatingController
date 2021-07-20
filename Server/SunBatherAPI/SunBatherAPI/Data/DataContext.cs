@@ -17,5 +17,6 @@ namespace SunBatherAPI.Data
             public DbSet<SystemIdentity> SystemID { get; set; }
             public DbSet<SystemStatus> SystemStatus { get; set; }
             public DbSet<RecordEvent> RecordEvent { get; set; }
-    }
+            public DbSet<CompetitorEvent> CompetitorEvent { get; set; }
+      }
 }

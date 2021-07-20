@@ -61,7 +61,7 @@ function graphPageIntialize(viewModel) {
   viewModel.set('displayDateTo', dateNowConvert.getDate() + '/' + (dateNowConvert.getMonth() + 1) + '/' + dateNowConvert.getFullYear());
 
   // populates data on graph
-  apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')]);
+  apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true);
 }
 
 export function GraphViewModel() {
@@ -79,7 +79,7 @@ export function GraphViewModel() {
   }
 
   viewModel.dateToClicked = () => { 
-    viewModel.set('showPicker', true);
+    viewModel.set('showDatePicker', true);
     viewModel.set('showData', false);
     viewModel.set('dateFromClicked', false);
   }
@@ -101,8 +101,7 @@ export function GraphViewModel() {
     var graphOptionList = commonFunction.graphOptions();
     var getDateFrom = viewModel.get('storedDateFrom');
     var getDateTo = viewModel.get('storedDateTo');
-    console.log(getDateFrom);
-    apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')]);
+    apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true);
   }
 
   // creates a new object everytime, but its the only way, obervable array is not good - jack 

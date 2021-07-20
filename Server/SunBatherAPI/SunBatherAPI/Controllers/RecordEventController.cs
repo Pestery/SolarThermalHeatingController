@@ -50,22 +50,6 @@ namespace SunBatherAPI.Controllers
             return recordEvent;
         }
 
-        [Route("[action]/{id}")]
-        [HttpGet]
-        public async Task<ActionResult<RecordEvent>> GetRecordEventEarliest(int id)
-        {
-            // orders then finds first id (min), there is another method to do this which is .min(), but both work fine
-            // and are just as fast as each other
-            var recordEvent = await _context.RecordEvent.OrderBy(p => p.Id).FirstOrDefaultAsync(p => p.SystemIdentityID == id);
-
-            if (recordEvent == null)
-            {
-                return NotFound();
-            }
-
-            return recordEvent;
-        }
-
         [Route("[action]/{id}/{dateFrom}/{dateTo}")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecordEvent>>> GetRecordEventDateToFrom(int id, string dateFrom, string dateTo)

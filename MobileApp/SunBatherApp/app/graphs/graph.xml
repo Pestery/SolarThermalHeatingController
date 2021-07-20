@@ -11,13 +11,13 @@
                 <GridLayout rows="*, 30" columns="*" class="graph-data-info">
                     <chart:RadCartesianChart row="0" id="cartesianChart">
                         <chart:RadCartesianChart.horizontalAxis>
-                            <chart:DateTimeContinuousAxis  majorStep="{{ graphXAxisInterval }}" majorStepUnit="{{ graphXAxisUnit }}" dateFormat="{{ graphFormat }}" plotMode="OnTicks"/>
+                            <chart:DateTimeContinuousAxis  majorStep="{{ graphXAxisInterval }}" majorStepUnit="{{ graphXAxisUnit }}" dateFormat="{{ graphFormat }}" plotMode="OnTicks" class="horizontal-Axis" />
                         </chart:RadCartesianChart.horizontalAxis>
                         <chart:RadCartesianChart.verticalAxis>
-                            <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}"/>
+                            <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}" class="vertical-Axis"/>
                         </chart:RadCartesianChart.verticalAxis>
                         <chart:RadCartesianChart.series>
-                            <chart:LineSeries items="{{ graphData }}" categoryProperty="{{ xAxisData }}" valueProperty="{{ yAxisData }}">
+                            <chart:LineSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}">
                             </chart:LineSeries>
                         </chart:RadCartesianChart.series>
                         <chart:RadCartesianChart.palettes>
@@ -27,14 +27,14 @@
                                 </chart:Palette.entries>
                             </chart:Palette>
                         </chart:RadCartesianChart.palettes>
-                    </chart:RadCartesianChart>
+                    </chart:RadCartesianChart> 
                     <label row="1" text="{{ axisLegend }}" textWrap="true" />
                 </GridLayout>
             </StackLayout>
             <!-- is invisible until date picker clicked -->
             <StackLayout visibility="{{ showDatePicker ? 'visible' : 'collapse'}}" >
-                <StackLayout>
-                    <DatePicker loaded="{{ onDatePickerLoaded }}" minDate="{{ minDate }}" maxDate="{{ maxDate }}" tap="{{ test }}"/>
+                <StackLayout >
+                    <DatePicker loaded="{{ onDatePickerLoaded }}" minDate="{{ minDate }}" maxDate="{{ maxDate }}" date="{{ dateFromClicked ? storedDateFrom : storedDateTo}}"/>
                 </StackLayout>
                 <StackLayout class="graph-stats-header">
                     <Label text="Date Submit" textWrap="true" tap='{{ hidePicker }}'/> 
@@ -62,9 +62,9 @@
                     <Label col="2" row="0" text="Average" textWrap="true" />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="graph-stats-data">
-                    <Label col="0" row="0" text="{{ min }}" textWrap="true" />
-                    <Label col="1" row="0" text="{{ max }}" textWrap="true" />
-                    <Label col="2" row="0" text="{{ average }}" textWrap="true" />
+                    <Label col="0" row="0" text="{{ minOption }}" textWrap="true" />
+                    <Label col="1" row="0" text="{{ maxOption }}" textWrap="true" />
+                    <Label col="2" row="0" text="{{ averageOption }}" textWrap="true" />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="options-header">
                     <Label col="0" row="0" text="Graph Type" textWrap="true" />
@@ -72,7 +72,7 @@
                     <Label col="2" row="0" text="Date To" textWrap="true" />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="options-data" >
-                    <TextField col="0" row="0" text="{{ graphSelected }}" textWrap="true" keyboardType="datetime" tap="{{ graphPickerClicked }}"/>
+                    <TextField col="0" row="0" text="{{ graphSelected }}" textWrap="true" tap="{{ graphPickerClicked }}"/>
                     <TextField col="1" row="0" text="{{ displayDateFrom }}" textWrap="true" tap="{{ dateFromClicked }}" />
                     <TextField col="2" row="0" text="{{ displayDateTo }}" textWrap="true" tap="{{ dateToClicked }}" />
                 </GridLayout>

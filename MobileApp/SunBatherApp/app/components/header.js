@@ -12,6 +12,13 @@ export function onNavigateGraphs(args) {
     page.frame.navigate("graphs/graph");
 }
 
+export function onNavigateCompare(args) {
+  console.log("Graphs Compare"); 
+  const view = args.object;
+  const page = view.page;
+  page.frame.navigate("graphsCompare/compare");
+}
+
 export function onNavigateController(args) {
     console.log("Controller"); 
     const view = args.object;

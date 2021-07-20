@@ -45,7 +45,8 @@ namespace SunBatherAPI.Data
             context.SaveChanges();
 
             RecordEvent[] recordEvent;
-            int numberOfRecords = 200;
+            CompetitorEvent[] competitorEvent;
+            int numberOfRecords = 3360;
             int timeInterval = 15; // in minutes 
             bool dateTimeNow = false;
             DateTime testingTime;
@@ -61,6 +62,13 @@ namespace SunBatherAPI.Data
             foreach (RecordEvent re in recordEvent)
             {
                 context.RecordEvent.Add(re);
+            }
+            context.SaveChanges();
+
+            competitorEvent = CompetitorEventArrayGenerator(numberOfRecords, timeInterval, testingTime);
+            foreach (CompetitorEvent ce in competitorEvent)
+            {
+                context.CompetitorEvent.Add(ce);
             }
             context.SaveChanges();
 
@@ -89,18 +97,33 @@ namespace SunBatherAPI.Data
             return GuidArray;
         }
 
-        // cost cant be negative so this is used to prevent it, example max cost of running system is $2
+        // cost cant be negative so this is used to prevent it, example max cost of running system is $0.5
         public static double CostData(double cost, double minimum, double maximum, Random rnd)
         {
             cost = Math.Round(cost + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
 
             if (cost < 0) {
                 cost = 0;
-            } else if (cost > 2) {
-                cost = 2;
+            } else if (cost > 0.5) {
+                cost = 0.5;
             }
 
             return cost; 
+        }
+
+        // Emissions cant be negative so this is used to prevent it, example max Emission of running system is 1
+        public static double EmissionData(double emission, double minimum, double maximum, Random rnd)
+        {
+            emission = Math.Round(emission + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+
+            if (emission < 0) {
+                emission = 0;
+            }
+            else if (emission > 1) {
+                emission = 1;
+            }
+
+            return emission;
         }
 
         // generates data (only for one customer)
@@ -116,7 +139,7 @@ namespace SunBatherAPI.Data
             double temperatureOutChange = 20;
             double temperatureRoofChange = 30;
             double solarIrradianceChange = 1000;
-            double emissions = 100;
+            double emissions = 1;
             double cost = 0.25;
             double energyAdsorbed = 700;
 
@@ -137,13 +160,44 @@ namespace SunBatherAPI.Data
                 temperatureOutChange = Math.Round(temperatureOutChange + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
                 temperatureRoofChange = Math.Round(temperatureRoofChange + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
                 solarIrradianceChange = Math.Round(solarIrradianceChange + (rnd.NextDouble() * ((maximum * 10) - (minimum * 10)) + (minimum * 10)), 1);
-                emissions = Math.Round(emissions + (rnd.NextDouble() * (maximum - minimum) + minimum), 1);
+                emissions = EmissionData(cost, minimum, maximum, rnd);
                 cost = CostData(cost, minimum, maximum, rnd);
                 energyAdsorbed = Math.Round(energyAdsorbed + (rnd.NextDouble() * ((maximum * 10 ) - (minimum * 10)) + (minimum * 10)), 1);
                 dateTime = dateTime.AddMinutes(-timeInterval);
             }
 
             return RecordEventArray;
+        }
+
+        public static CompetitorEvent[] CompetitorEventArrayGenerator(int samplesGenerated, int timeInterval, DateTime dateTime)
+        {
+            // initialise values
+            CompetitorEvent[] CompetitorEventArray = new CompetitorEvent[samplesGenerated];
+
+            // sample data from AusGrid (Per week)
+            // COST: Gas pump = 60, Gas Heater = 131
+            // Emissions: Gas pump = 290, Gas Heater = 354
+            // / 7 * 24 * 60 is to convert from a week to a minute
+            double gasPumpCost = (60.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
+            double gasHeaterCost = (131.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
+            double gasPumpEmissions = (290.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
+            double gasHeaterEmissions = (354.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
+
+            for (int i = samplesGenerated; i > 0; i--)
+            {
+                CompetitorEventArray[i - 1] = new CompetitorEvent
+                {
+                    Id = i,
+                    GasPumpCost = Math.Round(gasPumpCost, 3),
+                    GasHeaterCost = Math.Round(gasHeaterCost, 3),
+                    GasPumpEmissions = Math.Round(gasPumpEmissions, 3),
+                    GasHeaterEmissions = Math.Round(gasHeaterEmissions, 3),
+                    ReadDateTime = dateTime };
+
+                dateTime = dateTime.AddMinutes(-timeInterval);
+            }
+
+            return CompetitorEventArray;
         }
     }
 }

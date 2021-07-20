@@ -26,7 +26,7 @@ function putRequest(updatedPumpMode, updatePumpStatus, updateSetTemperature) {
 // main 
 export function ContollerViewModel() {
   const viewModel = new Observable();
-  viewModel.set('headerSelected', 2); // needed for underline in header
+  viewModel.set('headerSelected', 3); // needed for underline in header
   viewModel.set('systemID', apiCall.systemID);
 
   Http.getJSON(apiCall.getSystemStatus).then(result => {

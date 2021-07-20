@@ -4,7 +4,7 @@ var commonFunction = require("../shared/commonFunctions");
 
 export function ConnectViewModel() {
     const viewModel = new Observable();
-    viewModel.set('headerSelected', 3); // needed for underline in header
+    viewModel.set('headerSelected', 4); // needed for underline in header
     //var items = {};
     var countries = [
         { name: "Australia" },

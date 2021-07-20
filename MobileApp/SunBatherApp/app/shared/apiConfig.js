@@ -29,5 +29,10 @@ module.exports = {
   getRecordEventList: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/" + guidKey,
   getRecordEventListToFrom: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventDateToFrom/" + guidKey,
   getRecordEventLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventLatest/" + guidKey,
+
+  // Get competitor record event
+  getCompetitorEventList: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/" + guidKey,
+  getCompetitorEventListToFrom: "http://" + localAPIIP + ":" + localAPIPort + "/api/CompetitorEvent/GetCompetitorEventDateToFrom/" + guidKey,
+  getCompetitorEventLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventLatest/" + guidKey,
 };
 
