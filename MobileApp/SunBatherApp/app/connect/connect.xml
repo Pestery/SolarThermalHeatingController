@@ -5,28 +5,7 @@
         </StackLayout>
         <StackLayout row="1" height="82%" >
             <StackLayout >
-                <GridLayout rows="*" columns="*,*,*" class="options-header">
-                    <ListView col="0" row="0" items="{{ countries }}" itemTap="{{ onItemTap }}" style="height:125px">
-                        <ListView.itemTemplate>
-                            <FlexboxLayout flexDirection="row">
-                                <Label text="{{ name }}" class="t-12" verticalAlignment="center" style="width: 60%" />
-                            </FlexboxLayout>
-                        </ListView.itemTemplate>
-                    </ListView>
-                    <Label col="1" row="0" text="Date From" textWrap="true" />
-                    <Label col="2" row="0" text="Date To" textWrap="true" />
-                </GridLayout>
-                <GridLayout rows="*" columns="*,*,*" class="options-header">
-                    <ListView col="0" row="0" items="{{ countries }}" itemTap="{{ onItemTap }}" style="height:125px">
-                        <ListView.itemTemplate>
-                            <FlexboxLayout flexDirection="row">
-                                <Label text="{{ name }}" class="t-12" verticalAlignment="center" style="width: 60%" />
-                            </FlexboxLayout>
-                        </ListView.itemTemplate>
-                    </ListView>
-                    <Label col="1" row="0" text="Date Froms" textWrap="true" />
-                    <Label col="2" row="0" text="Date To" textWrap="true" />
-                </GridLayout>
+
             </StackLayout>
         </StackLayout>
     </GridLayout>

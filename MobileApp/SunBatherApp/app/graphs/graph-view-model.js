@@ -1,7 +1,7 @@
 import { Observable } from '@nativescript/core'
-var apiCall = require("../shared/apiConfig");
-var commonFunction = require("../shared/commonFunctions");
 var apiRequests = require("../shared/apiRequests");
+var commonFunction = require("../shared/commonFunctions");
+import { graphOptions }  from "../models/graphModel";
 
 function pickerFunction(data, viewModel) {
   const datePicker = data.object
@@ -28,40 +28,24 @@ function graphPageIntialize(viewModel) {
 
   // graph options list, default value loaded in screen is roof temp
   viewModel.set('graphOptionSelected', 1)
-  var graphOptionList = commonFunction.graphOptions();
+  var graphOptionList = graphOptions();
   graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
   viewModel.set('graphOptions', graphOptionList);
 
-  // turn live data to true when testing live data, else it uses sample data from API 
+  // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done
   var liveData = false;
-  var dateNow;
-  var dateYesterday;
-  var dateNowConvert;
-  var dateYesterdayConvert;
+  var dateInfo = commonFunction.isLiveData(liveData);
 
-   // iso string is good and prevents time zone hassle when converting to C#
-  if (liveData) {
-    dateNow = new Date().toISOString();
-    dateYesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-    dateNowConvert = new Date(dateNow);
-    dateYesterdayConvert = new Date(dateYesterday); 
-  } else {
-    dateNow = new Date("07/11/2021 12:00").toISOString();
-    dateYesterday = new Date("07/10/2021 12:00").toISOString();
-    dateNowConvert = new Date(dateNow);
-    dateYesterdayConvert = new Date(dateYesterday); 
-  }
- 
   // for getRequest
-  viewModel.set('storedDateFrom', dateYesterday); 
-  viewModel.set('storedDateTo', dateNow);
+  viewModel.set('storedDateFrom', dateInfo.dateYesterday); 
+  viewModel.set('storedDateTo', dateInfo.dateNow);
 
   // display dates (MONTH must have + 1 for since months are done 0-11, not 1-12)
-  viewModel.set('displayDateFrom', dateYesterdayConvert.getDate() + '/' + (dateYesterdayConvert.getMonth() + 1) + '/' + dateYesterdayConvert.getFullYear());
-  viewModel.set('displayDateTo', dateNowConvert.getDate() + '/' + (dateNowConvert.getMonth() + 1) + '/' + dateNowConvert.getFullYear());
+  viewModel.set('displayDateFrom', dateInfo.dateYesterdayConvert.getDate() + '/' + (dateInfo.dateYesterdayConvert.getMonth() + 1) + '/' + dateInfo.dateYesterdayConvert.getFullYear());
+  viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
 
   // populates data on graph
-  apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true);
+  apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true);
 }
 
 export function GraphViewModel() {
@@ -85,20 +69,19 @@ export function GraphViewModel() {
   }
 
   viewModel.graphPickerClicked = () => {
+    
     viewModel.set('showData', false);
     viewModel.set('showGraphPicker', true);
   }
 
   viewModel.hidePicker = () => {
-    var graphOptionList = commonFunction.graphOptions();
     viewModel.set('showDatePicker', false);
     viewModel.set('showData', true);
     viewModel.set('showGraphPicker', false);
-    viewModel.set('graphSelected', graphOptionList[viewModel.get('graphOptionSelected')].nameAbbreviated);
   }
 
   viewModel.updateGraph = () => {
-    var graphOptionList = commonFunction.graphOptions();
+    var graphOptionList = graphOptions();
     var getDateFrom = viewModel.get('storedDateFrom');
     var getDateTo = viewModel.get('storedDateTo');
     apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true);
@@ -106,10 +89,11 @@ export function GraphViewModel() {
 
   // creates a new object everytime, but its the only way, obervable array is not good - jack 
   viewModel.onItemTap = (args) => {
-    var graphOptionList = commonFunction.graphOptions();
+    var graphOptionList = graphOptions();
     graphOptionList[args.index].isSelected = true;
     viewModel.set('graphOptions', graphOptionList);
     viewModel.set('graphOptionSelected', args.index);
+    viewModel.set('graphSelected', graphOptionList[viewModel.get('graphOptionSelected')].nameAbbreviated);
   }
 
   return viewModel

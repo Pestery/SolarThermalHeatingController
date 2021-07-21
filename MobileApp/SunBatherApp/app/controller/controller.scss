@@ -6,19 +6,19 @@
 
 .system-id {
     @extend .field-header;
-    margin-top: 10;
+    margin-top: 2;
     background-color: #0032f8;
 }
 
 .system-settings {
     @extend .field-header;
-    margin-top: 7;
+    margin-top: 4;
     background-color: #CD5C5C;
 }
 
 .system-status {
     @extend .field-header;
-    margin-top: 7;
+    margin-top: 4;
     background-color: #6b5ccd;
 }
 
@@ -47,7 +47,6 @@
 .system-datafield-controller-status {
     @extend .system-datafield-controller;
     height: 84;
-    margin-bottom: 106;
 }
 
 .visible {
@@ -62,4 +61,14 @@
     background-color: #1E90FF;
     opacity: 0.5;
     height: 42;
+}
+
+.view-other {
+    width: 100%;
+    font-size: 18;
+    margin-top: 137;
+    padding-top: 3;
+    background-color: #1E90FF;
+    border-width: 2;
+    height: 40;
 }

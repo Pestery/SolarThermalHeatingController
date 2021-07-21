@@ -49,7 +49,6 @@ function graphDataOption(viewModel, databaseField, graphDataArray, dataType) {
     viewModel.set('graphData' + dataType, graphDataArray);
 }
 
-// works for now, will need to be cleaned up 
 export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, graphPage) {
     var dataType = "Option";
     Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
@@ -76,7 +75,7 @@ export function getCompetitorEventList(dateFrom, dateTo, viewModel, graphOption,
     }
 
     Http.getJSON(apiCall.getCompetitorEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
-        const compareDataInfo = commonFunction.createGraphData(result, optionChosen);
+        const compareDataInfo = commonFunction.findGraphDataCompare(result, optionChosen);
         graphDataOption(viewModel, optionChosen, compareDataInfo.graphDataArray, dataType);
         fieldData(viewModel, compareDataInfo.min, compareDataInfo.max, compareDataInfo.average, dataType);
         graphTitleCompare(viewModel, graphOption.name, graphOption.nameAbbreviated, compareOption.name, compareOption.nameAbbreviated);

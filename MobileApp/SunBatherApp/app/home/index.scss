@@ -1,71 +1,65 @@
-.home-page {
-    background-color:#FFF;
-}        
+.field-header {
+    font-size: 18;
+    padding-top: 5;
+    height: 40;
+}
 
 .system-data-header-status {
-    font-size: 18;
-    //margin-top: 4;
-    padding-top: 6;
-    height: 42;
+    @extend .field-header;
     background-color: #FF8C00;
-    //border-radius: 6; soft edges
 }
 
 .system-data-header-conditions {
-    font-size: 18;
+    @extend .field-header;    
     margin-top: 4;
-    padding-top: 6;
-    height: 42;
     background-color: #CD5C5C;
 }
 
 .system-datafield {
-    font-size: 15;
-    height: 70; 
-    background-color: #00BFFF;
+    font-size: 14;
+    height: 62; 
+    background-color: #1E90FF;
+    padding-top: 6;
 }
 
 .system-data-sub-header {
-    padding-top: 8;
-    background-color:#00BFFF;
     border-bottom-color: #00CED1;
     border-bottom-width: 2;
-    height: 40; 
-}
-
-.system-data-sub-field {
-    padding-bottom: 8;
-    height: 30; 
 }
 
 .graph-data {
-    width: 96%;
     font-size: 18;
     margin-top: 4;
-    text-align: center; 
-    color: #FFF;
-    height: 275;
+    height: 303;
 }
 
 .graph-data-header {
-    padding-top: 6;
+    @extend .field-header;
     background-color:#4B0082;
-    height: 42;
 }
 
 .graph-data-info {
     font-size: 12;
-    background-color: #00BFFF;
+    background-color: #1E90FF;
 }
 
 .view-other {
-    width: 100%;
     font-size: 18;
     margin-top: 4;
-    padding-top: 5;
-    text-align: center;  
-    color: #FFF;
+    padding-top: 3;
     background-color: #1E90FF;
     border-width: 2;
-    height: 46;
+    height: 40;
+}
+
+.horizontal-Axis {
+    label-Fit-Mode: Rotate;
+    line-Hidden: false;
+    line-color: white;
+    line-Thickness: 1
+}
+
+.vertical-Axis {
+    line-color: white;
+    line-Thickness: 1
 }

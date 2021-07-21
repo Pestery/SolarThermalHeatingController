@@ -2,6 +2,8 @@ import { Observable } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 var apiRequests = require("../shared/apiRequests");
+import { compareOptions }  from "../models/compareModel";
+import { competitorOptions }  from "../models/competitorModel";
 
 function pickerFunction(data, viewModel) {
     const datePicker = data.object
@@ -27,47 +29,31 @@ function comparePageIntialize(viewModel) {
 
     // graph options list, default value loaded in screen is emissions
     viewModel.set('graphOptionSelected', 1)
-    var graphOptionList = commonFunction.graphOptionsCompare();
+    var graphOptionList = compareOptions();
     graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
     viewModel.set('graphOptions', graphOptionList);
 
     // compare options list, default value loaded in screen is 
     viewModel.set('compareOptionSelected', 1)
-    var compareOptionList = commonFunction.competitorOptions();
+    var compareOptionList = competitorOptions();
     compareOptionList[viewModel.get('compareOptionSelected')].isSelected = true;
     viewModel.set('compareOptions', compareOptionList);
 
-    // turn live data to true when testing live data, else it uses sample data from API 
+    // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done
     var liveData = false;
-    var dateNow;
-    var dateYesterday;
-    var dateNowConvert;
-    var dateYesterdayConvert;
-
-    // iso string is good and prevents time zone hassle when converting to C#
-    if (liveData) {
-        dateNow = new Date().toISOString();
-        dateYesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-        dateNowConvert = new Date(dateNow);
-        dateYesterdayConvert = new Date(dateYesterday); 
-    } else {
-        dateNow = new Date("07/11/2021 12:00").toISOString();
-        dateYesterday = new Date("07/10/2021 12:00").toISOString();
-        dateNowConvert = new Date(dateNow);
-        dateYesterdayConvert = new Date(dateYesterday); 
-    }
+    var dateInfo = commonFunction.isLiveData(liveData);
     
     // for getRequest
-    viewModel.set('storedDateFrom', dateYesterday); 
-    viewModel.set('storedDateTo', dateNow);
+    viewModel.set('storedDateFrom', dateInfo.dateYesterday); 
+    viewModel.set('storedDateTo', dateInfo.dateNow);
 
     // display dates (MONTH must have + 1 for since months are done 0-11, not 1-12)
-    viewModel.set('displayDateFrom', dateYesterdayConvert.getDate() + '/' + (dateYesterdayConvert.getMonth() + 1) + '/' + dateYesterdayConvert.getFullYear());
-    viewModel.set('displayDateTo', dateNowConvert.getDate() + '/' + (dateNowConvert.getMonth() + 1) + '/' + dateNowConvert.getFullYear());
+    viewModel.set('displayDateFrom', dateInfo.dateYesterdayConvert.getDate() + '/' + (dateInfo.dateYesterdayConvert.getMonth() + 1) + '/' + dateInfo.dateYesterdayConvert.getFullYear());
+    viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
 
     // populates data on graph
-    apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false);
-    apiRequests.getCompetitorEventList(dateYesterday, dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], compareOptionList[viewModel.get('compareOptionSelected')]);
+    apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false);
+    apiRequests.getCompetitorEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], compareOptionList[viewModel.get('compareOptionSelected')]);
 }
 
 export function CompareViewModel() {
@@ -101,8 +87,8 @@ export function CompareViewModel() {
   }
     
     viewModel.hidePicker = () => {
-        var graphOptionList = commonFunction.graphOptionsCompare();
-        var compareOptionList = commonFunction.competitorOptions();
+        var graphOptionList = compareOptions();
+        var compareOptionList = competitorOptions();
         viewModel.set('showDatePicker', false);
         viewModel.set('showData', true);
         viewModel.set('showGraphPicker', false);
@@ -112,8 +98,8 @@ export function CompareViewModel() {
     }
     
     viewModel.updateGraph = () => {
-        var graphOptionList = commonFunction.graphOptionsCompare();
-        var compareOptionList = commonFunction.competitorOptions();
+        var graphOptionList = compareOptions();
+        var compareOptionList = competitorOptions();
         var getDateFrom = viewModel.get('storedDateFrom');
         var getDateTo = viewModel.get('storedDateTo');
         apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false);
@@ -122,14 +108,14 @@ export function CompareViewModel() {
     
       // creates a new object everytime, but its the only way, obervable array is not good - jack 
     viewModel.onItemTapGraph = (args) => {
-        var graphOptionList = commonFunction.graphOptionsCompare();
+        var graphOptionList = compareOptions();
         graphOptionList[args.index].isSelected = true;
         viewModel.set('graphOptions', graphOptionList);
         viewModel.set('graphOptionSelected', args.index);
     }
 
     viewModel.onItemTapCompare = (args) => {
-        var compareOptionList = commonFunction.competitorOptions();
+        var compareOptionList = competitorOptions();
         compareOptionList[args.index].isSelected = true;
         viewModel.set('compareOptions', compareOptionList);
         viewModel.set('compareOptionSelected', args.index);

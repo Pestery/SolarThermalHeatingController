@@ -1,0 +1,42 @@
+INSTRUCTIONS: 
+1. Add your local IP address to this file and to the web api (under Properties -> launchSettings.json)
+2. rename this file to "apiConfig.js" 
+3. apiConfig.js is in the gitignore file and wont be pushed to github, prevents ip issues
+3. if you have issues message jack
+
+// file is for urls
+// 10.0.2.2 is used FOR EMULATOR
+// localAPIIP is used for MOBILE PHONE or EMULATOR (allows for communcation across api in other local computers)
+
+var guidKey = "1"; // need to make work for guid, just using int for now for testing -jack
+var localAPIIP = "INPUT IP HERE"; // e.g 192.168.0.12, this can be found in command prompt -> ipconfig 
+var localAPIPort = "5001"; // set port of API, modify if you have modified on web api 
+
+module.exports = {
+  systemID: "71823731239",
+  keyID: 1,
+  
+  // Local only example
+  localUrlGet: "http://10.0.2.2:5000/api/TemperatureSensors/1", // find id 1
+  localUrlGetLatest: "http://10.0.2.2:5000/api/TemperatureSensors/GetLatest", // finds latest id (max)
+  
+  // Mobile phone or local example
+  // Get temperature only (example)
+  getTemp: "http://" + localAPIIP + ":" + localAPIPort + "/api/TemperatureSensors/1", 
+  getTempLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/TemperatureSensors/GetLatest",
+
+  // Get system status
+  getSystemStatus: "http://" + localAPIIP + ":" + localAPIPort + "/api/SystemStatus/" + guidKey,
+  putSystemStatus: "http://" + localAPIIP + ":" + localAPIPort + "/api/SystemStatus/" + guidKey,
+
+  // Get record event
+  getRecordEventList: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/" + guidKey,
+  getRecordEventListToFrom: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventDateToFrom/" + guidKey,
+  getRecordEventLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventLatest/" + guidKey,
+
+  // Get competitor record event
+  getCompetitorEventList: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/" + guidKey,
+  getCompetitorEventListToFrom: "http://" + localAPIIP + ":" + localAPIPort + "/api/CompetitorEvent/GetCompetitorEventDateToFrom/" + guidKey,
+  getCompetitorEventLatest: "http://" + localAPIIP + ":" + localAPIPort + "/api/RecordEvent/GetRecordEventLatest/" + guidKey,
+};
+

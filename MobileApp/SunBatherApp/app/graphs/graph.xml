@@ -36,13 +36,13 @@
                 <StackLayout >
                     <DatePicker loaded="{{ onDatePickerLoaded }}" minDate="{{ minDate }}" maxDate="{{ maxDate }}" date="{{ dateFromClicked ? storedDateFrom : storedDateTo}}"/>
                 </StackLayout>
-                <StackLayout class="graph-stats-header">
+                <StackLayout class="submit-button">
                     <Label text="Date Submit" textWrap="true" tap='{{ hidePicker }}'/> 
                 </StackLayout>
             </StackLayout>
             <StackLayout visibility="{{ showGraphPicker ? 'visible' : 'collapse'}}">
                 <StackLayout class="list-data">
-                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:575px" >
+                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:505px" >
                         <ListView.itemTemplate>
                             <FlexboxLayout flexDirection="row">
                                 <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>
@@ -50,8 +50,8 @@
                         </ListView.itemTemplate>
                     </ListView>
                 </StackLayout>
-                <StackLayout class="graph-stats-header">
-                    <Label text="Graph Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                <StackLayout class="submit-button">
+                    <Label text="Option Submit" textWrap="true" tap='{{ hidePicker }}'/> 
                 </StackLayout>
             </StackLayout>
             <!-- is invisible when date picker clicked -->
