@@ -1,4 +1,12 @@
-﻿{
+﻿// INSTRUCTIONS 
+// 1. add your local ip to line 27 (e.g http://192.0.0.21:5001)
+// 2. ip can be found in command prompt -> ipconfig
+// 3. do this as well for the app
+// 4. rename this file to "launchSettings.json"
+// 5. launchSettings.json is in the gitignore file and wont be pushed to github, prevents ip issues
+// 6. if you have issues message jack
+
+{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
@@ -22,7 +30,7 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "api/TemperatureSensors",
-      "applicationUrl": "http://localhost:5000;http://192.168.0.17:5001",
+      "applicationUrl": "http://localhost:5000;http://ADD IP HERE:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
