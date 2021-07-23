@@ -1,10 +1,15 @@
-.field-header {
-    font-size: 18;
-    padding-top: 5;
-    height: 40;
-}
-.options-header {
-    @extend .field-header;
-    margin-top: 6;
-    background-color: #f82500;
+.connect-page-styles {
+    .field-header {
+        width: 90%;
+        font-size: 18;
+        padding-top: 6;
+        height: 42;
+    }
+
+    .system-id {
+        @extend .field-header;
+        margin-top: 200;
+        margin-bottom: 1;
+        background-color: #0032f8;
+    }
 }

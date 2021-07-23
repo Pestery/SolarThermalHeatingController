@@ -1,5 +1,5 @@
 <Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true">
-    <GridLayout columns="*" rows="*,auto" width="100%"  >
+    <GridLayout columns="*" rows="*,auto" width="100%" class="controller-page-styles" >
         <StackLayout row="0" >
             <comps:header />
         </StackLayout>
@@ -35,10 +35,8 @@
                 </GridLayout>
             </StackLayout>
             <StackLayout class="view-other">
-                <Label text="Configure Controller Wifi Settings" />
+                <Label text="Configure Controller Wifi Settings" tap="onNavigateConnect"/>
             </StackLayout>  
         </StackLayout>
     </GridLayout>
 </Page>
-
-<!--- visibility="{{ showDetails ? 'visible' : 'collapse'}}" -->

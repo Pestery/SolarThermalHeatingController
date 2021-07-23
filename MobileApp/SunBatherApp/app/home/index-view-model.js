@@ -28,7 +28,6 @@ function indexPageIntialize(viewModel) {
       dateYesterday = new Date("07/10/2021 12:00").toISOString();
     }
     
-    console.log('entered function')
     // populates data on graph
     apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[defualtSetting], true);
 }

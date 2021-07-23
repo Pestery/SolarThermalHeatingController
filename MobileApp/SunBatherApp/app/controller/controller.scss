@@ -1,74 +1,76 @@
-.field-header {
+.controller-page-styles {
+    .field-header {
     font-size: 18;
     padding-top: 6;
     height: 42;
-  }
+    }
 
-.system-id {
-    @extend .field-header;
-    margin-top: 2;
-    background-color: #0032f8;
-}
+    .system-id {
+        @extend .field-header;
+        margin-top: 2;
+        background-color: #0032f8;
+    }
 
-.system-settings {
-    @extend .field-header;
-    margin-top: 4;
-    background-color: #CD5C5C;
-}
+    .system-settings {
+        @extend .field-header;
+        margin-top: 4;
+        background-color: #0032f8;
+    }
 
-.system-status {
-    @extend .field-header;
-    margin-top: 4;
-    background-color: #6b5ccd;
-}
+    .system-status {
+        @extend .field-header;
+        margin-top: 4;
+        background-color: #0032f8;
+    }
 
-.system-datafield-controller {
-    font-size: 16;
-    padding-top: 7;
-    background-color: #1E90FF;
-}
+    .system-datafield-controller {
+        font-size: 16;
+        padding-top: 7;
+        background-color: #1E90FF;
+    }
 
-.system-datafield-controller-id {
-    @extend .system-datafield-controller;
-    height: 42;
-}
+    .system-datafield-controller-id {
+        @extend .system-datafield-controller;
+        height: 42;
+    }
 
-.system-datafield-controller-settings {
-    @extend .system-datafield-controller;
-    height: 78;
-}
+    .system-datafield-controller-settings {
+        @extend .system-datafield-controller;
+        height: 78;
+    }
 
-.system-datafield-controller-settings TextField {
-    font-size: 16;
-    color: #FFF;
-    height: 38;
-}
+    .system-datafield-controller-settings TextField {
+        font-size: 16;
+        color: #FFF;
+        height: 38;
+    }
 
-.system-datafield-controller-status {
-    @extend .system-datafield-controller;
-    height: 84;
-}
+    .system-datafield-controller-status {
+        @extend .system-datafield-controller;
+        height: 84;
+    }
 
-.visible {
-    font-size: 16;
-    background-color: #1E90FF;
-    height: 40;
-}
+    .visible {
+        font-size: 16;
+        background-color: #1E90FF;
+        height: 40;
+    }
 
-.opaque {
-    font-size: 16;
-    padding-top: 6;
-    background-color: #1E90FF;
-    opacity: 0.5;
-    height: 42;
-}
+    .opaque {
+        font-size: 16;
+        padding-top: 6;
+        background-color: #1E90FF;
+        opacity: 0.5;
+        height: 42;
+    }
 
-.view-other {
-    width: 100%;
-    font-size: 18;
-    margin-top: 137;
-    padding-top: 3;
-    background-color: #1E90FF;
-    border-width: 2;
-    height: 40;
+    .view-other {
+        width: 100%;
+        font-size: 18;
+        margin-top: 137;
+        padding-top: 3;
+        background-color: #1E90FF;
+        border-width: 2;
+        height: 40;
+    }
 }

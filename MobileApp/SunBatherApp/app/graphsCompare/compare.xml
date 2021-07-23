@@ -1,5 +1,5 @@
 <Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:chart="nativescript-ui-chart" >
-    <GridLayout columns="*" rows="*,auto" width="100%"  >
+    <GridLayout columns="*" rows="*,auto" width="100%" class="compare-page-styles">
         <StackLayout row="0" >
             <comps:header />
         </StackLayout>

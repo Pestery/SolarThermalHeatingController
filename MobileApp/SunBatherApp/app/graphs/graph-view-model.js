@@ -69,7 +69,6 @@ export function GraphViewModel() {
   }
 
   viewModel.graphPickerClicked = () => {
-    
     viewModel.set('showData', false);
     viewModel.set('showGraphPicker', true);
   }

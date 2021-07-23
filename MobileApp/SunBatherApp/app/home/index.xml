@@ -1,5 +1,5 @@
 <Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:chart="nativescript-ui-chart">
-    <GridLayout columns="*" rows="*,auto" width="100%"  >
+    <GridLayout columns="*" rows="*,auto" width="100%"  class="index-page-styles">
         <StackLayout row="0" >
             <comps:header />
         </StackLayout>
@@ -8,22 +8,26 @@
                 <GridLayout rows="*" columns="*" class="system-data-header-status">
                     <Label col="0" text="System Status" textWrap="true"/>
                 </GridLayout>
-                <GridLayout rows="*,*" columns="*,*,*" class="system-datafield">
-                    <Label col="0" row="0" text="Pump Status" textWrap="true" class="system-data-sub-header" />
-                    <Label col="0" row="1" text="{{ pumpStatus }}" textWrap="true" />                     
-                    <Label col="1" row="0" text="Set Temperature" textWrap="true" class="system-data-sub-header" />
-                    <Label col="1" row="1" text="{{ setTemp }}" textWrap="true" />               
-                    <Label col="2" row="0" text="Pool Temperature" textWrap="true" class="system-data-sub-header" />
-                    <Label col="2" row="1" text="{{ poolTemp }}" textWrap="true" />
+                <GridLayout rows="*" columns="*,*,*" class="system-datafield">
+                    <Label col="0" text="Pump Status" textWrap="true" />
+                    <Label col="1" text="Set Temperature" textWrap="true" />
+                    <Label col="2" text="Pool Temperature" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*" class="system-datafield-data">
+                    <Label col="0" text="{{ pumpStatus }}" textWrap="true" />                     
+                    <Label col="1" text="{{ setTemp }}" textWrap="true" /> 
+                    <Label col="2" text="{{ poolTemp }}" textWrap="true" />              
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="system-data-header-conditions">
                     <Label col="0" text="Current Conditions" textWrap="true"/>
                 </GridLayout>
-                <GridLayout rows="*,*" columns="*,*" class="system-datafield">
-                    <Label col="0" row="0" text="Current Roof Temperature" textWrap="true" class="system-data-sub-header" />
-                    <Label col="0" row="1" text="{{ roofTemp }}" textWrap="true" />
-                    <Label col="1" row="0" text="Current UV" textWrap="true" class="system-data-sub-header" />
-                    <Label col="1" row="1" text="{{ currentUV }}" textWrap="true" />
+                <GridLayout rows="*" columns="*,*" class="system-datafield">
+                    <Label col="0" text="Current Roof Temperature" textWrap="true" class="system-data-sub-header" />
+                    <Label col="1" text="Current UV" textWrap="true" class="system-data-sub-header" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*" class="system-datafield-data">
+                    <Label col="0" text="{{ roofTemp }}" textWrap="true" />
+                    <Label col="1" text="{{ currentUV }}" textWrap="true" />
                 </GridLayout>
             </StackLayout>
             <StackLayout class="graph-data">

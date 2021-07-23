@@ -1,109 +1,111 @@
-.graph-data-page {
-    font-size: 18;
-    height: 320; 
-}
+.compare-page-styles {
+    .graph-data-page {
+        font-size: 18;
+        height: 320; 
+    }
 
-.graph-data-info {
-    font-size: 12;
-    background-color: #1E90FF;
-}
+    .graph-data-info {
+        font-size: 12;
+        background-color: #1E90FF;
+    }
 
-.graph-data-page-selected {
-    font-size: 18;
-    margin-top: 2;
-    height: 290; 
-}
+    .graph-data-page-selected {
+        font-size: 18;
+        margin-top: 2;
+        height: 290; 
+    }
 
-.field-header {
-    font-size: 18;
-    padding-top: 4;
-    height: 38;
-}
+    .field-header {
+        font-size: 18;
+        padding-top: 4;
+        height: 38;
+    }
 
-.sub-headings {
-    font-size: 16;
-    padding-top: 5;
-    height: 36;
-}
+    .sub-headings {
+        font-size: 16;
+        padding-top: 5;
+        height: 36;
+    }
 
-.field-data-header {
-    font-size: 14;
-    padding-top: 4;
-    height: 32;
-}
+    .field-data-header {
+        font-size: 14;
+        padding-top: 4;
+        height: 32;
+    }
 
-.field-data {
-    font-size: 12;
-    padding-top: 4;
-    height: 30;
-}
+    .field-data {
+        font-size: 12;
+        padding-top: 4;
+        height: 30;
+    }
 
-.graph-header {
-    @extend .field-header;
-    background-color: #0032f8;
-}
+    .graph-header {
+        @extend .field-header;
+        background-color: #0032f8;
+    }
 
-.graph-stats-title {
-    @extend .sub-headings;
-    margin-top: 3;
-    background-color: #0032f8;
-}
+    .graph-stats-title {
+        @extend .sub-headings;
+        margin-top: 3;
+        background-color: #0032f8;
+    }
 
-.graph-stats-header {
-    @extend .field-data-header;
-    background-color: #f82500;
-}
+    .graph-stats-header {
+        @extend .field-data-header;
+        background-color: #f82500;
+    }
 
-.graph-stats-data {
-    @extend .field-data;
-    background-color: #1E90FF;
-}
+    .graph-stats-data {
+        @extend .field-data;
+        background-color: #1E90FF;
+    }
 
-.options-header {
-    @extend .field-data-header;
-    margin-top: 3;
-    background-color: #f82500;
-}
+    .options-header {
+        @extend .field-data-header;
+        margin-top: 3;
+        background-color: #f82500;
+    }
 
-.options-data {
-    @extend .field-data;
-    background-color: #1E90FF;
-}
+    .options-data {
+        @extend .field-data;
+        background-color: #1E90FF;
+    }
 
-.options-data TextField {
-    font-size: 12;
-    margin-top: -1;
-    color: #FFF;
-    height: 30;
-}
+    .options-data TextField {
+        font-size: 12;
+        margin-top: -1;
+        color: #FFF;
+        height: 30;
+    }
 
-.submit-button {
-    @extend .field-header;    
-    margin-top: 3;
-    background-color: #0032f8;
-}
+    .submit-button {
+        @extend .field-header;    
+        margin-top: 3;
+        background-color: #0032f8;
+    }
 
-.list-data {
-    font-size: 15;
-    margin-top: 6;
-    background-color: #1E90FF;
+    .list-data {
+        font-size: 15;
+        margin-top: 6;
+        background-color: #1E90FF;
 
-}
+    }
 
-.list-data Label.active {
-    font-size: 15;
-    margin-top: 6;
-    background-color: #00BFFF;
-}
+    .list-data Label.active {
+        font-size: 15;
+        margin-top: 6;
+        background-color: #00BFFF;
+    }
 
-.horizontal-Axis {
-    label-Fit-Mode: Rotate;
-    line-Hidden: false;
-    line-color: white;
-    line-Thickness: 1
-}
+    .horizontal-Axis {
+        label-Fit-Mode: Rotate;
+        line-Hidden: false;
+        line-color: white;
+        line-Thickness: 1
+    }
 
-.vertical-Axis {
-    line-color: white;
-    line-Thickness: 1
+    .vertical-Axis {
+        line-color: white;
+        line-Thickness: 1
+    }
 }
