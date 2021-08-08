@@ -1,7 +1,5 @@
 var config = require("../../shared/config");
-import { Http } from '@nativescript/core';
-import { Observable } from '@nativescript/core'
-
+import { Http, Observable } from '@nativescript/core';
 
 // returns message
 function getMessage(message) {
@@ -15,7 +13,7 @@ export function UserViewModel() {
   // finds getJSON from API
   viewModel.getRequest = () => {
     console.log("hhhhh")
-    Http.getJSON(config.apiMobileUrlGetLatest).then(result => {
+    Http.getJSON(config.apiGETRequest).then(result => {
       console.log(result);
       viewModel.set('message', getMessage(result));
     }, error => {

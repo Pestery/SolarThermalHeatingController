@@ -1,8 +1,9 @@
 // INSTRUCTIONS: 
 // 1. Add your local IP address to this file and to the web api (under Properties -> launchSettings.json)
-// 2. rename this file to "apiConfig.js" 
-// 3. apiConfig.js is in the gitignore file and wont be pushed to github, prevents ip issues
-// 4. if you have issues message jack
+// 2. make a copy of this file
+// 3. rename the copy file to "apiConfig.js" 
+// 4. apiConfig.js is in the gitignore file and wont be pushed to github, prevents ip issues
+// 5. if you have issues message jack
 
 // file is for urls
 // 10.0.2.2 is used FOR EMULATOR
