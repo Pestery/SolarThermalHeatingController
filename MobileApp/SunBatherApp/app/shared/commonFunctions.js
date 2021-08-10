@@ -63,7 +63,7 @@ function findMax(newMax, originalMax) {
   return originalMax;
 }
 
-function loopThroughData(arrayData, initialValue, databaseField) {
+function loopThroughData(arrayData, initialValue, databaseField, comparitorConstant) {
   var i; 
   var arrayDataInfo = {};
   var min, max, average;
@@ -74,6 +74,8 @@ function loopThroughData(arrayData, initialValue, databaseField) {
     min = findMin(arrayData[i][databaseField], min);
     max = findMax(arrayData[i][databaseField], max);
     average = average + arrayData[i][databaseField];
+
+    arrayData[i][databaseField] = arrayData[i][databaseField] * comparitorConstant
   }
 
   arrayDataInfo.graphDataArray = arrayData;
@@ -131,7 +133,7 @@ function timePeriod(dateFrom, dateTo, graphDataInfo) {
 // converts datetime to time
 export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   var graphDataInfo = {};
-  graphDataInfo = loopThroughData(graphData, graphData[0][graphOption.databaseField], graphOption.databaseField);
+  graphDataInfo = loopThroughData(graphData, graphData[0][graphOption.databaseField], graphOption.databaseField, 1);
 
   // store data in array
   graphDataInfo.yAxisInterval = ((graphDataInfo.max - graphDataInfo.min) / 3).toFixed(0);
@@ -140,14 +142,26 @@ export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   return graphDataInfo;
 }
 
+// export function findGraphDataComparison(dateFrom, dateTo, graphData, graphOption) {
+//   var graphDataInfo = {};
+//   graphDataInfo = loopThroughData(graphData, graphData[0][graphOption.databaseField], graphOption.databaseField);
+
+//   // store data in array
+//   graphDataInfo.yAxisInterval = ((graphDataInfo.max - graphDataInfo.min) / 3).toFixed(0);
+//   graphDataInfo = timePeriod(dateFrom, dateTo, graphDataInfo);
+
+//   return graphDataInfo;
+// }
+
 export function findGraphDataCompare(graphData, optionChosen) {
   var compareDataInfo = {};
-  compareDataInfo = loopThroughData(graphData, graphData[0][optionChosen], optionChosen);
+  compareDataInfo = loopThroughData(graphData, graphData[0][optionChosen], optionChosen, 1.5);
 
-  // store data in array
-  compareDataInfo.min = compareDataInfo.min.toFixed(1);
+  // store data in array and rounds the numbers
+  compareDataInfo.min = compareDataInfo.min.toFixed(1); 
   compareDataInfo.max = compareDataInfo.max.toFixed(1);
 
+  console.log(compareDataInfo)
   return compareDataInfo;
 }
 
