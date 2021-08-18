@@ -5,7 +5,7 @@
 // Then fill in the connection data below
 
 // The name and password of the wifi network which the Arduino should connect to
-#define WIFI_SSID "insert-wifi-SSID-name-here"
+#define WIFI_SSID      "insert-wifi-SSID-name-here"
 #define WIFI_PASSWORD  "insert-wifi-password-here"
 
 // The address and port number of the server to send data to
