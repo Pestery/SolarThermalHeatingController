@@ -76,9 +76,11 @@ void loop() {
 					// A key will have been sent with this message
 					// Record the key for later
 					requestSendDataForDatabaseKey = data[0];
+					break;
 
 				case Interconnect::EchoESP8266:
 					interconnect.send(Interconnect::GeneralNotification, String(F("Echo: ")) + data);
+					break;
 
 				default:
 					break;
@@ -93,7 +95,6 @@ void loop() {
 		// Try to send it and clear the buffer value if successful
 		if (postToDatabase(databaseAddress.c_str(), databasePort, dataForDatabase)) {
 			dataForDatabase = String();
-			interconnect.send(Interconnect::GeneralNotification, String(F("Sent data to database")));
 		}
 
 	} else if (requestSendDataForDatabaseKey && interconnect.emptySendBuffer()) {
