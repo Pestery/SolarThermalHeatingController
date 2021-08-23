@@ -121,6 +121,12 @@ TEST(RingBuffer) {
 	CHECK_IS_FALSE(t.isFull());
 	CHECK_EQUAL_SHOW(t.size(), 0);
 	CHECK_EQUAL_SHOW(t.freeSpace(), 15);
+
+	// Check minimum size buffer
+	RingBuffer minBuf(0);
+	CHECK_EQUAL_SHOW(minBuf.capacity(), 0);
+	CHECK_IS_TRUE(minBuf.isFull());
+	CHECK_IS_FALSE(minBuf.push('t'));
 }
 
 #endif

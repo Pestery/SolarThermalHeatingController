@@ -1,9 +1,6 @@
 #ifndef RING_BUFFER_H
 #define RING_BUFFER_H
 
-// Minimum size of a ring buffer
-#define RING_BUFFER_MIN_SIZE 16
-
 // A class used to manage single ring buffer
 class RingBuffer {
 public:
@@ -94,10 +91,10 @@ public:
 	}
 
 	// Default constructor and destructor
-	RingBuffer(IndexType size = RING_BUFFER_MIN_SIZE) :
+	RingBuffer(IndexType size = 16) :
 		m_size(size),
 		m_buffer(nullptr) {
-	  if (m_size < RING_BUFFER_MIN_SIZE) m_size = RING_BUFFER_MIN_SIZE;
+			if (m_size < 1) m_size = 1; // Minimum size which should cause isFull() to always return true
 			m_buffer = (uint8_t*)malloc(m_size);
 			reset();
 	}
