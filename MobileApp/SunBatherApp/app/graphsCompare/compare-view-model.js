@@ -1,5 +1,4 @@
 import { Observable } from '@nativescript/core'
-var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
 var apiRequests = require("../shared/apiRequests");
 import { compareOptions }  from "../models/compareModel";
@@ -52,8 +51,7 @@ function comparePageIntialize(viewModel) {
     viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
 
     // populates data on graph
-    apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false);
-    apiRequests.getCompetitorEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], compareOptionList[viewModel.get('compareOptionSelected')]);
+    apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false, compareOptionList[viewModel.get('compareOptionSelected')]);
 }
 
 export function CompareViewModel() {
@@ -102,8 +100,7 @@ export function CompareViewModel() {
         var compareOptionList = competitorOptions();
         var getDateFrom = viewModel.get('storedDateFrom');
         var getDateTo = viewModel.get('storedDateTo');
-        apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false);
-        apiRequests.getCompetitorEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], compareOptionList[viewModel.get('compareOptionSelected')]);
+        apiRequests.getRecordEventList(getDateFrom, getDateTo, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false, compareOptionList[viewModel.get('compareOptionSelected')]);
     }
     
       // creates a new object everytime, but its the only way, obervable array is not good - jack 

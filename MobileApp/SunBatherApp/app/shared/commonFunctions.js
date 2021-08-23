@@ -49,6 +49,7 @@ function averageRound(average, count) {
   return average.toFixed(1);
 }
 
+// finds min value 
 function findMin(newMin, originalMin) {
   if (newMin < originalMin) {
     originalMin = newMin;
@@ -56,6 +57,7 @@ function findMin(newMin, originalMin) {
   return originalMin;
 }
 
+// finds max value 
 function findMax(newMax, originalMax) {
   if (newMax > originalMax) {
     originalMax = newMax;
@@ -63,6 +65,10 @@ function findMax(newMax, originalMax) {
   return originalMax;
 }
 
+// loops through data from GET Request and does the following
+// Finds min, max and average
+// multiplies cost or emissions which comparitor constant (if compared is called)
+// Stores data into a usable array for the display to use
 function loopThroughData(arrayData, initialValue, databaseField, comparitorConstant) {
   var i; 
   var arrayDataInfo = {};
@@ -71,11 +77,10 @@ function loopThroughData(arrayData, initialValue, databaseField, comparitorConst
 
   for (i = 0; i < arrayData.length; i++){
     arrayData[i].readDateTime = new Date(arrayData[i].readDateTime).getTime();
+    arrayData[i][databaseField] = arrayData[i][databaseField] * comparitorConstant;
     min = findMin(arrayData[i][databaseField], min);
     max = findMax(arrayData[i][databaseField], max);
     average = average + arrayData[i][databaseField];
-
-    arrayData[i][databaseField] = arrayData[i][databaseField] * comparitorConstant
   }
 
   arrayDataInfo.graphDataArray = arrayData;
@@ -142,26 +147,15 @@ export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   return graphDataInfo;
 }
 
-// export function findGraphDataComparison(dateFrom, dateTo, graphData, graphOption) {
-//   var graphDataInfo = {};
-//   graphDataInfo = loopThroughData(graphData, graphData[0][graphOption.databaseField], graphOption.databaseField);
-
-//   // store data in array
-//   graphDataInfo.yAxisInterval = ((graphDataInfo.max - graphDataInfo.min) / 3).toFixed(0);
-//   graphDataInfo = timePeriod(dateFrom, dateTo, graphDataInfo);
-
-//   return graphDataInfo;
-// }
-
-export function findGraphDataCompare(graphData, optionChosen) {
+export function findGraphDataCompare(graphData, graphOption, optionChosen) {
   var compareDataInfo = {};
-  compareDataInfo = loopThroughData(graphData, graphData[0][optionChosen], optionChosen, 1.5);
+  compareDataInfo = loopThroughData(graphData, graphData[0][graphOption.databaseField], graphOption.databaseField, optionChosen);
 
   // store data in array and rounds the numbers
+  compareDataInfo.yAxisInterval = ((compareDataInfo.max - compareDataInfo.min) / 3).toFixed(0);
   compareDataInfo.min = compareDataInfo.min.toFixed(1); 
   compareDataInfo.max = compareDataInfo.max.toFixed(1);
 
-  console.log(compareDataInfo)
   return compareDataInfo;
 }
 

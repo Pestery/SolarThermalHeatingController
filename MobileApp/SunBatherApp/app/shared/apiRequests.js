@@ -8,14 +8,17 @@ function graphMinMax(viewModel, min, max) {
     viewModel.set('graphMin', -5000);
     viewModel.set('graphMax', 5000);
 
+    min = Math.floor(min);
+    max = Math.floor(max);
+
     var diff = (max - min) / 3;
 
-    if (diff < 1) {
+    if (diff < 1) { 
         diff = 1;
     }
 
     viewModel.set('graphMin', (min - diff).toFixed(0));
-    viewModel.set('graphMax', (max + diff).toFixed(0));
+    viewModel.set('graphMax', (max + diff));
 }
 
 // min, max and average of data
@@ -55,57 +58,39 @@ function graphDataOption(viewModel, databaseField, graphDataArray, dataType) {
     viewModel.set('graphData' + dataType, graphDataArray);
 }
 
-export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, graphPage) {
+export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, graphPage, competitor) {
+    var optionChosenConstant;
     var dataTypeOption = "Option";
     var dataTypeCompare = "Compare";
-    var compare = false; 
 
-    Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
-        const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
-        //const graphDataInfoComparison = commonFunction.findGraphDataComparison(dateFrom, dateTo, result, graphOption);
-        graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataTypeOption);
-        graphMinMax(viewModel, graphDataInfo.min, graphDataInfo.max);
-        fieldData(viewModel, graphDataInfo.min, graphDataInfo.max, graphDataInfo.average, dataTypeOption);
-        graphFormat(viewModel, graphDataInfo.xAxisInterval, graphDataInfo.yAxisInterval, graphDataInfo.xAxisUnit, graphDataInfo.xAxisFormat);
-        if (graphPage) {
-            graphTitleOption(viewModel, graphOption.name, graphOption.nameAbbreviated);
+    if (!graphPage){
+        if (graphOption.databaseField == "emissions") {
+            optionChosenConstant = competitor.emissionConstant;
+        } else {
+            optionChosenConstant = competitor.costConstant;
         }
-    }, error => {
-        console.log(error);
-    });
-}
-
-export function getRecordCompareEventList(dateFrom, dateTo, viewModel, graphOption, graphPage) {
-    var dataType = "Compare";
-    Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
-        const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
-        graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataType);
-        graphMinMax(viewModel, graphDataInfo.min, graphDataInfo.max);
-        fieldData(viewModel, graphDataInfo.min, graphDataInfo.max, graphDataInfo.average, dataType);
-        graphFormat(viewModel, graphDataInfo.xAxisInterval, graphDataInfo.yAxisInterval, graphDataInfo.xAxisUnit, graphDataInfo.xAxisFormat);
-        if (graphPage) {
-            graphTitleOption(viewModel, graphOption.name, graphOption.nameAbbreviated);
-        }
-    }, error => {
-        console.log(error);
-    });
-}
-
-export function getCompetitorEventList(dateFrom, dateTo, viewModel, graphOption, compareOption) {     
-    var optionChosen;
-    var dataType = "Compare";
-    if (graphOption.databaseField == "emissions") {
-        optionChosen = compareOption.databaseFieldEmissions;
-      } else {
-        optionChosen = compareOption.databaseFieldCost;
     }
 
-    Http.getJSON(apiCall.getCompetitorEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
-        const compareDataInfo = commonFunction.findGraphDataCompare(result, optionChosen);
-        graphDataOption(viewModel, optionChosen, compareDataInfo.graphDataArray, dataType);
-        fieldData(viewModel, compareDataInfo.min, compareDataInfo.max, compareDataInfo.average, dataType);
-        graphTitleCompare(viewModel, graphOption.name, graphOption.nameAbbreviated, compareOption.name, compareOption.nameAbbreviated);
+    Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
+        const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
+        graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataTypeOption);
+
+        fieldData(viewModel, graphDataInfo.min, graphDataInfo.max, graphDataInfo.average, dataTypeOption);
+        graphFormat(viewModel, graphDataInfo.xAxisInterval, graphDataInfo.yAxisInterval, graphDataInfo.xAxisUnit, graphDataInfo.xAxisFormat);
+
+        if (graphPage) {
+            graphTitleOption(viewModel, graphOption.name, graphOption.nameAbbreviated);
+            graphMinMax(viewModel, graphDataInfo.min, graphDataInfo.max);
+            graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
+
+        } else {
+            const graphDataInfoComparison = commonFunction.findGraphDataCompare(result, graphOption, optionChosenConstant);
+            graphDataOption(viewModel, graphOption.databaseField, graphDataInfoComparison.graphDataArray, dataTypeCompare);
+            graphTitleCompare(viewModel, graphOption.name, graphOption.nameAbbreviated, competitor.name, competitor.nameAbbreviated);
+            graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
+            fieldData(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max, graphDataInfoComparison.average, dataTypeCompare);
+        }
     }, error => {
         console.log(error);
     });
-}
+} 

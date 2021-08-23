@@ -3,11 +3,16 @@ var apiRequests = require("../shared/apiRequests");
 var commonFunction = require("../shared/commonFunctions");
 import { graphOptions }  from "../models/graphModel";
 
+// used for the date picking, is part of NS and must be initialized on page start up
 function pickerFunction(data, viewModel) {
   const datePicker = data.object
+  // Fires everytime you change the date
   datePicker.on('dateChange', args => {
+    // get args value and turn it into usable time
     var updatedTimeISO = new Date(args.value).toISOString();
     var updatedTime = new Date(args.value);
+    
+    // if/else to determine which timepicker was clicked (if it was Date from or Date To)
     if (viewModel.get('dateFromClicked')) {
       viewModel.set('storedDateFrom', updatedTimeISO);
       viewModel.set('displayDateFrom', updatedTime.getDate() + '/' + (updatedTime.getMonth() + 1) + '/' + updatedTime.getFullYear());
@@ -45,17 +50,19 @@ function graphPageIntialize(viewModel) {
   viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
 
   // populates data on graph
-  apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true);
+  apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true, "Null");
 }
 
 export function GraphViewModel() {
   const viewModel = new Observable(); 
   graphPageIntialize(viewModel);
 
+  // Initialise date picker
   viewModel.onDatePickerLoaded = (data) => { 
     pickerFunction(data, viewModel);
   }
 
+  // The next functions change the display of the screen depending on what has been selected
   viewModel.dateFromClicked = () => {
     viewModel.set('showDatePicker', true);
     viewModel.set('showData', false);
