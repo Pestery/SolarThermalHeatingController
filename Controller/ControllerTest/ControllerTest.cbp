@@ -28,13 +28,17 @@
 		<Unit filename="../Controller/interconnect.h" />
 		<Unit filename="../Controller/main_arduino.h" />
 		<Unit filename="../Controller/main_esp8266.h" />
+		<Unit filename="../Controller/ring_buffer.h" />
 		<Unit filename="../Controller/sensor_record.h" />
 		<Unit filename="../Controller/state_flags.h" />
 		<Unit filename="../Controller/timer.h" />
+		<Unit filename="arduino_hardware_serial.h" />
 		<Unit filename="arduino_pins.h" />
 		<Unit filename="arduino_string.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="test_date_time.h" />
+		<Unit filename="test_interconnect.h" />
+		<Unit filename="test_ring_buffer.h" />
 		<Unit filename="test_sensor_record.h" />
 		<Unit filename="test_state_flags.h" />
 		<Unit filename="test_timer.h" />

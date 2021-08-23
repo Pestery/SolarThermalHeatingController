@@ -49,6 +49,8 @@ public:
 
 	void reserve(int s) {}
 
+	const char* c_str() const {return m_data.c_str();}
+
 	int indexOf(int c) const {return indexOf(c, 0);}
 	int indexOf(int c, unsigned fromIndex) const {
 		for (unsigned i=fromIndex; i<m_data.size(); i++) {

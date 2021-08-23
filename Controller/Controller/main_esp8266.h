@@ -18,7 +18,7 @@
 
 // Declare global values
 StateFlags   stateFlags();
-Interconnect interconnect;
+Interconnect linkArduino(Serial, INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266);
 String       wifiSSID        = WIFI_SSID;
 String       wifiPassword    = WIFI_PASSWORD;
 String       databaseAddress = DATABASE_ADDRESS;
@@ -49,42 +49,39 @@ void setup() {
 // This function will only run after setup() has completed
 void loop() {
 
-	// Receive data from Arduino
-	while (Serial.available() > 0) {
-		if (interconnect.receiveByte(Serial.read())) {
+	// Update interconnect
+	linkArduino.update();
 
-			// A message is ready
-			Interconnect::Type type = interconnect.getReceivedType();
-			String data = interconnect.getReceivedMessage();
-			//Serial.print("Message ready. Type:");
-			//Serial.print((char)type);
-			//Serial.print(". Data:");
-			//Serial.println(data);
-			switch (type) {
+	// Check for received messages
+	Interconnect::Type header = Interconnect::None;
+	String payload;
+	if (linkArduino.receive(header, payload)) {
 
-				case Interconnect::DataForDatabase:
+		// Process received message
+		switch (header) {
 
-					// Received data which needs to be sent to the database
-					// Try to send the data
-					// Record the data if not sent
-					if (!postToDatabase(databaseAddress.c_str(), databasePort, data)) dataForDatabase = data;
-					break;
+			case Interconnect::DataForDatabase:
 
-				case Interconnect::RequestSendDataForDatabase:
+				// Received data which needs to be sent to the database
+				// Try to send the data
+				// Record the data if not sent
+				if (!postToDatabase(databaseAddress.c_str(), databasePort, payload)) dataForDatabase = payload;
+				break;
 
-					// Received a request to be allowed to send a large message
-					// A key will have been sent with this message
-					// Record the key for later
-					requestSendDataForDatabaseKey = data[0];
-					break;
+			case Interconnect::RequestSendDataForDatabase:
 
-				case Interconnect::EchoESP8266:
-					interconnect.send(Interconnect::GeneralNotification, String(F("Echo: ")) + data);
-					break;
+				// Received a request to be allowed to send a large message
+				// A key will have been sent with this message
+				// Record the key for later
+				requestSendDataForDatabaseKey = payload[0];
+				break;
 
-				default:
-					break;
-			}
+			case Interconnect::EchoESP8266:
+				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Echo: ")) + payload);
+				break;
+
+			default:
+				break;
 		}
 	}
 
@@ -97,18 +94,13 @@ void loop() {
 			dataForDatabase = String();
 		}
 
-	} else if (requestSendDataForDatabaseKey && interconnect.emptySendBuffer()) {
+	} else if (requestSendDataForDatabaseKey && linkArduino.emptySendBuffer()) {
 
 		// There is a request-to-send-data-key
 		// If here then everything else must have been finished, so send a reply and clear the key
 		// Send the synchronisation key back with the allow message
-		interconnect.send(Interconnect::AllowSendDataForDatabase, String(requestSendDataForDatabaseKey));
+		linkArduino.send(Interconnect::AllowSendDataForDatabase, String(requestSendDataForDatabaseKey));
 		requestSendDataForDatabaseKey = 0;
-	}
-
-	// Send data to Arduino, if able
-	while (interconnect.sendRequired() && (Serial.availableForWrite() > 0)) {
-		Serial.write(interconnect.getNextByteToSend());
 	}
 }
 
