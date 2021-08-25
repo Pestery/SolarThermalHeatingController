@@ -1,0 +1,13 @@
+<StackLayout rows="auto" class="header">
+    <GridLayout rows="auto" columns="*,*" width="100%" class="header-top" >
+        <Label col="0" text="SunBather" />
+        <Label col="1" horizontalAlignment="right" text="logo" />
+    </GridLayout>
+    <GridLayout rows="auto" columns="*,*,*,*,*" width="100%" class="header-buttons" >
+        <Label col="0" text="Home" class="{{ headerSelected == 0 ? 'active' : 'nonActive'}}" tap="onNavigateHome" />
+        <Label col="1" text="Graphs" class="{{ headerSelected == 1 ? 'active' : 'nonActive'}}" tap="onNavigateGraphs" />
+        <Label col="2" text="Compare" class="{{ headerSelected == 2 ? 'active' : 'nonActive'}}" tap="onNavigateCompare" />
+        <Label col="3" text="Controller" class="{{ headerSelected == 3 ? 'active' : 'nonActive'}}" tap="onNavigateController" />
+        <Label col="4" text="Connect" class="{{ headerSelected == 4 ? 'active' : 'nonActive'}}" tap="onNavigateConnect" />
+    </GridLayout>
+</StackLayout>

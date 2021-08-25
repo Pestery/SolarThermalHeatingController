@@ -36,6 +36,7 @@ msbuild.wrn
 hooks/
 node_modules/
 platforms/
+lib/
 
 # Logs
 logs
@@ -63,3 +64,9 @@ typings/
 
 # Arduino ignore
 connection_info.h
+
+# App Ip config ignore
+apiConfig.js
+
+# Web API Ip Config Ignore
+launchSettings.json

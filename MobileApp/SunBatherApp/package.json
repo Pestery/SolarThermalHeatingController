@@ -1,0 +1,51 @@
+{
+  "name": "@nativescript/template-tab-navigation",
+  "main": "app/app.js",
+  "displayName": "Tabs",
+  "templateType": "App template",
+  "version": "8.0.5",
+  "description": "NativeScript Application",
+  "author": "NativeScript Team <oss@nativescript.org>",
+  "license": "SEE LICENSE IN <your-license-filename>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "app",
+    "App_Resources",
+    "hooks",
+    "tools",
+    "!tools/assets",
+    ".editorconfig",
+    "jsconfig.json"
+  ],
+  "keywords": [
+    "nstudio",
+    "nativescript",
+    "mobile",
+    "{N}",
+    "tns",
+    "template",
+    "tab",
+    "navigation",
+    "category-general"
+  ],
+  "repository": "<fill-your-repository-here>",
+  "homepage": "https://github.com/NativeScript/nativescript-app-templates",
+  "bugs": {
+    "url": "https://github.com/NativeScript/NativeScript/issues"
+  },
+  "dependencies": {
+    "@nativescript-community/ble": "^3.0.29",
+    "@nativescript/core": "~8.0.0",
+    "@nativescript/theme": "~3.0.1",
+    "nativescript-datetimepicker": "^1.2.3",
+    "nativescript-ui-chart": "^8.0.2"
+  },
+  "devDependencies": {
+    "@nativescript/android": "8.0.0",
+    "@nativescript/webpack": "beta"
+  },
+  "private": "true",
+  "readme": "NativeScript Application"
+}

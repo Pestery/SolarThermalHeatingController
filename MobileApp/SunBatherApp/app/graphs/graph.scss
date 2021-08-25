@@ -1,0 +1,98 @@
+.graph-page-styles {
+    .graph-data-page {
+        font-size: 18;
+        height: 368; 
+    }
+
+    .graph-data-page-selected {
+        font-size: 18;
+        height: 303; 
+    }
+
+    .graph-data-info {
+        font-size: 12;
+        background-color: #1E90FF;
+    }
+
+    .field-header {
+        font-size: 18;
+        padding-top: 5;
+        height: 40;
+    }
+
+    .field-data-header {
+        font-size: 16;
+        padding-top: 5;
+        height: 36; 
+    }
+
+    .field-data {
+        font-size: 14;
+        padding-top: 6;
+        height: 34;
+    }
+
+    .graph-header {
+        @extend .field-header;
+        background-color: #0032f8;
+    }
+
+    .graph-stats-header {
+        @extend .field-data-header;
+        margin-top: 3;
+        background-color: #f82500;
+    }
+
+    .graph-stats-data {
+        @extend .field-data;
+        background-color: #1E90FF;
+    }
+
+    .options-header {
+        @extend .field-data-header;
+        margin-top: 3;
+        background-color: #f82500;
+    }
+
+    .options-data {
+        @extend .field-data;
+        background-color: #1E90FF;
+    }
+
+    .options-data TextField {
+        font-size: 14;
+        margin-top: -1;
+        color: #FFF;
+        height: 30;
+    }
+
+    .submit-button {
+        @extend .field-header;    
+        margin-top: 3;
+        background-color: #0032f8;
+    }
+
+    .list-data {
+        font-size: 15;
+        margin-top: 3;
+        background-color: #1E90FF;
+    }
+
+    .list-data Label.active {
+        font-size: 15;
+        margin-top: 6;
+        background-color: #00BFFF;
+    }
+
+    .horizontal-Axis {
+        label-Fit-Mode: Rotate;
+        line-Hidden: false;
+        line-color: white;
+        line-Thickness: 1
+    }
+
+    .vertical-Axis {
+        line-color: white;
+        line-Thickness: 1
+    }
+}

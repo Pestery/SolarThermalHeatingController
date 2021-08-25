@@ -1,0 +1,117 @@
+<Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:chart="nativescript-ui-chart" >
+    <GridLayout columns="*" rows="*,auto" width="100%" class="compare-page-styles">
+        <StackLayout row="0" >
+            <comps:header />
+        </StackLayout>
+        <StackLayout row="1" height="82%" class="layout-scheme">
+            <StackLayout class="{{ showDatePicker ? 'graph-data-page-selected' : 'graph-data-page'}}">
+                <StackLayout class="graph-header">
+                    <Label text="{{ graphHeader }}" textWrap="true" />
+                </StackLayout>
+                <GridLayout rows="*, 30" columns="*" class="graph-data-info">
+                    <chart:RadCartesianChart row="0" id="cartesianChart">
+                        <chart:RadCartesianChart.horizontalAxis>
+                            <chart:DateTimeContinuousAxis  majorStep="{{ graphXAxisInterval }}" majorStepUnit="{{ graphXAxisUnit }}" dateFormat="{{ graphFormat }}" plotMode="OnTicks" class="horizontal-Axis" />
+                        </chart:RadCartesianChart.horizontalAxis>
+                        <chart:RadCartesianChart.verticalAxis>
+                            <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}" class="vertical-Axis" />
+                        </chart:RadCartesianChart.verticalAxis>
+                        <chart:RadCartesianChart.series>
+                            <chart:LineSeries seriesName="sunbather" items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}" />
+                            <chart:LineSeries seriesName="competitor" items="{{ graphDataCompare }}" categoryProperty="{{ xAxisDataCompare }}" valueProperty="{{ yAxisDataCompare }}" />
+                        </chart:RadCartesianChart.series>
+                        <chart:RadCartesianChart.palettes>
+                            <chart:Palette seriesName="sunbather">
+                                <chart:Palette.entries>
+                                    <chart:PaletteEntry  strokeColor="#FFF" />
+                                </chart:Palette.entries>
+                            </chart:Palette>
+                            <chart:Palette seriesName="competitor">
+                                <chart:Palette.entries>
+                                    <chart:PaletteEntry  strokeColor="#DC143C" />
+                                </chart:Palette.entries>
+                            </chart:Palette>
+                        </chart:RadCartesianChart.palettes>
+                    </chart:RadCartesianChart> 
+                    <label row="1" text="{{ axisLegend }}" textWrap="true" />
+                </GridLayout>
+            </StackLayout>
+            <!-- is invisible until date picker clicked -->
+            <StackLayout visibility="{{ showDatePicker ? 'visible' : 'collapse'}}" >
+                <StackLayout >
+                    <DatePicker loaded="{{ onDatePickerLoaded }}" minDate="{{ minDate }}" maxDate="{{ maxDate }}" date="{{ dateFromClicked ? storedDateFrom : storedDateTo}}"/>
+                </StackLayout>
+                <StackLayout class="submit-button">
+                    <Label text="Date Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                </StackLayout>
+            </StackLayout>
+            <StackLayout visibility="{{ showGraphPicker ? 'visible' : 'collapse'}}">
+                <StackLayout class="list-data">
+                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTapGraph }}" style="height:575px" >
+                        <ListView.itemTemplate>
+                            <FlexboxLayout flexDirection="row">
+                                <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>
+                            </FlexboxLayout>
+                        </ListView.itemTemplate>
+                    </ListView>
+                </StackLayout>
+                <StackLayout class="submit-button">
+                    <Label text="Graph Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                </StackLayout>
+            </StackLayout>
+            <StackLayout visibility="{{ showCompetitorPicker ? 'visible' : 'collapse'}}">
+                <StackLayout class="list-data">
+                    <ListView items="{{ compareOptions }}" itemTap="{{ onItemTapCompare }}" style="height:575px" >
+                        <ListView.itemTemplate>
+                            <FlexboxLayout flexDirection="row">
+                                <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>
+                            </FlexboxLayout>
+                        </ListView.itemTemplate>
+                    </ListView>
+                </StackLayout>
+                <StackLayout class="submit-button">
+                    <Label text="Competitor Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                </StackLayout>
+            </StackLayout>
+            <!-- is invisible when date picker clicked -->
+            <StackLayout visibility="{{ showData ? 'visible' : 'collapse'}}">
+                <StackLayout class="graph-stats-title">
+                    <Label text="Compare Data" textWrap="true" />
+                </StackLayout>
+                <GridLayout rows="*" columns="*,*,*,*" class="graph-stats-header">
+                    <Label col="0" row="0" text="System" textWrap="true" />
+                    <Label col="1" row="0" text="Min" textWrap="true" />
+                    <Label col="2" row="0" text="Max" textWrap="true" />
+                    <Label col="3" row="0" text="Average" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*,*" class="graph-stats-data">
+                    <Label col="0" row="0" text="SunBather" textWrap="true" />
+                    <Label col="1" row="0" text="{{ minOption }}" textWrap="true" />
+                    <Label col="2" row="0" text="{{ maxOption }}" textWrap="true" />
+                    <Label col="3" row="0" text="{{ averageOption }}" textWrap="true" />
+                </GridLayout>
+                    <GridLayout rows="*" columns="*,*,*,*" class="graph-stats-data">
+                    <Label col="0" row="0" text="Competitor" textWrap="true" />
+                    <Label col="1" row="0" text="{{ minCompare }}" textWrap="true" />
+                    <Label col="2" row="0" text="{{ maxCompare }}" textWrap="true" />
+                    <Label col="3" row="0" text="{{ averageCompare }}" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*,*" class="options-header">
+                    <Label col="0" row="0" text="Graph Type" textWrap="true" />
+                    <Label col="1" row="0" text="Competitor" textWrap="true" />
+                    <Label col="2" row="0" text="Date From" textWrap="true" />
+                    <Label col="3" row="0" text="Date To" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*,*" class="options-data" >
+                    <TextField col="0" row="0" text="{{ graphSelected }}" textWrap="true" tap="{{ graphPickerClicked }}"/>
+                    <TextField col="1" row="0" text="{{ competitorSelected }}" textWrap="true" tap="{{ graphCompetitorClicked }}"/>
+                    <TextField col="2" row="0" text="{{ displayDateFrom }}" textWrap="true" tap="{{ dateFromClicked }}" />
+                    <TextField col="3" row="0" text="{{ displayDateTo }}" textWrap="true" tap="{{ dateToClicked }}" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="submit-button">
+                    <Label col="0" text="Update Graph" textWrap="true" tap="{{ updateGraph }}" />
+                </GridLayout>
+            </StackLayout>
+        </StackLayout>
+    </GridLayout>
+</Page>

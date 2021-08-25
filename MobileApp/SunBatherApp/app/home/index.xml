@@ -1,0 +1,65 @@
+<Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:chart="nativescript-ui-chart">
+    <GridLayout columns="*" rows="*,auto" width="100%"  class="index-page-styles">
+        <StackLayout row="0" >
+            <comps:header />
+        </StackLayout>
+        <StackLayout row="1" height="82%" class="layout-scheme">
+            <StackLayout>
+                <GridLayout rows="*" columns="*" class="system-data-header-status">
+                    <Label col="0" text="System Status" textWrap="true"/>
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*" class="system-datafield">
+                    <Label col="0" text="Pump Status" textWrap="true" />
+                    <Label col="1" text="Set Temperature" textWrap="true" />
+                    <Label col="2" text="Pool Temperature" textWrap="true" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*,*" class="system-datafield-data">
+                    <Label col="0" text="{{ pumpStatus }}" textWrap="true" />                     
+                    <Label col="1" text="{{ setTemp }}" textWrap="true" /> 
+                    <Label col="2" text="{{ poolTemp }}" textWrap="true" />              
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="system-data-header-conditions">
+                    <Label col="0" text="Current Conditions" textWrap="true"/>
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*" class="system-datafield">
+                    <Label col="0" text="Current Roof Temperature" textWrap="true" class="system-data-sub-header" />
+                    <Label col="1" text="Current UV" textWrap="true" class="system-data-sub-header" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*,*" class="system-datafield-data">
+                    <Label col="0" text="{{ roofTemp }}" textWrap="true" />
+                    <Label col="1" text="{{ currentUV }}" textWrap="true" />
+                </GridLayout>
+            </StackLayout>
+            <StackLayout class="graph-data">
+                <StackLayout class="graph-data-header">
+                    <Label text="Energy Adsorbed" textWrap="true" />
+                </StackLayout>
+                <GridLayout rows="*, 30" class="graph-data-info">
+                    <chart:RadCartesianChart id="cartesianChart">
+                        <chart:RadCartesianChart.horizontalAxis>
+                            <chart:DateTimeContinuousAxis  majorStep="{{ graphXAxisInterval }}" majorStepUnit="{{ graphXAxisUnit }}" dateFormat="{{ graphFormat }}" plotMode="OnTicks" class="horizontal-Axis" />
+                        </chart:RadCartesianChart.horizontalAxis>
+                        <chart:RadCartesianChart.verticalAxis>
+                            <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}" class="vertical-Axis" />
+                        </chart:RadCartesianChart.verticalAxis>
+                        <chart:RadCartesianChart.series>
+                            <chart:LineSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}"/>
+                        </chart:RadCartesianChart.series>
+                        <chart:RadCartesianChart.palettes>
+                            <chart:Palette >
+                                <chart:Palette.entries>
+                                    <chart:PaletteEntry  strokeColor="#FFF" />
+                                </chart:Palette.entries>
+                            </chart:Palette>
+                        </chart:RadCartesianChart.palettes>
+                    </chart:RadCartesianChart>
+                    <label row="1" text="{{ axisLegend }}" textWrap="true" />
+                </GridLayout>
+            </StackLayout>
+            <StackLayout class="view-other">
+                <Label text="View Other Graphs" tap="onNavigateGraphs" />
+            </StackLayout>   
+        </StackLayout>   
+    </GridLayout>
+</Page>
+

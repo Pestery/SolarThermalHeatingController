@@ -1,2 +1,5 @@
 To add more methods in a api controller, the following link is useful
 --> http://www.binaryintellect.net/articles/9db02aa1-c193-421e-94d0-926e440ed297.aspx
+
+API Info
+--> https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-5.0#controllerbase-class
