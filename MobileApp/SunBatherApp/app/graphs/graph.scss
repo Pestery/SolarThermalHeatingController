@@ -11,7 +11,7 @@
 
     .graph-data-info {
         font-size: 12;
-        background-color: #1E90FF;
+        background-color: white;
     }
 
     .field-header {
@@ -34,65 +34,65 @@
 
     .graph-header {
         @extend .field-header;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .graph-stats-header {
         @extend .field-data-header;
         margin-top: 3;
-        background-color: #f82500;
+        background-color: #1e73be;
     }
 
     .graph-stats-data {
         @extend .field-data;
-        background-color: #1E90FF;
+        background-color: white;
     }
 
     .options-header {
         @extend .field-data-header;
         margin-top: 3;
-        background-color: #f82500;
+        background-color: #1e73be;
     }
 
     .options-data {
         @extend .field-data;
-        background-color: #1E90FF;
+        background-color: white;
     }
 
     .options-data TextField {
         font-size: 14;
         margin-top: -1;
-        color: #FFF;
+        color: black;
         height: 30;
     }
 
     .submit-button {
         @extend .field-header;    
         margin-top: 3;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .list-data {
         font-size: 15;
         margin-top: 3;
-        background-color: #1E90FF;
+        background-color: #1e73be
     }
 
     .list-data Label.active {
         font-size: 15;
         margin-top: 6;
-        background-color: #00BFFF;
+        background-color: #1e73be
     }
 
     .horizontal-Axis {
         label-Fit-Mode: Rotate;
         line-Hidden: false;
-        line-color: white;
+        line-color: #1e73be;
         line-Thickness: 1
     }
 
     .vertical-Axis {
-        line-color: white;
+        line-color: #1e73be;
         line-Thickness: 1
     }
 }
