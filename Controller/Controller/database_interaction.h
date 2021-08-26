@@ -49,5 +49,38 @@ bool postToDatabase(const char* databaseAddress, uint16_t databasePort, const St
 	return false;
 }
 
+// Request the latest controller commands from the database
+// A POST request is used as the container
+// Returns a string containing the results, or an empty string on failure
+bool requestCommandsFromDatabase(const char* databaseAddress, uint16_t databasePort) {
+
+	// Make sure the wifi is currently connected
+	if (WiFi.status() == WL_CONNECTED) {
+
+		// Use WiFiClient class to create TCP connection
+		WiFiClient client;
+		if (client.connect(databaseAddress, databasePort)) {
+
+			// Send message to the server
+			if (client.connected()) {
+
+				// Send POST request
+				client.println(F("POST /api/TemperatureSensors HTTP/1.1"));
+				client.println(F("Content-Type: application/json"));
+				client.print(F("Content-Length: ")); client.println(body.length());
+				client.println();
+				client.println(body);
+			}
+
+			// Close the connection
+			// Return success
+			client.stop();
+			return true;
+		}
+	}
+
+	// Return failed to get data
+	return false;
+}
 
 #endif

@@ -3,7 +3,14 @@
 #include <iostream>
 #include "unit_test.h"
 
+// Include headers which contain replacement Arduino functions used for testing
+#include "arduino_hardware_serial.h"
+#include "arduino_pins.h"
+#include "arduino_string.h"
+
 // Include headers which contain test code
+#include "test_misc.h"
+#include "test_json_decoder.h"
 #include "test_ring_buffer.h"
 #include "test_timer.h"
 #include "test_state_flags.h"

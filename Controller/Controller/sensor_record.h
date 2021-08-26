@@ -2,6 +2,7 @@
 #define SENSOR_RECORD_H
 
 // Include headers
+#include "misc.h"
 #include "date_time.h"
 
 // Holds information about all sensors at a single moment in time.
@@ -23,9 +24,9 @@ struct SensorRecord {
 	// The string should have been generated using a previous call to toString().
 	void fromCSV(const String& data) {
 		int start = 0;
-		index = getNextSubStringCSV(data, start).toInt();
-		dateTime = DateTime(getNextSubStringCSV(data, start));
-		temperatureIn = getNextSubStringCSV(data, start).toFloat();
+		index = Misc::getNextSubString(data, start).toInt();
+		dateTime = DateTime(Misc::getNextSubString(data, start));
+		temperatureIn = Misc::getNextSubString(data, start).toFloat();
 	}
 
 	// Generate a CSV-string representation of the data within this class
@@ -96,32 +97,6 @@ struct SensorRecord {
 			temperatureIn = rhs.temperatureIn;
 		}
 		return *this;
-	}
-
-private:
-
-	// Get next sub-section within a CSV-string
-	// This method is used within the fromCSV() method.
-	String getNextSubStringCSV(const String& data, int& start) {
-		String result;
-		if (start >= 0) {
-
-			// Find next comma
-			int finish = data.indexOf(',', start);
-			if (finish < 0) {
-
-				// Reached end of source string
-				if (start < data.length()) result = data.substring(start);
-				start = -1;
-
-			} else {
-
-				// Somewhere in middle of source string
-				if (finish > start) result = data.substring(start, finish);
-				start = finish + 1;
-			}
-		}
-		return result;
 	}
 };
 

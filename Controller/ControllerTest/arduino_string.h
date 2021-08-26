@@ -21,6 +21,7 @@ public:
 	String() = default;
 	String(uint32_t rhs) : m_data(std::to_string(rhs)) {}
 	String(const char* rhs) : m_data(rhs) {}
+	String(const char* data, unsigned length) : m_data(data, length) {}
 	String(const String& rhs) = default;
 	String(const std::string& rhs) : m_data(rhs) {}
 
@@ -41,6 +42,8 @@ public:
 	char& operator [] (int i) {return m_data[i];}
 	const char& operator [] (int i) const {return m_data[i];}
 
+	friend bool operator == (const char* lhs, const String& rhs) {return rhs == lhs;}
+
 	bool operator == (const char* rhs) const {return m_data == rhs;}
 	bool operator == (const String& rhs) const {return m_data == rhs.m_data;}
 
@@ -51,10 +54,10 @@ public:
 
 	const char* c_str() const {return m_data.c_str();}
 
-	int indexOf(int c) const {return indexOf(c, 0);}
-	int indexOf(int c, unsigned fromIndex) const {
+	int indexOf(char c) const {return indexOf(c, 0);}
+	int indexOf(char c, unsigned fromIndex) const {
 		for (unsigned i=fromIndex; i<m_data.size(); i++) {
-			if (m_data[i] == c) return true;
+			if (m_data[i] == c) return i;
 		}
 		return -1;
 	}
@@ -68,6 +71,22 @@ public:
 		if (right > m_data.size()) right = m_data.size();
 		return String(std::string(m_data.c_str() + left, right - left));
 	}
+
+	void trim() {
+		if (!m_data.empty()) {
+			int i = 0, j = length() - 1;
+			while ((i < length()) && isWhitespace(m_data[i])) i++;
+			while ((j > 0) && isWhitespace(m_data[j])) j--;
+			if (i <= j) {
+				m_data = substring(i, ++j).m_data;
+			} else {
+				m_data.clear();
+			}
+		}
+	}
+
+	friend inline std::ostream& operator<<(std::ostream& s, const String& in) {s << in.m_data; return s;}
+
 };
 
 #endif
