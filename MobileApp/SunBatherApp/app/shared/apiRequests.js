@@ -1,6 +1,7 @@
 import { Http } from '@nativescript/core'
 var apiCall = require("../shared/apiConfig");
 var commonFunction = require("../shared/commonFunctions");
+var competitorData = require("../shared/competitorData");
 
 // find min and max of graph (y axis settings)
 function graphMinMax(viewModel, min, max) {
@@ -63,14 +64,6 @@ export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, gra
     var dataTypeOption = "Option";
     var dataTypeCompare = "Compare";
 
-    if (!graphPage){
-        if (graphOption.databaseField == "emissions") {
-            optionChosenConstant = competitor.emissionConstant;
-        } else {
-            optionChosenConstant = competitor.costConstant;
-        }
-    }
-
     Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
         const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
         graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataTypeOption);
@@ -84,7 +77,7 @@ export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, gra
             graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
 
         } else {
-            const graphDataInfoComparison = commonFunction.findGraphDataCompare(result, graphOption, optionChosenConstant);
+            const graphDataInfoComparison = competitorData.findGraphDataCompare(result, graphOption, competitor);
             graphDataOption(viewModel, graphOption.databaseField, graphDataInfoComparison.graphDataArray, dataTypeCompare);
             graphTitleCompare(viewModel, graphOption.name, graphOption.nameAbbreviated, competitor.name, competitor.nameAbbreviated);
             graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
