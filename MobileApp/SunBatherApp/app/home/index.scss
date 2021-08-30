@@ -13,23 +13,24 @@
 
     .system-data-header-status {
         @extend .field-header;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .system-data-header-conditions {
         @extend .field-header;    
         margin-top: 4;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .system-datafield {
         @extend .field-data-header;
-        background-color: #f82500;
+        background-color: white;
+        color: black;
     }
 
     .system-datafield-data {
         @extend .field-data-header;
-        background-color: #1E90FF;;
+        background-color: white;
     }
 
     .graph-data {
@@ -40,32 +41,32 @@
 
     .graph-data-header {
         @extend .field-header;
-        background-color:#0032f8;
+        background-color:#1e73be;
     }
 
     .graph-data-info {
         font-size: 12;
-        background-color: #1E90FF;
+        background-color: white;
     }
 
     .view-other {
         font-size: 18;
         margin-top: 4;
         padding-top: 3;
-        background-color: #1E90FF;
-        border-width: 2;
+        background-color: #1e73be;
+        border-width: 0; //changed this width from 2 to 0, hopefully doesnt break button.
         height: 40;
     }
 
     .horizontal-Axis {
         label-Fit-Mode: Rotate;
         line-Hidden: false;
-        line-color: white;
+        line-color: #1e73be;
         line-Thickness: 1
     }
 
     .vertical-Axis {
-        line-color: white;
+        line-color: #1e73be;
         line-Thickness: 1
     }
 }

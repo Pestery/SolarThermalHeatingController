@@ -1,7 +1,6 @@
 <StackLayout rows="auto" class="header">
-    <GridLayout rows="auto" columns="*,*" width="100%" class="header-top" >
-        <Label col="0" text="SunBather" />
-        <Label col="1" horizontalAlignment="right" text="logo" />
+    <GridLayout rows="auto" columns="*,*,*" class="header-top" >
+        <Label col="1" text="Sunbather" textWrap="true" />
     </GridLayout>
     <GridLayout rows="auto" columns="*,*,*,*,*" width="100%" class="header-buttons" >
         <Label col="0" text="Home" class="{{ headerSelected == 0 ? 'active' : 'nonActive'}}" tap="onNavigateHome" />

@@ -4,8 +4,12 @@
   }
   
 .header-top {
-  font-size: 22;
-  background-color: #00BFFF;
+  font-size: 26;
+  font-family: Arial, Helvetica, sans-serif !important ;
+  font-weight: bold;
+  background-color: #1e73be;
+  text-align: center;  
+  color: white;
   height: 80;
   padding-top: 35;
   padding-left: 20;
@@ -14,7 +18,7 @@
 
 .header-buttons {
   font-size: 16;
-  background-color:#1E90FF;
+  background-color:#1e73be;
   height: 40;
   text-align: center;
   padding-top: 6;

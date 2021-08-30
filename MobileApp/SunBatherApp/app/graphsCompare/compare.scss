@@ -6,7 +6,7 @@
 
     .graph-data-info {
         font-size: 12;
-        background-color: #1E90FF;
+        background-color: white;
     }
 
     .graph-data-page-selected {
@@ -41,71 +41,78 @@
 
     .graph-header {
         @extend .field-header;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .graph-stats-title {
         @extend .sub-headings;
         margin-top: 3;
-        background-color: #0032f8;
+        margin-bottom: 1;
+        background-color: #1e73be;
+        font-size: 18;
+        border-width: 1;
+        padding: 5px;
+        border-color: white;
     }
 
     .graph-stats-header {
         @extend .field-data-header;
-        background-color: #f82500;
+        background-color: #1e73be;        
     }
 
     .graph-stats-data {
         @extend .field-data;
-        background-color: #1E90FF;
+        background-color: white;
+        color: black;
     }
 
     .options-header {
         @extend .field-data-header;
         margin-top: 3;
-        background-color: #f82500;
+        background-color: #1e73be;
     }
 
     .options-data {
         @extend .field-data;
-        background-color: #1E90FF;
+        background-color: white;
     }
 
     .options-data TextField {
         font-size: 12;
         margin-top: -1;
-        color: #FFF;
+        color: black;
         height: 30;
     }
 
     .submit-button {
         @extend .field-header;    
         margin-top: 3;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .list-data {
         font-size: 15;
         margin-top: 6;
-        background-color: #1E90FF;
+        background-color: #1e73be;
 
     }
 
     .list-data Label.active {
         font-size: 15;
         margin-top: 6;
-        background-color: #00BFFF;
+        background-color: #1e73be;
+        
     }
 
     .horizontal-Axis {
         label-Fit-Mode: Rotate;
         line-Hidden: false;
-        line-color: white;
+        line-color: #1e73be;
         line-Thickness: 1
     }
 
     .vertical-Axis {
-        line-color: white;
+        line-color: #1e73be;
         line-Thickness: 1
     }
 }
