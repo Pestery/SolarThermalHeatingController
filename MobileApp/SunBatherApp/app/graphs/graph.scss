@@ -1,0 +1,105 @@
+.graph-page-styles {
+    // graph field
+    .graph-data-page {
+        font-size: 18;
+        height: 373; 
+    }
+
+    // graph field when selecting options (is minimised to fit picker)
+    .graph-data-page-selected {
+        font-size: 18;
+        height: 305; 
+    }
+
+    // graph font size
+    .graph-data-info {
+        font-size: 12;
+    }
+
+    // Header and submit button styles
+    .field-header {
+        font-size: 18;
+        padding-top: 5;
+        height: 40;
+        color: #FFF;
+    }
+
+    // field headers (min max, graph type...)
+    .field-data-header {
+        font-size: 16;
+        padding-top: 5;
+        height: 36; 
+        color: #FFF;
+    }
+
+    // field data (min max vales)
+    .field-data {
+        font-size: 14;
+        padding-top: 6;
+        height: 34;
+    }
+
+    .graph-header {
+        @extend .field-header;
+        background-color: #1e73be;
+    }
+
+    .graph-stats-header {
+        @extend .field-data-header;
+        margin-top: 3;
+        background-color: #1e73be;
+    }
+
+    .graph-stats-data {
+        @extend .field-data;
+    }
+
+    .options-header {
+        @extend .field-data-header;
+        margin-top: 1;
+        background-color: #1e73be;
+    }
+
+    .options-data {
+        @extend .field-data;
+        background-color: white;
+    }
+
+    .options-data TextField {
+        font-size: 14;
+        margin-top: -1;
+        color: black;
+        height: 30;
+    }
+
+    .submit-button {
+        @extend .field-header;    
+        margin-top: 2;
+        background-color: #1e73be;
+    }
+
+    .list-data {
+        font-size: 15;
+        margin-top: 3;
+        background-color: #2599ff;
+        color: #FFF;
+    }
+
+    .list-data Label.active {
+        font-size: 15;
+        margin-top: 6;
+        background-color: #1e73be
+    }
+
+    .horizontal-Axis {
+        label-Fit-Mode: Rotate;
+        line-Hidden: false;
+        line-color: #000000;
+        line-Thickness: 2
+    }
+
+    .vertical-Axis {
+        line-color: #000000;
+        line-Thickness: 2
+    }
+}

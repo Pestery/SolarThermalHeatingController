@@ -7,4 +7,6 @@ module.exports = {
     apiLocalUrlGetLatest: "http://10.0.2.2:5000/api/TemperatureSensors/GetLatest", // finds latest id (max)
     apiMobileUrlGet: "http://192.168.68.110:5001/api/TemperatureSensors/1", 
     apiMobileUrlGetLatest: "http://192.168.68.110:5001/api/TemperatureSensors/GetLatest",
+        apiGETRequest: "http://10.0.2.2:5000/api/Products/2"
+
   };

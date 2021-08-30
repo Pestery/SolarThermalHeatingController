@@ -1,0 +1,26 @@
+<Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" >
+    <GridLayout columns="*" rows="*,auto" width="100%" class="connect-page-styles">
+        <StackLayout row="0" >
+            <comps:header />
+        </StackLayout>
+        <StackLayout row="1" height="82%" class="layout-scheme">
+            <StackLayout>
+                <GridLayout rows="*" columns="*" class="button-search" visibility="{{ isBusy ? 'collapse' : 'visible'}}" >
+                    <Label col="0" text="Find Contoller" textWrap="true" tap="{{ connectController }}"/>
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="button-search" visibility="{{ isBusy ? 'visible' : 'collapse'}}" >
+                    <Label col="0" text="Stop Search" textWrap="true" tap="{{ stopScan }}"/>
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="search-logo">
+                    <ActivityIndicator busy="{{ isBusy }}" />
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="button-connect"  >
+                    <Label col="0" text="Connect" textWrap="true" tap="{{ connect }}"/>
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="button-connect"  >
+                    <Label col="0" text="Disconnect" textWrap="true" tap="{{ disConnect }}"/>
+                </GridLayout>
+            </StackLayout>
+        </StackLayout>
+    </GridLayout>
+</Page> 

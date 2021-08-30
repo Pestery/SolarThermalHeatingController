@@ -7,7 +7,7 @@
 
     <StackLayout class="p-20">
         <Label text="Tap the button" class="h1 text-center" />
-        <Button text="Get Latest Temp" tap="{{ getRequest }}" class="-primary" />
+        <Label text="Get Latest Temp" tap="{{ getRequest }}" class="-primary" />
         <Label text="{{ message }}" class="h2 text-center" textWrap="true" />
     </StackLayout>
 </Page>

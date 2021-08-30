@@ -1,0 +1,72 @@
+.index-page-styles {
+    .field-header {
+        font-size: 18;
+        padding-top: 5;
+        height: 40;
+        color: white;    
+    }
+
+    .field-data-header {
+        font-size: 14;
+        padding-top: 4;
+        height: 31;
+    }
+
+    .system-data-header-status {
+        @extend .field-header;
+        background-color: #1e73be;
+    }
+
+    .system-data-header-conditions {
+        @extend .field-header;    
+        margin-top: 2;
+        background-color: #1e73be;
+    }
+
+    .system-datafield {
+        @extend .field-data-header;
+        background-color: white;
+        color: black;
+    }
+
+    .system-datafield-data {
+        @extend .field-data-header;
+        background-color: white;
+    }
+
+    .graph-data {
+        margin-top: 2;
+        height: 309;
+    }
+
+    .graph-data-header {
+        @extend .field-header;
+        background-color:#1e73be;
+    }
+
+    .graph-data-info {
+        font-size: 12;
+    }
+
+    .view-other {
+        font-size: 18;
+        margin-top: 3;
+        padding-top: 3;
+        background-color: #1e73be;
+        color: #FFF;
+        border-width: 0; //changed this width from 2 to 0, hopefully doesnt break button.
+        height: 40;
+    }
+
+    .horizontal-Axis {
+        label-Fit-Mode: Rotate;
+        line-Hidden: false;
+        line-color: #000000;
+        line-Thickness: 2
+    }
+
+    .vertical-Axis {
+        line-color: #000000;
+        line-Thickness: 2
+    }
+}
