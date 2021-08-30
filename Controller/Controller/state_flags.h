@@ -28,6 +28,9 @@ public:
 		return m_flags & bitFlags;
 	}
 
+	// Get the raw data
+	inline Type& data() __attribute__((always_inline)) {return m_flags;}
+
 	// Constructors
 	StateFlags() : m_flags(0) {}
 	StateFlags(Type bitFlags) : m_flags(bitFlags) {}
