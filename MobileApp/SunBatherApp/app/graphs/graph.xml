@@ -4,7 +4,7 @@
             <comps:header />
         </StackLayout>
         <StackLayout row="1" height="82%" class="layout-scheme">
-            <StackLayout class="{{ showDatePicker ? 'graph-data-page-selected' : 'graph-data-page'}}">
+            <StackLayout class="{{ minimiseGraph ? 'graph-data-page-selected' : 'graph-data-page'}}">
                 <StackLayout class="graph-header">
                     <Label text="{{ graphHeader }}" textWrap="true" />
                 </StackLayout>
@@ -23,7 +23,7 @@
                         <chart:RadCartesianChart.palettes>
                             <chart:Palette >
                                 <chart:Palette.entries>
-                                    <chart:PaletteEntry  strokeColor="#FFF" />
+                                    <chart:PaletteEntry  strokeColor="#1e73be" />
                                 </chart:Palette.entries>
                             </chart:Palette>
                         </chart:RadCartesianChart.palettes>
@@ -42,7 +42,7 @@
             </StackLayout>
             <StackLayout visibility="{{ showGraphPicker ? 'visible' : 'collapse'}}">
                 <StackLayout class="list-data">
-                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:505px" >
+                    <ListView items="{{ graphOptions }}" itemTap="{{ onItemTap }}" style="height:548px" >
                         <ListView.itemTemplate>
                             <FlexboxLayout flexDirection="row">
                                 <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>

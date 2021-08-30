@@ -49,7 +49,7 @@ function graphTitleCompare(viewModel, nameOption, nameOptionAbbreviated, nameCom
     viewModel.set('graphHeader', nameOption);
     viewModel.set('graphSelected', nameOptionAbbreviated);
     viewModel.set('competitorSelected', nameCompareAbbreviated);
-    viewModel.set('axisLegend', 'X axis: Time' + '   ' + 'Y axis: ' + nameOption + "   Red: " + nameCompare + "   White: SunBather");
+    viewModel.set('axisLegend', 'X axis: Time' + '   ' + 'Y axis: ' + nameOption + "   Red: " + nameCompare + "   Blue: SunBather");
 }
 
 // Used as the arrays spots in the compare.xml (line 20/21)
@@ -60,7 +60,6 @@ function graphDataOption(viewModel, databaseField, graphDataArray, dataType) {
 }
 
 export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, graphPage, competitor) {
-    var optionChosenConstant;
     var dataTypeOption = "Option";
     var dataTypeCompare = "Compare";
 

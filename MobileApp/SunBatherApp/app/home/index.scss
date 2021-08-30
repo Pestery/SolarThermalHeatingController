@@ -3,6 +3,7 @@
         font-size: 18;
         padding-top: 5;
         height: 40;
+        color: white;    
     }
 
     .field-data-header {
@@ -18,7 +19,7 @@
 
     .system-data-header-conditions {
         @extend .field-header;    
-        margin-top: 4;
+        margin-top: 2;
         background-color: #1e73be;
     }
 
@@ -34,9 +35,8 @@
     }
 
     .graph-data {
-        font-size: 18;
-        margin-top: 4;
-        height: 303;
+        margin-top: 2;
+        height: 309;
     }
 
     .graph-data-header {
@@ -46,14 +46,14 @@
 
     .graph-data-info {
         font-size: 12;
-        background-color: white;
     }
 
     .view-other {
         font-size: 18;
-        margin-top: 4;
+        margin-top: 3;
         padding-top: 3;
         background-color: #1e73be;
+        color: #FFF;
         border-width: 0; //changed this width from 2 to 0, hopefully doesnt break button.
         height: 40;
     }
@@ -61,12 +61,12 @@
     .horizontal-Axis {
         label-Fit-Mode: Rotate;
         line-Hidden: false;
-        line-color: #1e73be;
-        line-Thickness: 1
+        line-color: #000000;
+        line-Thickness: 2
     }
 
     .vertical-Axis {
-        line-color: #1e73be;
-        line-Thickness: 1
+        line-color: #000000;
+        line-Thickness: 2
     }
 }

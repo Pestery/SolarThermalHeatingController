@@ -45,7 +45,6 @@ namespace SunBatherAPI.Data
             context.SaveChanges();
 
             RecordEvent[] recordEvent;
-            CompetitorEvent[] competitorEvent;
             int numberOfRecords = 3360;
             int timeInterval = 15; // in minutes 
             bool dateTimeNow = false;
@@ -62,13 +61,6 @@ namespace SunBatherAPI.Data
             foreach (RecordEvent re in recordEvent)
             {
                 context.RecordEvent.Add(re);
-            }
-            context.SaveChanges();
-
-            competitorEvent = CompetitorEventArrayGenerator(numberOfRecords, timeInterval, testingTime);
-            foreach (CompetitorEvent ce in competitorEvent)
-            {
-                context.CompetitorEvent.Add(ce);
             }
             context.SaveChanges();
 
@@ -167,37 +159,6 @@ namespace SunBatherAPI.Data
             }
 
             return RecordEventArray;
-        }
-
-        public static CompetitorEvent[] CompetitorEventArrayGenerator(int samplesGenerated, int timeInterval, DateTime dateTime)
-        {
-            // initialise values
-            CompetitorEvent[] CompetitorEventArray = new CompetitorEvent[samplesGenerated];
-
-            // sample data from AusGrid (Per week)
-            // COST: Gas pump = 60, Gas Heater = 131
-            // Emissions: Gas pump = 290, Gas Heater = 354
-            // / 7 * 24 * 60 is to convert from a week to a minute
-            double gasPumpCost = (60.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
-            double gasHeaterCost = (131.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
-            double gasPumpEmissions = (290.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
-            double gasHeaterEmissions = (354.00 / (7.00 * 24.00 * 60.00)) * timeInterval;
-
-            for (int i = samplesGenerated; i > 0; i--)
-            {
-                CompetitorEventArray[i - 1] = new CompetitorEvent
-                {
-                    Id = i,
-                    GasPumpCost = Math.Round(gasPumpCost, 3),
-                    GasHeaterCost = Math.Round(gasHeaterCost, 3),
-                    GasPumpEmissions = Math.Round(gasPumpEmissions, 3),
-                    GasHeaterEmissions = Math.Round(gasHeaterEmissions, 3),
-                    ReadDateTime = dateTime };
-
-                dateTime = dateTime.AddMinutes(-timeInterval);
-            }
-
-            return CompetitorEventArray;
         }
     }
 }
