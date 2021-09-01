@@ -31,6 +31,7 @@ public:
 	String& operator = (const String& rhs) = default;
 
 	String& operator += (char rhs) {m_data += rhs; return *this;}
+	String& operator += (int rhs) {m_data += std::to_string(rhs); return *this;}
 	String& operator += (const char* rhs) {m_data += rhs; return *this;}
 	String& operator += (const std::string& rhs) {m_data += rhs; return *this;}
 	String& operator += (const String& rhs) {m_data += rhs.m_data; return *this;}
@@ -82,6 +83,18 @@ public:
 			} else {
 				m_data.clear();
 			}
+		}
+	}
+
+	void toLowerCase() {
+		for (unsigned i=0; i<m_data.size(); i++) {
+			if (('A' <= m_data[i]) && (m_data[i] <= 'Z')) m_data += 'a' - 'A';
+		}
+	}
+
+	void toUpperCase() {
+		for (unsigned i=0; i<m_data.size(); i++) {
+			if (('a' <= m_data[i]) && (m_data[i] <= 'z')) m_data += 'A' - 'a';
 		}
 	}
 

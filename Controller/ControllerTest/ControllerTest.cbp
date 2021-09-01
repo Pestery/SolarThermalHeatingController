@@ -23,7 +23,6 @@
 		<Unit filename="../Controller/Controller.ino" />
 		<Unit filename="../Controller/connection_info.h" />
 		<Unit filename="../Controller/connection_info_template.h.txt" />
-		<Unit filename="../Controller/database_interaction.h" />
 		<Unit filename="../Controller/date_time.h" />
 		<Unit filename="../Controller/interconnect.h" />
 		<Unit filename="../Controller/json_decoder.h" />
@@ -32,8 +31,10 @@
 		<Unit filename="../Controller/misc.h" />
 		<Unit filename="../Controller/ring_buffer.h" />
 		<Unit filename="../Controller/sensor_record.h" />
+		<Unit filename="../Controller/server_address.h" />
+		<Unit filename="../Controller/server_link.h" />
+		<Unit filename="../Controller/settings.h" />
 		<Unit filename="../Controller/state_flags.h" />
-		<Unit filename="../Controller/status.h" />
 		<Unit filename="../Controller/timer.h" />
 		<Unit filename="arduino_hardware_serial.h" />
 		<Unit filename="arduino_pins.h" />
@@ -45,6 +46,7 @@
 		<Unit filename="test_misc.h" />
 		<Unit filename="test_ring_buffer.h" />
 		<Unit filename="test_sensor_record.h" />
+		<Unit filename="test_server_address.h" />
 		<Unit filename="test_state_flags.h" />
 		<Unit filename="test_timer.h" />
 		<Unit filename="unit_test.h" />

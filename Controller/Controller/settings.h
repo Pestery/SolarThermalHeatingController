@@ -1,12 +1,12 @@
-#ifndef STATUS_H
-#define STATUS_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
 // Include headers
 #include "json_decoder.h"
 #include "utility.h"
 
-// The Status class holds information about the controller settings and status.
-class Status {
+// The Settings class holds information about the controller settings and current status.
+class Settings {
 public:
 
 	// Minimum and maximum allowed values for the target temperature

@@ -96,7 +96,26 @@ void loop() {
 				// Received an echo request from the serial port, directed toward the ESP8266 (used for debugging)
 				// Try to forward the request to the ESP8266
 				if (!linkWifi.send(header, payload)) {
-					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Echo: Failed to send echo request to ESP8266. Buffer full."));
+					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Failed to echo to ESP8266"));
+				}
+				break;
+
+			case Interconnect::DebugSendToServer:
+
+				// Received a request to send data to the server
+				// This command should come from the serial port and is intended for debugging only
+				// Try to forward the request to the ESP8266
+				if (!linkWifi.send(header, payload)) {
+					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Failed to pass data to server"));
+				}
+				break;
+
+			case Interconnect::SetServerAddress:
+
+				// Received a request to change the server address
+				// Try to forward the request to the ESP8266
+				if (!linkWifi.send(header, payload)) {
+					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Failed to change server address"));
 				}
 				break;
 
