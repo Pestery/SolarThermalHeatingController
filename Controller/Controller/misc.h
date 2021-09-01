@@ -4,29 +4,14 @@
 // This namespace contains general miscellaneous functions which may not fit elsewhere
 namespace Misc {
 
-	// Get the smaller of two values
-	// This template function returns which ever input value is lower
-	template <typename T>
-	inline constexpr const T& min(const T& lhs, const T& rhs) {
-		return (lhs < rhs) ? lhs : rhs;
+	// A small function to create strings
+	// This exists within the specification, but does not seem to work within the Arduino IDE
+	inline String makeString(const char* buffer, unsigned int length) {
+		String result;
+		result.reserve(length);
+		while (length--) result += *(buffer++);
+		return result;
 	}
-
-	// Get the larger of two values
-	// This template function returns which ever input value is higher
-	template <typename T>
-	inline constexpr const T& max(const T& lhs, const T& rhs) {
-		return (lhs > rhs) ? lhs : rhs;
-	}
-
-	// Clamp a value to within a given range
-	// This template function returns the input value, or the low or high value if outside the allowed range
-	template <typename T>
-	inline constexpr const T& clamp(const T& value, const T& low, const T& high) {
-		if (value < low) return low;
-		if (value > high) return high;
-		return value;
-	}
-
 
 	// Get next sub-section within a larger string
 	// 'source' is the larger source string which is being searched

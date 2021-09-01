@@ -17,6 +17,7 @@
 #include "test_date_time.h"
 #include "test_sensor_record.h"
 #include "test_interconnect.h"
+#include "test_server_address.h"
 
 // Declare functions
 std::stringstream& exceptionToStream(const std::exception& error, std::stringstream& stream, unsigned indentLevel, bool indentAutoIncrement) noexcept;

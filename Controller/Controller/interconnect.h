@@ -38,6 +38,17 @@ public:
 		// A notification message which should be forwarded to the user, probably via the serial port
 		GeneralNotification = ':',
 
+		// Set the server address
+		// Payload should be of the general format: http://localhost:5000/api/System
+		SetServerAddress = 's',
+
+		// Get the server address
+		GetServerAddress = 'S',
+
+		// A debug command used to send data to server
+		// The response will be forwarded back through to the serial port
+		DebugSendToServer = 't',
+
 		// A debug command used to echo back data to the source
 		EchoArduino = 'x',
 		EchoESP8266 = 'y',

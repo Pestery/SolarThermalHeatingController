@@ -36,6 +36,10 @@ public:
 		m_previousTrigger(0),
 		m_interval(triggerIntervalInMilliseconds) {
 	}
+	Timer(unsigned long triggerIntervalInMilliseconds, unsigned long currentTime) :
+		m_previousTrigger(currentTime),
+		m_interval(triggerIntervalInMilliseconds) {
+	}
 
 };
 
