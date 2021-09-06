@@ -9,18 +9,21 @@
         @extend .field-header;
         margin-top: 2;
         background-color: #1e73be;
+        color: white;
     }
 
     .system-settings {
         @extend .field-header;
         margin-top: 4;
         background-color: #1e73be;
+        color: white;
     }
 
     .system-status {
         @extend .field-header;
         margin-top: 4;
         background-color: #1e73be;
+        color: white;
     }
 
     .system-datafield-controller {
@@ -64,8 +67,8 @@
     .opaque {
         font-size: 16;
         padding-top: 6;
-        background-color: #1e73be;
-        opacity: 0.5;
+        background-color: white;
+        //opacity: 0.5;
         height: 42;
     }
 
@@ -75,6 +78,7 @@
         margin-top: 137;
         padding-top: 3;
         background-color: #1e73be;
+        color: white;
         border-width: 0;
         height: 40;
     }

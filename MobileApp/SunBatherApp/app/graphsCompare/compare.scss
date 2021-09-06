@@ -52,11 +52,13 @@
         border-width: 1;
         padding: 5px;
         border-color: white;
+        color: white;
     }
 
     .graph-stats-header {
         @extend .field-data-header;
-        background-color: #1e73be;        
+        background-color: #1e73be;   
+        color: white;     
     }
 
     .graph-stats-data {
@@ -69,6 +71,7 @@
         @extend .field-data-header;
         margin-top: 3;
         background-color: #1e73be;
+        color: white;
     }
 
     .options-data {
@@ -87,6 +90,7 @@
         @extend .field-header;    
         margin-top: 3;
         background-color: #1e73be;
+        color: white;
     }
 
     .list-data {

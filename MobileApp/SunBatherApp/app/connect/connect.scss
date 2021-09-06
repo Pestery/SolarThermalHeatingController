@@ -11,13 +11,14 @@
         margin-top: 200;
         margin-bottom: 1;
         background-color: #1e73be;
+        color: white;
     }
 
     .button-connect {
         @extend .field-header;
         margin-top: 10;
         margin-bottom: 1;
-        color: black;
+        color: white;
         background-color: #1e73be;
     }
 
