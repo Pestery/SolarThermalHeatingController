@@ -47,6 +47,7 @@ public:
 
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
+		DebugSendToServerKeepHeaders = 'T',
 		DebugSendToServer = 't',
 
 		// A debug command used to echo back data to the source

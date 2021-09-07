@@ -3,6 +3,7 @@
 
 // Include headers
 #include <ESP8266WiFi.h>
+#include <EEPROM.h>
 #include "interconnect.h"
 #include "state_flags.h"
 #include "server_link.h"
@@ -45,6 +46,10 @@ void setup() {
 	// probably using PROGMEM instead: https://www.arduino.cc/reference/en/language/variables/utilities/progmem/
 	WiFi.begin(wifiSSID, wifiPassword);
 
+	// Setup the EEPROM data
+	// This will use a buffer of 512 bytes
+	EEPROM.begin(512);
+
 	// Initialise server data
 	linkServer.init();
 }
@@ -82,13 +87,14 @@ void loop() {
 				requestSendDataForDatabaseKey = payload[0];
 				break;
 
+			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer: {
 
 				// Received data which needs to be sent to the database
 				// Try to send the data
 				// Record the data if not sent
 				String reply;
-				if (linkServer.sendJson(payload, reply, true)) {
+				if (linkServer.sendJson(payload, reply, header == Interconnect::DebugSendToServerKeepHeaders)) {
 					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Sent to server. Reply: ")) + reply);
 				} else {
 					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Error sending to server. Reply: ")) + reply);

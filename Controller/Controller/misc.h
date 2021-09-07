@@ -13,6 +13,39 @@ namespace Misc {
 		return result;
 	}
 
+	// Convert a hexadecimal string to an integer value
+	unsigned hexToInt(const char* hexString) {
+		unsigned result = 0;
+		if (hexString) {
+
+			// Peek at first two bytes of the string
+			// If it starts with "0x" or "0X" then skip those bytes
+			if (hexString[0] && hexString[1]) {
+				if (hexString[0] == '0') {
+					if ((hexString[1] == 'x') || (hexString[1] == 'X')) {
+						hexString += 2;
+					}
+				}
+			}
+
+			// Process the string
+			unsigned h;
+			while (*hexString) {
+				h = *(hexString++);
+				if (('0' <= h) && (h <= '9')) {
+					result = (result * 16) + (h - '0');
+				} else if (('a' <= h) && (h <= 'f')) {
+					result = (result * 16) + (h + 10 - 'a');
+				} else if (('A' <= h) && (h <= 'F')) {
+					result = (result * 16) + (h + 10 - 'A');
+				} else {
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
 	// Get next sub-section within a larger string
 	// 'source' is the larger source string which is being searched
 	// 'startAt' is the index location within that string at which to start. This value will get incremented and should initially be set to zero.

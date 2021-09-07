@@ -100,6 +100,7 @@ void loop() {
 				}
 				break;
 
+			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer:
 
 				// Received a request to send data to the server
