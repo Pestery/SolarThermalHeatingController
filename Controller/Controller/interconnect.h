@@ -36,21 +36,37 @@ public:
 		DataForDatabase  = 'd',
 
 		// A notification message which should be forwarded to the user, probably via the serial port
+		// Do not use. Intended for system messages back to user
+		// Payload is the notification message
 		GeneralNotification = ':',
 
 		// Set the server address
-		// Payload should be of the general format: http://localhost:5000/api/System
+		// Payload is the protocol, website and web page
+		// The general format should be similar to: http://localhost:5000/api/System
 		SetServerAddress = 's',
 
 		// Get the server address
+		// No payload
 		GetServerAddress = 'S',
+
+		// Set the wifi SSID name and password
+		// The payload should be either:
+		//  - The wifi name
+		//  - The wifi name, followed by plus '+' symbol, followed by wifi password
+		SetWifiInfo = 'w',
+
+		// Request the wifi status
+		// No payload
+		GetWifiInfo = 'W',
 
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
+		// Payload is the (probably JSON) message to be sent to the server
 		DebugSendToServerKeepHeaders = 'T',
 		DebugSendToServer = 't',
 
 		// A debug command used to echo back data to the source
+		// Payload is the test message
 		EchoArduino = 'x',
 		EchoESP8266 = 'y',
 

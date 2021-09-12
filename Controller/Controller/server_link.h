@@ -28,6 +28,9 @@ public:
 	// The EEPROM address used for storing server info
 	static constexpr int EepromAddress = 0;
 
+	// The size required for this class within the EEPROM
+	static constexpr int EepromSize = sizeof(ServerAddress);
+
 	// Send some data to the database
 	// A POST request is used as the container, and the data must be in JSON format
 	// Returns true on success, or false on failure
@@ -103,7 +106,7 @@ public:
 		if (m_address.set(newAddress)) {
 
 			// Copy the address data to the EEPROM (non-volatile memory)
-			EEPROM.put(EepromAddress, m_address);
+			EEPROM.put(EepromAddress, *this);
 			EEPROM.commit();
 
 			// Result result
@@ -122,7 +125,7 @@ public:
 	void init() {
 
 		// Copy the address data from the EEPROM (non-volatile memory)
-		EEPROM.get(EepromAddress, m_address);
+		EEPROM.get(EepromAddress, *this);
 	}
 
 	// Default constructor
