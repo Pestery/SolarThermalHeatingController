@@ -1,4 +1,5 @@
 .connect-page-styles {
+    color: rgb(255, 255, 255);
     .field-header {
         width: 90%;
         font-size: 18;
@@ -17,7 +18,6 @@
         @extend .field-header;
         margin-top: 10;
         margin-bottom: 1;
-        color: black;
         background-color: #1e73be;
     }
 
