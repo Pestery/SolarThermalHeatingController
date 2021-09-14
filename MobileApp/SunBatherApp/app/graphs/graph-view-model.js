@@ -64,23 +64,27 @@ export function GraphViewModel() {
 
   // The next functions change the display of the screen depending on what has been selected
   viewModel.dateFromClicked = () => {
+    viewModel.set('minimiseGraph', true);
     viewModel.set('showDatePicker', true);
     viewModel.set('showData', false);
     viewModel.set('dateFromClicked', true);
   }
 
   viewModel.dateToClicked = () => { 
+    viewModel.set('minimiseGraph', true);
     viewModel.set('showDatePicker', true);
     viewModel.set('showData', false);
     viewModel.set('dateFromClicked', false);
   }
 
   viewModel.graphPickerClicked = () => {
+    viewModel.set('minimiseGraph', true);
     viewModel.set('showData', false);
     viewModel.set('showGraphPicker', true);
   }
 
   viewModel.hidePicker = () => {
+    viewModel.set('minimiseGraph', false);
     viewModel.set('showDatePicker', false);
     viewModel.set('showData', true);
     viewModel.set('showGraphPicker', false);

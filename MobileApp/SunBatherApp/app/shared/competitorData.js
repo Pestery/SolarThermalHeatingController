@@ -1,7 +1,7 @@
 var commonFunction = require("../shared/commonFunctions");
 
 //assumptions
-var timeInterval = 15; // Default sensor reading is 15 min
+var timeInterval = 1; // Default sensor reading is 15 min
 
 //variables
 var naturalGasCostpkW = 0.04;   //default cost of 4c per kW
@@ -31,24 +31,20 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
     var arrayDataInfo = {};
     var min, max, average;
     var thermalPowerAbsorbed;
-    var test = getThermalPower(arrayData[0]);
-    min = max = average = 0;
-    console.log(arrayData[0][databaseField])
-    console.log(test)
-    console.log(energyConstant)
-    console.log(heaterConstant)
 
-    for (i = 0; i < arrayData.length; i++){
+    thermalPowerAbsorbed = getThermalPower(arrayData[0]);
+    arrayData[0][databaseField] = min = max = average = (thermalPowerAbsorbed*energyConstant)/heaterConstant;
+    arrayData[0].readDateTime = new Date(arrayData[0].readDateTime).getTime();
+
+    for (i = 1; i < arrayData.length; i++){
         arrayData[i].readDateTime = new Date(arrayData[i].readDateTime).getTime();
         thermalPowerAbsorbed = getThermalPower(arrayData[i]);
         arrayData[i][databaseField] = (thermalPowerAbsorbed*energyConstant)/heaterConstant;
-        console.log(arrayData[i][databaseField])
         min = commonFunction.findMin(arrayData[i][databaseField], min);
         max = commonFunction.findMax(arrayData[i][databaseField], max);
         average = average + arrayData[i][databaseField];
     }
 
-    console.log('finished loop')
     arrayDataInfo.graphDataArray = arrayData;
     arrayDataInfo.min = min;  
     arrayDataInfo.max = max;  
@@ -59,9 +55,6 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
 
 export function findGraphDataCompare(graphData, graphOption, optionChosen) {
     var compareDataInfo = {};
-    console.log('test')
-    console.log(graphOption)
-    console.log(optionChosen)
 
     switch (optionChosen.idName) {
         case "ELECTRICHEATER1":
@@ -93,7 +86,6 @@ export function findGraphDataCompare(graphData, graphOption, optionChosen) {
                 }
     }
 
-    console.log('complete')
     // store data in array and rounds the numbers
     compareDataInfo.yAxisInterval = ((compareDataInfo.max - compareDataInfo.min) / 3).toFixed(0);
     compareDataInfo.min = compareDataInfo.min.toFixed(1); 

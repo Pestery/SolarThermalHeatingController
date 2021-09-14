@@ -34,7 +34,7 @@
                 <StackLayout class="graph-data-header">
                     <Label text="Energy Adsorbed" textWrap="true" />
                 </StackLayout>
-                <GridLayout rows="*, 30" class="graph-data-info">
+                <GridLayout rows="*, 25" class="graph-data-info">
                     <chart:RadCartesianChart id="cartesianChart">
                         <chart:RadCartesianChart.horizontalAxis>
                             <chart:DateTimeContinuousAxis  majorStep="{{ graphXAxisInterval }}" majorStepUnit="{{ graphXAxisUnit }}" dateFormat="{{ graphFormat }}" plotMode="OnTicks" class="horizontal-Axis" />
@@ -48,7 +48,7 @@
                         <chart:RadCartesianChart.palettes>
                             <chart:Palette >
                                 <chart:Palette.entries>
-                                    <chart:PaletteEntry  strokeColor="#FFF" />
+                                    <chart:PaletteEntry  strokeColor="#1e73be" />
                                 </chart:Palette.entries>
                             </chart:Palette>
                         </chart:RadCartesianChart.palettes>

@@ -69,13 +69,14 @@ export function findMax(newMax, originalMax) {
 // Finds min, max and average
 // multiplies cost or emissions which comparitor constant (if compared is called)
 // Stores data into a usable array for the display to use
-function loopThroughData(arrayData, initialValue, databaseField) {
+function loopThroughData(arrayData, databaseField) {
   var i; 
   var arrayDataInfo = {};
   var min, max, average;
-  min = max = average = initialValue;
+  min = max = average = arrayData[0][databaseField];
+  arrayData[0].readDateTime = new Date(arrayData[0].readDateTime).getTime();
 
-  for (i = 0; i < arrayData.length; i++){
+  for (i = 1; i < arrayData.length; i++){
     arrayData[i].readDateTime = new Date(arrayData[i].readDateTime).getTime();
     min = findMin(arrayData[i][databaseField], min);
     max = findMax(arrayData[i][databaseField], max);
@@ -137,7 +138,7 @@ function timePeriod(dateFrom, dateTo, graphDataInfo) {
 // converts datetime to time
 export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   var graphDataInfo = {};
-  graphDataInfo = loopThroughData(graphData, graphData[0][graphOption.databaseField], graphOption.databaseField);
+  graphDataInfo = loopThroughData(graphData, graphOption.databaseField);
 
   // store data in array
   graphDataInfo.yAxisInterval = ((graphDataInfo.max - graphDataInfo.min) / 3).toFixed(0);
@@ -154,7 +155,7 @@ export function isLiveData(liveData) {
     dateInfo.dateNow = new Date().toISOString();
     dateInfo.dateYesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
     dateInfo.dateNowConvert = new Date(dateInfo.dateNow);
-    dateInfo.dateYesterdayConvert = new Date(dateInfo.dateYesterday); 
+    dateInfo.dateYesterdayConvert = new Date(dateInfo.dateYesterday);  
   } else {
     dateInfo.dateNow = new Date("07/11/2021 12:00").toISOString();
     dateInfo.dateYesterday = new Date("07/10/2021 12:00").toISOString();

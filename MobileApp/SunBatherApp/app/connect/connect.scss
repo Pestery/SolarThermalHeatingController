@@ -10,14 +10,15 @@
         @extend .field-header;
         margin-top: 200;
         margin-bottom: 1;
-        background-color: #0032f8;
+        background-color: #1e73be;
     }
 
     .button-connect {
         @extend .field-header;
         margin-top: 10;
         margin-bottom: 1;
-        background-color: #f80000;
+        color: black;
+        background-color: #1e73be;
     }
 
     .search-logo {
