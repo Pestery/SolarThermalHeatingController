@@ -21,6 +21,20 @@
                     <Label col="0" text="Disconnect" textWrap="true" tap="{{ disConnect }}"/>
                 </GridLayout>
             </StackLayout>
+            <StackLayout visibility="{{ showBluetoothList ? 'visible' : 'collapse'}}">
+                <StackLayout class="list-data">
+                    <ListView items="{{ compareOptions }}" style="height:575px" >
+                        <ListView.itemTemplate>
+                            <FlexboxLayout flexDirection="row">
+                                <Label text="{{ name }}"  verticalAlignment="center" style="width: 100%" />
+                            </FlexboxLayout>
+                        </ListView.itemTemplate>
+                    </ListView>
+                </StackLayout>
+                <StackLayout class="submit-button">
+                    <Label text="Competitor Submit" textWrap="true" tap='{{ hidePicker }}'/> 
+                </StackLayout>
+            </StackLayout>
         </StackLayout>
     </GridLayout>
 </Page> 

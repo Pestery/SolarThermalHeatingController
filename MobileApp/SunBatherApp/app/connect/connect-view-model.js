@@ -1,18 +1,38 @@
 import { Observable } from '@nativescript/core'
 import { Bluetooth } from '@nativescript-community/ble';
+import { competitorOptions }  from "../models/competitorModel";
 var bluetooth = new Bluetooth();
 
-function connectPageIntialize(viewModel) {
+// TODO 
+// Add found counter
+// Prioritise Arduino devices
+// List devices
+// disable connect button
+// Enter WIFI stuff
+// write to device
+// Disconnect
+
+function connectPageIntialize(viewModel, blueToothList) {
     viewModel.set('headerSelected', 4); // needed for underline in header
     viewModel.set('isBusy', false);
+    viewModel.set('foundDevicesCount', 0);
+    viewModel.set('showBluetoothList', false);
+    var compareOptionList = competitorOptions();
+    viewModel.set('compareOptions', blueToothList);
 }
 
 export function ConnectViewModel() {
     const viewModel = new Observable();
-    connectPageIntialize(viewModel);
+    var blueToothList = {};
+    connectPageIntialize(viewModel, blueToothList);
 
     viewModel.connectController = () => {
-        bluetooth.isBluetoothEnabled().then(enabled => {
+        for (var i = 0; i < 4; i++)
+        {
+            blueToothList[i] = "Bluetooth Item: " + i;
+        }
+        console.log(blueToothList)
+        /*bluetooth.isBluetoothEnabled().then(enabled => {
             console.log("Enabled? " + enabled)
             if (!enabled) {
                 alert("Please Turn on Bluetooth")
@@ -35,7 +55,7 @@ export function ConnectViewModel() {
             }
         }, error => {
             console.log(error);
-        });
+        });*/
     }
     
     viewModel.stopScan = () => {
