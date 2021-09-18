@@ -22,14 +22,14 @@ This board configuration info applies to the [Arduino MEGA with Wifi](https://ww
 
 The 8-Pin dip switch settings for the board are:
 
-                                               | Pin-1  | Pin-2  | Pin-3  | Pin-4  | Pin-5  | Pin-6  | Pin-7  | Pin-8  |
------------------------------------------------|--------|--------|--------|--------|--------|--------|--------|--------|
-To program Arduino chip using PC               | *Off*  | *Off*  | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  |
-To program ESP8266 chip using PC               | *Off*  | *Off*  | *Off*  | *Off*  | **ON** | **ON** | **ON** | *Off*  |
-To communicate between Arduino and PC          | *Off*  | *Off*  | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  |
-To communicate between ESP8266 and PC          | *Off*  | *Off*  | *Off*  | *Off*  | **ON** | **ON** | *Off*  | *Off*  |
-To communicate between Arduino and ESP8266     | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  | *Off*  | *Off*  |
-To communicate between Arduino, ESP8266 and PC | **ON** | **ON** | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  |
+|                                               | Pin-1  | Pin-2  | Pin-3  | Pin-4  | Pin-5  | Pin-6  | Pin-7  | Pin-8  |
+|-----------------------------------------------|--------|--------|--------|--------|--------|--------|--------|--------|
+|To program Arduino chip using PC               | *Off*  | *Off*  | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  |
+|To program ESP8266 chip using PC               | *Off*  | *Off*  | *Off*  | *Off*  | **ON** | **ON** | **ON** | *Off*  |
+|To communicate between Arduino and PC          | *Off*  | *Off*  | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  |
+|To communicate between ESP8266 and PC          | *Off*  | *Off*  | *Off*  | *Off*  | **ON** | **ON** | *Off*  | *Off*  |
+|To communicate between Arduino and ESP8266     | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  | *Off*  | *Off*  |
+|To communicate between Arduino, ESP8266 and PC | **ON** | **ON** | **ON** | **ON** | *Off*  | *Off*  | *Off*  | *Off*  |
 
 When communicating between Arduino, ESP8266 and PC:
 - The ESP8266 should be set to use serial3 using the dip switch (set to RXD3-TXD3 instead of RXD0-TXD0)
