@@ -127,6 +127,52 @@ TEST(RingBuffer) {
 	CHECK_EQUAL_SHOW(minBuf.capacity(), 0);
 	CHECK_IS_TRUE(minBuf.isFull());
 	CHECK_IS_FALSE(minBuf.push('t'));
+
+	// Check adding string to buffer
+	t.resize(5);
+	CHECK_EQUAL(t.stringPush("ab"), 2);
+	CHECK_IS_FALSE(t.isEmpty());
+	CHECK_EQUAL(t.pop(), 'a');
+	CHECK_EQUAL(t.pop(), 'b');
+	CHECK_IS_TRUE(t.isEmpty());
+
+	CHECK_EQUAL(t.stringPush("abcdef"), 4);
+	CHECK_IS_TRUE(t.isFull());
+	CHECK_IS_FALSE(t.isEmpty());
+	CHECK_EQUAL(t.pop(), 'a');
+	CHECK_EQUAL(t.pop(), 'b');
+	CHECK_EQUAL(t.pop(), 'c');
+	CHECK_EQUAL(t.pop(), 'd');
+	CHECK_IS_TRUE(t.isEmpty());
+
+	// Check stringCompareAndClearOnMatch()
+	t.resize(16);
+	CHECK_EQUAL(t.stringPush("HelloWorldTest"), 14);
+	CHECK_IS_FALSE(t.isEmpty());
+	CHECK_IS_FALSE(t.stringCompareAndClearOnMatch("World"));
+	CHECK_IS_FALSE(t.stringCompareAndClearOnMatch("HelloWrong"));
+	CHECK_IS_TRUE(t.stringCompareAndClearOnMatch("Hello"));
+	CHECK_IS_FALSE(t.stringCompareAndClearOnMatch("Hello"));
+	CHECK_EQUAL_SHOW(t.size(), 9);
+	CHECK_IS_TRUE(t.stringCompareAndClearOnMatch("World"));
+	CHECK_IS_FALSE(t.stringCompareAndClearOnMatch("TestWrong"));
+	CHECK_EQUAL_SHOW(t.size(), 4);
+	CHECK_IS_TRUE(t.stringCompareAndClearOnMatch("Test"));
+	CHECK_IS_FALSE(t.stringCompareAndClearOnMatch("Test"));
+	CHECK_IS_TRUE(t.isEmpty());
+
+	// Check stringIndexOf()
+	CHECK_EQUAL(t.stringPush("HelloWorldTest"), 14);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("Hello"), 0);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("World"), 5);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("Test"), 10);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("Wrong"), -1);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("l", 0), 2);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("l", 1), 2);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("l", 2), 2);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("l", 3), 3);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("l", 4), 8);
+	CHECK_EQUAL_SHOW(t.stringIndexOf("l", 9), -1);
 }
 
 #endif

@@ -66,6 +66,13 @@ public:
 		return result;
 	}
 
+	// Discard a number of bytes from the buffer
+	void pop(int amount) {
+		while ((amount-- > 0) && !isEmpty()) {
+			pop();
+		}
+	}
+
 	// Clear all data within the buffer and leave it empty.
 	inline void reset() __attribute__((always_inline)) {
 		m_head = 0;
@@ -76,6 +83,7 @@ public:
 	// This will erase any data which exists within the buffer
 	bool resize(IndexType newSize) {
 		if (newSize == m_size) {
+			reset();
 			return true;
 		} else {
 			uint8_t* newBuffer = (uint8_t*)realloc(m_buffer, newSize);
@@ -85,9 +93,104 @@ public:
 				reset();
 				return true;
 			} else {
+				reset();
 				return false;
 			}
 		}
+	}
+
+	// Try to add a string to the ring buffer
+	// 'data' is string to copy into the buffer
+	// 'startAt' is the optional offset from the start of the buffer where the copy should begin
+	// 'length' is the optional maximum amount of data to copy. Set to -1 to ignore
+	// Returns the total amount of data copied, which may be less than requested
+	int stringPush(const char* data, int startAt = 0, int length = -1) {
+		int pushed = 0;
+		if (data && (startAt >= 0)) {
+
+			// Move to the start location
+			// Make sure there are no null-characters, which mark the end of the string
+			while (startAt && *data) {
+				data++;
+				startAt--;
+			}
+
+			// Start copying data
+			// End if null-character is found, or target copy length is reached, or if buffer is full
+			while (*data && length && push(*data)) {
+				data++;
+				length--;
+				pushed++;
+			}
+		}
+		return pushed;
+	}
+
+	// Check if the buffer starts with the 'testString'
+	// Returns true on match, or false on mismatch
+	bool stringBeginsWith(const char* testString) {
+		if (testString && testString[0]) {
+			const int iMax = size();
+			int i = 0;
+			while (true) {
+
+				// Get next character within testString
+				// Check if end of testString
+				const char c = testString[i];
+				if (!c) return true;
+
+				// Check if end of receive buffer
+				if (i >= iMax) return false;
+
+				// Check for data mismatch
+				// If match then increment offset
+				if (c != (char)peek(i++)) return false;
+			}
+		}
+		return false;
+	}
+
+	// Check if the buffer starts with the 'testString', and then clear that data if so
+	// If the data matches then remove the data and return true
+	// If the data does not match then return false
+	bool stringCompareAndClearOnMatch(const char* testString) {
+		if (testString && stringBeginsWith(testString)) {
+			pop(strlen(testString));
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// Find next occurrence of the given string within the buffer
+	// Returns the offset of the start of the string within the buffer, or -1 if not found
+	int stringIndexOf(const char* testString, int startAt = 0) {
+		if (!testString) return -1;
+
+		// Loop through testString
+		int i = 0;
+		const int recvSize = size();
+		while (true) {
+
+			// Get next character within testString
+			// Check if end of testString
+			const char c = testString[i];
+			if (!c) return startAt;
+
+			// Check if end of receive buffer
+			if ((startAt + i) >= recvSize) return -1;
+
+			// Check for data mismatch
+			// If mismatch then increment startAt value and reset offset
+			// If match then increment offset
+			if (c != (char)peek(startAt + i)) {
+				startAt++;
+				i = 0;
+			} else {
+				i++;
+			}
+		}
+		return -1;
 	}
 
 	// Default constructor and destructor

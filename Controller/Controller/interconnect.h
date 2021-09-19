@@ -13,17 +13,18 @@
 // Interconnect buffer sizes for different connections and direction of connections
 // This should be set to reflect the expected maximum size of message to be sent on that link
 #define INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266   250
-#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 64
-#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        64
+#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 32
+#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        32
 #define INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO   64
-#define INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO 64
-#define INTERCONNECT_BUFFER_PC_TO_ARDUINO        64
+#define INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO 32
+#define INTERCONNECT_BUFFER_PC_TO_ARDUINO        32
 
 // Used to make communication between the Arduino and ESP8266 a bit easier
 class Interconnect {
 public:
 
 	// A list of possible command types
+	// Note: An upper-case 'O' must not be used for any command letter, as it is used for Bluetooth module messages
 	enum Type : uint8_t {
 
 		// A small request to allow a DataForDatabase command to be sent
@@ -79,39 +80,50 @@ public:
 	void update() {
 
 		// Receive data
-		while (m_serial.available() && !m_recv.isFull()) {
-			uint8_t c = m_serial.read();
+		while (m_stream.available() && !m_recv.isFull()) {
+			uint8_t c = m_stream.read();
 			m_recv.push(c);
 			if (c == '\n') m_receivedMessages++;
+			m_receivedAnything = true;
 		}
 
 		// Send data
-		while (!m_send.isEmpty() && (m_serial.availableForWrite() > 0)) {
-			m_serial.write(m_send.pop());
+		while (!m_send.isEmpty() && (m_stream.availableForWrite() > 0)) {
+			m_stream.write(m_send.pop());
 		}
 	}
 
 	// Returns true if the receive buffer is full and should be emptied
-	int fullReceiveBuffer() const __attribute__((always_inline)) {
+	int fullReceiveBuffer() const {
 		return m_recv.isFull();
 	}
 
 	// Return true if the send buffer is empty
-	int emptySendBuffer() const __attribute__((always_inline)) {
+	int emptySendBuffer() const {
 		return m_send.isEmpty();
 	}
 
 	// Returns true if there are any received messages within the receive buffer
-	int waitingMessages() const __attribute__((always_inline)) {
+	int waitingMessages() const {
 		return (m_receivedMessages > 0);
+	}
+
+	// Returns true if anything has been received since the last time this method was called
+	bool receivedAnything() {
+		if (m_receivedAnything) {
+			m_receivedAnything = false;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	// Add data to the send queue
 	// Returns true on success, or false if there was not enough space in the buffer
-	inline bool send(Type header) __attribute__((always_inline)) {
+	bool send(Type header) {
 		return send(header, nullptr);
 	}
-	inline bool send(Type header, const String& payload) __attribute__((always_inline)) {
+	bool send(Type header, const String& payload) {
 		return send(header, payload.c_str());
 	}
 	bool send(Type header, const char* payload) {
@@ -154,21 +166,21 @@ public:
 
 	// Add data to the send queue
 	// This method will always send the message, but may block if the buffer is full
-	inline void sendForce(Type header) __attribute__((always_inline)) {
+	void sendForce(Type header) {
 		sendForce(header, nullptr);
 	}
-	inline void sendForce(Type header, const String& payload) __attribute__((always_inline)) {
+	void sendForce(Type header, const String& payload) {
 		sendForce(header, payload.c_str());
 	}
 	void sendForce(Type header, const char* payload) {
 
 		// Send whatever data can be sent
-		while (!m_send.isEmpty() && (m_serial.availableForWrite() > 0)) {
-			m_serial.write(m_send.pop());
+		while (!m_send.isEmpty() && (m_stream.availableForWrite() > 0)) {
+			m_stream.write(m_send.pop());
 		}
 
 		// Add message header
-		while (!m_send.push(header)) m_serial.write(m_send.pop());
+		while (!m_send.push(header)) m_stream.write(m_send.pop());
 
 		// Add message body, if any
 		uint8_t c, e;
@@ -177,16 +189,16 @@ public:
 			c = payload[i];
 			e = getEscapedVersion(c);
 			if (e) {
-				while (!m_send.push('\\')) m_serial.write(m_send.pop());
-				while (!m_send.push(e)) m_serial.write(m_send.pop());
+				while (!m_send.push('\\')) m_stream.write(m_send.pop());
+				while (!m_send.push(e)) m_stream.write(m_send.pop());
 			} else {
-				while (m_send.freeSpace() < 1) m_serial.write(m_send.pop());
-				while (!m_send.push(c)) m_serial.write(m_send.pop());
+				while (m_send.freeSpace() < 1) m_stream.write(m_send.pop());
+				while (!m_send.push(c)) m_stream.write(m_send.pop());
 			}
 		}
 
 		// Add message tail
-		while (!m_send.push('\n')) m_serial.write(m_send.pop());
+		while (!m_send.push('\n')) m_stream.write(m_send.pop());
 	}
 
 	// Extract a received message from the interconnect
@@ -245,12 +257,44 @@ public:
 		return true;
 	}
 
+	// Check if the receive buffer starts with the 'testString'
+	// If the data matches then remove the data and return true
+	// If the data does not match then return false
+	// This function is mostly added just for the Bluetooth module
+	bool compareAndReceive(const char* testString) {
+		if (!testString) return false;
+
+		// Loop through testString
+		int i = 0;
+		const int iMax = m_recv.size();
+		while (true) {
+			const char c = testString[i];
+			if (!c) break; // End of testString
+			if (c != (char)m_recv.peek(i)) return false; // Data mismatch
+			if (++i >= iMax) return false; // End of receive buffer
+		}
+		return true;
+	}
+
+	// Access receive buffer directly
+	RingBuffer& receiveBuffer() {return m_recv;}
+
+	// Access receive buffer directly
+	const RingBuffer& receiveBuffer() const {return m_recv;}
+
+	// Access send buffer directly
+	RingBuffer& sendBuffer() {return m_send;}
+
+	// Access send buffer directly
+	const RingBuffer& sendBuffer() const {return m_send;}
+
 	// Default constructor
-	Interconnect(HardwareSerial& serial, RingBuffer::IndexType sendBufferSize, RingBuffer::IndexType recvBufferSize) :
+	Interconnect(Stream& stream, RingBuffer::IndexType sendBufferSize, RingBuffer::IndexType recvBufferSize) :
 		m_send(sendBufferSize),
 		m_recv(recvBufferSize),
 		m_receivedMessages(0),
-		m_serial(serial) {
+		m_receivedAnything(false),
+		m_stream(stream) {
 	}
 
 private:
@@ -282,7 +326,8 @@ private:
 	RingBuffer m_send;
 	RingBuffer m_recv;
 	uint8_t    m_receivedMessages;
-	HardwareSerial& m_serial;
+	bool       m_receivedAnything;
+	Stream& m_stream;
 };
 
 

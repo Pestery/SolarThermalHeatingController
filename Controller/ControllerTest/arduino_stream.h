@@ -1,5 +1,5 @@
-#ifndef ARDUINO_HARDWARE_SERIAL_H
-#define ARDUINO_HARDWARE_SERIAL_H
+#ifndef ARDUINO_STREAM_H
+#define ARDUINO_STREAM_H
 
 ///////////////////////////////////////////////////////////////////
 // This file is intended only to be a rough replacement for      //
@@ -10,7 +10,7 @@
 #include <string>
 
 // A minimal replacement for the String class within the
-class HardwareSerial {
+class Stream {
 	std::string m_writeBuffer;
 	std::string m_readBuffer;
 public:
