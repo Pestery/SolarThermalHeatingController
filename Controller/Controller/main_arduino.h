@@ -8,6 +8,7 @@
 #include "timer.h"
 #include "interconnect.h"
 #include "state_flags.h"
+#include "bluetooth_interconnect.h"
 
 // State flags
 #define FLAG_PENDING_SENSOR_RECORD     (StateFlags::Type(1 << 0))
@@ -15,14 +16,15 @@
 #define FLAG_PENDING_DATA_FOR_DATABASE (FLAG_PENDING_SENSOR_RECORD | FLAG_PENDING_CURRENT_STATUS)
 
 // Declare global values
-StateFlags   stateFlags;
-SensorRecord sensorRecord;
-Interconnect linkWifi(Serial3, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266, INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO);
-Interconnect linkPC(Serial,    INTERCONNECT_BUFFER_ARDUINO_TO_PC,      INTERCONNECT_BUFFER_PC_TO_ARDUINO);
-Timer        timerReadSensors(5 * 1000);
-Timer        timerCheckForCommands(60 * 1000);
-Timer        timerLargeMessageReminder(2500);
-char         sendLargeMessageSyncKey = '0';
+StateFlags            stateFlags;
+SensorRecord          sensorRecord;
+Interconnect          linkWifi(Serial3, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266,   INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO);
+Interconnect          linkPC(Serial,    INTERCONNECT_BUFFER_ARDUINO_TO_PC,        INTERCONNECT_BUFFER_PC_TO_ARDUINO);
+BluetoothInterconnect linkBT(Serial1,   INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH, INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO);
+Timer                 timerReadSensors(5 * 1000);
+Timer                 timerCheckForCommands(60 * 1000);
+Timer                 timerLargeMessageReminder(2500);
+char                  sendLargeMessageSyncKey = '0';
 
 // Runs once at Arduino power-up
 // This function is used to setup all data before loop() is called
@@ -31,6 +33,7 @@ void setup() {
 	// Setup serial connections
 	Serial.begin(SERIAL_BITRATE_ARDUINO_PC); // For PC connection
 	Serial3.begin(SERIAL_BITRATE_ARDUINO_ESP8266); // For ESP8266 connection
+	Serial1.begin(9600); // For Bluetooth module
 
 	// Debug message
 	//Serial.println(F("Arduino starting..."));
@@ -43,11 +46,12 @@ void loop() {
 	// Update interconnects
 	linkWifi.update();
 	linkPC.update();
+	linkBT.update();
 
 	// Check for received messages
 	Interconnect::Type header = Interconnect::None;
 	String payload;
-	if (linkWifi.receive(header, payload) || linkPC.receive(header, payload)) {
+	if (linkWifi.receive(header, payload) || linkPC.receive(header, payload) || linkBT.receive(header, payload)) {
 
 		// Process received message
 		switch (header) {
@@ -100,6 +104,7 @@ void loop() {
 				}
 				break;
 
+			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer:
 
 				// Received a request to send data to the server

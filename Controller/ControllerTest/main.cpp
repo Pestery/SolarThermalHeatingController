@@ -4,7 +4,7 @@
 #include "unit_test.h"
 
 // Include headers which contain replacement Arduino functions used for testing
-#include "arduino_hardware_serial.h"
+#include "arduino_stream.h"
 #include "arduino_pins.h"
 #include "arduino_string.h"
 

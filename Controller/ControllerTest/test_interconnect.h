@@ -3,12 +3,12 @@
 
 // Include headers
 #include <cmath>
-#include "arduino_hardware_serial.h"
+#include "arduino_stream.h"
 #include "../Controller/interconnect.h"
 #include "unit_test.h"
 
 TEST(Interconnect) {
-	HardwareSerial serial;
+	Stream serial;
 	Interconnect t(serial, 16, 16);
 	Interconnect::Type header;
 	String payload;

@@ -16,6 +16,7 @@ Content-Length: 81
 ***********************/
 
 // Include headers
+#include <WiFiClientSecure.h>
 #include <EEPROM.h>
 #include "server_address.h"
 #include "timer.h"
@@ -26,6 +27,9 @@ public:
 
 	// The EEPROM address used for storing server info
 	static constexpr int EepromAddress = 0;
+
+	// The size required for this class within the EEPROM
+	static constexpr int EepromSize = sizeof(ServerAddress);
 
 	// Send some data to the database
 	// A POST request is used as the container, and the data must be in JSON format
@@ -38,8 +42,15 @@ public:
 			// Check if using a secure connection
 			if (m_address.secure()) {
 
-				// Use WiFiClient class to create TCP connection
+				// Define the WiFiClientSecure class, which is used to create a secure TCP connection
 				WiFiClientSecure client;
+
+				// Set the connection as insecure
+				// This will allow an SSL connection, but will not validate the certificate of the server
+				// TODO: This is VERY insecure and should be changed in future!!!
+				client.setInsecure(); // <---- VERY INSECURE!!!
+
+				// Try to connect to the server
 				if (client.connect(m_address.host(), m_address.port())) {
 					bool result = false;
 
@@ -54,13 +65,15 @@ public:
 					return result;
 
 				} else {
-					if (keepHeaders) reply = F("Failed to connect");
+					if (keepHeaders) reply = F("Failed to connect securely");
 				}
 
 			} else {
 
-				// Use WiFiClient class to create TCP connection
+				// Define the WiFiClient class, which is used to create an insecure TCP connection
 				WiFiClient client;
+
+				// Try to connect to the server
 				if (client.connect(m_address.host(), m_address.port())) {
 					bool result = false;
 
@@ -93,7 +106,8 @@ public:
 		if (m_address.set(newAddress)) {
 
 			// Copy the address data to the EEPROM (non-volatile memory)
-			EEPROM.get(EepromAddress, m_address);
+			EEPROM.put(EepromAddress, *this);
+			EEPROM.commit();
 
 			// Result result
 			return true;
@@ -111,7 +125,7 @@ public:
 	void init() {
 
 		// Copy the address data from the EEPROM (non-volatile memory)
-		EEPROM.get(EepromAddress, m_address);
+		EEPROM.get(EepromAddress, *this);
 	}
 
 	// Default constructor
@@ -175,6 +189,7 @@ private:
 	// Returns true on success, or false on failure
 	bool processReplyJson(WiFiClient& client, int& statusCode, String& reply, bool keepHeaders) {
 		unsigned contentLength = 0;
+		bool chunkedReply = false;
 		String temp;
 		temp.reserve(100);
 		reply = String();
@@ -213,6 +228,15 @@ private:
 					temp = temp.substring((i - temp.c_str()) + 1);
 					temp.trim();
 					contentLength = temp.toInt();
+				} else if (header == F("transfer-encoding")) {
+					temp = temp.substring((i - temp.c_str()) + 1);
+					temp.trim();
+					temp.toLowerCase();
+					if (temp == F("chunked")) {
+						chunkedReply = true;
+					} else {
+						return false;
+					}
 				}
 			}
 		}
@@ -227,6 +251,15 @@ private:
 				reply += '\n';
 			} else {
 				reply = getNextLength(client, contentLength);
+			}
+		} else if (chunkedReply) {
+
+			// Check if keeping headers
+			if (keepHeaders) {
+				reply += getNextChunked(client);
+				reply += '\n';
+			} else {
+				reply = getNextChunked(client);
 			}
 		}
 		return true;
@@ -304,8 +337,8 @@ private:
 	// Get the next arbitrary amount of data from a WiFiClient
 	// This will simply copy the next 'length' worth of data from the stream and return it as a string
 	String getNextLength(WiFiClient& client, unsigned length) {
-		String temp;
-		temp.reserve(length);
+		String result;
+		result.reserve(length);
 		Timer timeOut(60 * 1000, millis());
 
 		// Loop forever
@@ -315,7 +348,7 @@ private:
 			// Also check if timed-out waiting, or if connection has closed
 			while (client.available() == 0) {
 				if (timeOut.triggered(millis()) || !client.connected()) {
-					return temp;
+					return result;
 				}
 			}
 
@@ -323,10 +356,76 @@ private:
 			int b = client.read();
 			if (b != -1) {
 				length--;
-				temp += (char)b;
+				result += (char)b;
 			}
 		}
-		return temp;
+		return result;
+	}
+
+	// Get the next arbitrary amount of data from a WiFiClient
+	// This will simply copy the next amount of data from the stream and return it as a string
+	// The data is expected to be in the format "Transfer-Encoding: chunked"
+	// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding
+	String getNextChunked(WiFiClient& client) {
+		String result;
+		result.reserve(128);
+		Timer timeOut(60 * 1000, millis());
+		unsigned length = 0;
+		bool processEndOfLine = false;
+
+		// Loop forever
+		while (true) {
+
+			// Check if data is available to read
+			// Also check if timed-out waiting, or if connection has closed
+			while (client.available() == 0) {
+				if (timeOut.triggered(millis()) || !client.connected()) {
+					return result;
+				}
+			}
+
+			// Check what to do
+			if (processEndOfLine) {
+
+				// Check and clear the bytes used to mark the end of a line
+				// This should be "\r\n"
+				int b = client.read();
+				if (b == '\r') {
+					// Do nothing
+				} else if (b == '\n') {
+					// Found new-line character
+					processEndOfLine = false;
+				} else if (b == -1) {
+					// Soft error. Failed to read next byte. Just ignore the error
+				} else {
+					// Error. Unexpected byte
+					return result;
+				}
+
+			} else if (length == 0) {
+
+				// Get the next 'length' line
+				// This line will contain the length of the following line of data, in hexadecimal
+				// If the stated length is zero then reached end of data
+				String lengthString = getNextLine(client);
+				lengthString.trim();
+				length = Misc::hexToInt(lengthString.c_str());
+				if (length == 0) return result;
+
+			} else {
+
+				// Get next byte
+				// Also check if end of chunk
+				int b = client.read();
+				if (b != -1) {
+					result += (char)b;
+					if (--length == 0) {
+						processEndOfLine = true;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	// Private data

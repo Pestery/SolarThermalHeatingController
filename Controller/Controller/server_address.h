@@ -17,22 +17,22 @@ public:
 
 	// Check if the connection should be secured (HTTPS or HTTP)
 	// Returns true for secured (HTTPS), or false for unsecured (HTTP)
-	inline bool secure() const __attribute__((always_inline)) {
+	bool secure() const {
 		return m_secure;
 	}
 
 	// Get the host, or server address
-	inline const char* host() const __attribute__((always_inline)) {
+	const char* host() const {
 		return m_host;
 	}
 
 	// Get the port number to use when connecting
-	inline uint16_t port() const {
+	uint16_t port() const {
 		return m_port ? m_port : (m_secure ? 443 : 80);
 	}
 
 	// Get the path, or address of the web page within the host site
-	inline const char* path() const __attribute__((always_inline)) {
+	const char* path() const {
 		return m_path;
 	}
 
@@ -54,7 +54,7 @@ public:
 
 	// Decode new address string
 	// Returns true if address is valid and has been saved to local variables, or false on failure (no changes)
-	inline bool set(const String& address) __attribute__((always_inline)) {return set(address.c_str(), address.length());}
+	bool set(const String& address) {return set(address.c_str(), address.length());}
 
 	// Decode new address string
 	// Returns true if address is valid and has been saved to local variables, or false on failure (no changes)
