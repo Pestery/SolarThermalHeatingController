@@ -46,15 +46,16 @@ export function ContollerViewModel() {
 
   // updates set temperature
   viewModel.updateSetTemperature = () => {
+    console.log('perhaps')
+
     var updatedPumpMode = commonFunction.convertToBool(viewModel.get('pumpMode'));
     var pumpStatus = commonFunction.convertToBool(viewModel.get('pumpStatus'));
     var updateSetTemperature = viewModel.get('setTemp');
-
     // update database info
     putRequest(updatedPumpMode, pumpStatus, updateSetTemperature);
 
     // updates viewmodel for set temp
-    viewModel.set('setTemp', updateSetTemperature);
+    viewModel.set('setTemp', updateSetTemperature); 
   }
 
   // updates pump mode
@@ -64,7 +65,7 @@ export function ContollerViewModel() {
     var updateSetTemperature = viewModel.get('setTemp');
 
     // update database info
-    putRequest(updatedPumpMode, pumpStatus, updateSetTemperature);
+    putRequest(updatedPumpMode, pumpStatus, updateSetTemperature); -
 
     // updates viewmodel for pumpMode
     viewModel.set('pumpMode', commonFunction.convertAutoManual(updatedPumpMode));
