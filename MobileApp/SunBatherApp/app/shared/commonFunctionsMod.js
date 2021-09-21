@@ -1,9 +1,9 @@
 // File contains all common functions used by most classes
 
 // converts string to bool
-export function convertToBool(message) {
+function convertToBool(message) {
   if (message != undefined)
-  {
+    {
     if (message.toLowerCase() == "auto" || message.toLowerCase() == "on") {
       return true;
     }
@@ -13,7 +13,7 @@ export function convertToBool(message) {
 }
 
 // convers true/false to on/off
-export function convertOnOff(message) {
+function convertOnOff(message) {
   var sentence;
   if (message) {
     sentence = "On";
@@ -23,7 +23,7 @@ export function convertOnOff(message) {
   return sentence;
 }
 
-export function convertAutoManual(message) {
+function convertAutoManual(message) {
   var sentence;
   if (message) {
     sentence = "Auto"; 
@@ -34,19 +34,19 @@ export function convertAutoManual(message) {
 }
 
 // adds celcius to the value
-export function addCelcius(message) {
+function addCelcius(message) {
   message = message + " C"
   return message;
 }
   
 // adds UV to the value
-export function addUV(message) {
+function addUV(message) {
   message = message + " W/M^2"
   return message;
 }
 
 // finds average and rounds it to 1 decimal place
-export function averageRound(average, count) {
+function averageRound(average, count) {
   if (count < 1) {
     return 0;
   } else {
@@ -55,6 +55,7 @@ export function averageRound(average, count) {
   }
 }
 
+/*
 // finds min value 
 export function findMin(newMin, originalMin) {
   if (newMin < originalMin) {
@@ -170,5 +171,6 @@ export function isLiveData(liveData) {
   }
 
   return dateInfo;
-}
+}*/
 
+module.exports = { convertToBool, convertOnOff, convertAutoManual, addCelcius, addUV, averageRound } ;

@@ -92,4 +92,4 @@ export function findGraphDataCompare(graphData, graphOption, optionChosen) {
     compareDataInfo.max = compareDataInfo.max.toFixed(1);
   
     return compareDataInfo;
-  }
+}

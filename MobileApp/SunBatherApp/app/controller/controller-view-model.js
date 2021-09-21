@@ -46,8 +46,7 @@ export function ContollerViewModel() {
 
   // updates set temperature
   viewModel.updateSetTemperature = () => {
-    console.log('perhaps')
-
+    
     var updatedPumpMode = commonFunction.convertToBool(viewModel.get('pumpMode'));
     var pumpStatus = commonFunction.convertToBool(viewModel.get('pumpStatus'));
     var updateSetTemperature = viewModel.get('setTemp');
