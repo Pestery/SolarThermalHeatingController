@@ -55,9 +55,9 @@ function averageRound(average, count) {
   }
 }
 
-/*
+
 // finds min value 
-export function findMin(newMin, originalMin) {
+function findMin(newMin, originalMin) {
   if (newMin < originalMin) {
     originalMin = newMin;
   } 
@@ -65,7 +65,7 @@ export function findMin(newMin, originalMin) {
 }
 
 // finds max value 
-export function findMax(newMax, originalMax) {
+function findMax(newMax, originalMax) {
   if (newMax > originalMax) {
     originalMax = newMax;
   } 
@@ -100,61 +100,68 @@ function loopThroughData(arrayData, databaseField) {
 
 // if else can be optimized - JACK
 function timePeriod(dateFrom, dateTo, graphDataInfo) {
-  var dateFromConverted = new Date(dateFrom);
-  var dateToConvert = new Date(dateTo);
-  var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
-  var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
+  if (dateFrom < dateTo) {
+    var dateFromConverted = new Date(dateFrom);
+    var dateToConvert = new Date(dateTo);
+    var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
+    var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
 
-  if(dateToConvert.getDate() < dateFromConverted.getDate()){
-    monthDifference--;
-  }
+    if(dateToConvert.getDate() < dateFromConverted.getDate()){
+      monthDifference--;
+    }
 
-  if (dateDifference < 0) {
-    dateDifference += 30;
-  }
+    if (dateDifference < 0) {
+      dateDifference += 30;
+    }
 
-  if ((dateDifference <= 1) && (monthDifference <= 0)) {
+    if ((dateDifference <= 1) && (monthDifference <= 0)) {
+      graphDataInfo.xAxisInterval = 6;
+      graphDataInfo.xAxisUnit = "Hour";
+      graphDataInfo.xAxisFormat = "HH:mm";
+    } else if ((dateDifference > 1) && (dateDifference <= 3) && (monthDifference <= 0)) {
+      graphDataInfo.xAxisInterval = 12;
+      graphDataInfo.xAxisUnit = "Hour";
+      graphDataInfo.xAxisFormat = "dd/MM HH:mm";
+    } else if ((dateDifference > 3) && (dateDifference <= 10) && (monthDifference <= 0)){
+      graphDataInfo.xAxisInterval = 2;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } else if ((dateDifference > 10) && (monthDifference <= 0)){
+      graphDataInfo.xAxisInterval = 5;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } else if (monthDifference == 1) {
+      graphDataInfo.xAxisInterval = 6;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } else if (monthDifference > 1) {
+      graphDataInfo.xAxisInterval = 15;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } 
+  } else {
     graphDataInfo.xAxisInterval = 6;
     graphDataInfo.xAxisUnit = "Hour";
     graphDataInfo.xAxisFormat = "HH:mm";
-  } else if ((dateDifference > 1) && (dateDifference <= 3) && (monthDifference <= 0)) {
-    graphDataInfo.xAxisInterval = 12;
-    graphDataInfo.xAxisUnit = "Hour";
-    graphDataInfo.xAxisFormat = "dd/MM HH:mm";
-  } else if ((dateDifference > 3) && (dateDifference <= 10) && (monthDifference <= 0)){
-    graphDataInfo.xAxisInterval = 2;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } else if ((dateDifference > 10) && (monthDifference <= 0)){
-    graphDataInfo.xAxisInterval = 5;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } else if (monthDifference == 1) {
-    graphDataInfo.xAxisInterval = 6;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } else if (monthDifference > 1) {
-    graphDataInfo.xAxisInterval = 15;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } 
+  }
 
   return graphDataInfo;
 }
 
+
 // converts datetime to time
-export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
+function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   var graphDataInfo = {};
   graphDataInfo = loopThroughData(graphData, graphOption.databaseField);
 
   // store data in array
   graphDataInfo.yAxisInterval = ((graphDataInfo.max - graphDataInfo.min) / 3).toFixed(0);
   graphDataInfo = timePeriod(dateFrom, dateTo, graphDataInfo);
-
+  
   return graphDataInfo;
 }
 
-export function isLiveData(liveData) {
+function isLiveData(liveData) {
   var dateInfo = {};
 
    // iso string is good and prevents time zone hassle when converting to C#
@@ -171,6 +178,6 @@ export function isLiveData(liveData) {
   }
 
   return dateInfo;
-}*/
+}
 
-module.exports = { convertToBool, convertOnOff, convertAutoManual, addCelcius, addUV, averageRound } ;
+module.exports = { convertToBool, convertOnOff, convertAutoManual, addCelcius, addUV, averageRound, findMin, findMax, loopThroughData, timePeriod, findGraphData, isLiveData } ;

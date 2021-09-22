@@ -103,7 +103,8 @@ function timePeriod(dateFrom, dateTo, graphDataInfo) {
   var dateToConvert = new Date(dateTo);
   var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
   var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
-
+  console.log(dateFrom)
+  console.log(dateFromConverted)
   if(dateToConvert.getDate() < dateFromConverted.getDate()){
     monthDifference--;
   }
@@ -143,6 +144,7 @@ function timePeriod(dateFrom, dateTo, graphDataInfo) {
 
 // converts datetime to time
 export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
+  console.log(graphOption)
   var graphDataInfo = {};
   graphDataInfo = loopThroughData(graphData, graphOption.databaseField);
 
