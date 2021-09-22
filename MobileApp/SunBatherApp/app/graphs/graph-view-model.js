@@ -17,7 +17,7 @@ function pickerFunction(data, viewModel) {
       viewModel.set('storedDateFrom', updatedTimeISO);
       viewModel.set('displayDateFrom', updatedTime.getDate() + '/' + (updatedTime.getMonth() + 1) + '/' + updatedTime.getFullYear());
 
-    } else {
+    } else { 
       viewModel.set('storedDateTo', updatedTimeISO);
       viewModel.set('displayDateTo', updatedTime.getDate() + '/' + (updatedTime.getMonth() + 1) + '/' + updatedTime.getFullYear());
     }

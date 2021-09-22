@@ -5,7 +5,7 @@
 #include <ESP8266WiFi.h>
 #include "interconnect.h"
 #include "state_flags.h"
-#include "database_interaction.h"
+#include "server_link.h"
 
 // This file includes the connection info for the Arduino, but it is not included in the GitHub source
 // This is to allow different developers with different local wifi networks to setup the project accordingly
@@ -18,13 +18,14 @@
 
 // Declare global values
 StateFlags   stateFlags();
-Interconnect interconnect;
+Interconnect linkArduino(Serial, INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266);
 String       wifiSSID        = WIFI_SSID;
 String       wifiPassword    = WIFI_PASSWORD;
-String       databaseAddress = DATABASE_ADDRESS;
-uint16_t     databasePort    = DATABASE_PORT;
+//String       databaseAddress = DATABASE_ADDRESS;
+//uint16_t     databasePort    = DATABASE_PORT;
 char         requestSendDataForDatabaseKey = 0;
 String       dataForDatabase;
+ServerLink   linkServer;
 
 // Runs once at Arduino power-up
 // This function is used to setup all data before loop() is called
@@ -43,48 +44,76 @@ void setup() {
 	// TODO: This will need to be changed to instead use non-hard-coded values,
 	// probably using PROGMEM instead: https://www.arduino.cc/reference/en/language/variables/utilities/progmem/
 	WiFi.begin(wifiSSID, wifiPassword);
+
+	// Initialise server data
+	linkServer.init();
 }
 
 // Runs repeatedly once the Arduino has finished initialisation
 // This function will only run after setup() has completed
 void loop() {
 
-	// Receive data from Arduino
-	while (Serial.available() > 0) {
-		if (interconnect.receiveByte(Serial.read())) {
+	// Update interconnect
+	linkArduino.update();
 
-			// A message is ready
-			Interconnect::Type type = interconnect.getReceivedType();
-			String data = interconnect.getReceivedMessage();
-			//Serial.print("Message ready. Type:");
-			//Serial.print((char)type);
-			//Serial.print(". Data:");
-			//Serial.println(data);
-			switch (type) {
+	// Check for received messages
+	Interconnect::Type header = Interconnect::None;
+	String payload;
+	if (linkArduino.receive(header, payload)) {
 
-				case Interconnect::DataForDatabase:
+		// Process received message
+		switch (header) {
 
-					// Received data which needs to be sent to the database
-					// Try to send the data
-					// Record the data if not sent
-					if (!postToDatabase(databaseAddress.c_str(), databasePort, data)) dataForDatabase = data;
-					break;
+			case Interconnect::DataForDatabase: {
 
-				case Interconnect::RequestSendDataForDatabase:
-
-					// Received a request to be allowed to send a large message
-					// A key will have been sent with this message
-					// Record the key for later
-					requestSendDataForDatabaseKey = data[0];
-					break;
-
-				case Interconnect::EchoESP8266:
-					interconnect.send(Interconnect::GeneralNotification, String(F("Echo: ")) + data);
-					break;
-
-				default:
-					break;
+				// Received data which needs to be sent to the database
+				// Try to send the data
+				// Record the data if not sent
+				String reply;
+				if (!linkServer.sendJson(payload, reply)) dataForDatabase = payload;
+				break;
 			}
+
+			case Interconnect::RequestSendDataForDatabase:
+
+				// Received a request to be allowed to send a large message
+				// A key will have been sent with this message
+				// Record the key for later
+				requestSendDataForDatabaseKey = payload[0];
+				break;
+
+			case Interconnect::DebugSendToServer: {
+
+				// Received data which needs to be sent to the database
+				// Try to send the data
+				// Record the data if not sent
+				String reply;
+				if (linkServer.sendJson(payload, reply, true)) {
+					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Sent to server. Reply: ")) + reply);
+				} else {
+					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Error sending to server. Reply: ")) + reply);
+				}
+				break;
+			}
+
+			case Interconnect::SetServerAddress:
+				if (linkServer.changeAddress(payload)) {
+					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Server address changed to: ")) + payload);
+				} else {
+					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Error changing server address to: ")) + payload);
+				}
+				break;
+
+			case Interconnect::GetServerAddress:
+				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Server address: ")) + linkServer.getAddress());
+				break;
+
+			case Interconnect::EchoESP8266:
+				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Echo: ")) + payload);
+				break;
+
+			default:
+				break;
 		}
 	}
 
@@ -93,22 +122,18 @@ void loop() {
 
 		// There is data waiting to be sent to the database
 		// Try to send it and clear the buffer value if successful
-		if (postToDatabase(databaseAddress.c_str(), databasePort, dataForDatabase)) {
+		String reply;
+		if (linkServer.sendJson(dataForDatabase, reply)) {
 			dataForDatabase = String();
 		}
 
-	} else if (requestSendDataForDatabaseKey && interconnect.emptySendBuffer()) {
+	} else if (requestSendDataForDatabaseKey && linkArduino.emptySendBuffer()) {
 
 		// There is a request-to-send-data-key
 		// If here then everything else must have been finished, so send a reply and clear the key
 		// Send the synchronisation key back with the allow message
-		interconnect.send(Interconnect::AllowSendDataForDatabase, String(requestSendDataForDatabaseKey));
+		linkArduino.send(Interconnect::AllowSendDataForDatabase, String(requestSendDataForDatabaseKey));
 		requestSendDataForDatabaseKey = 0;
-	}
-
-	// Send data to Arduino, if able
-	while (interconnect.sendRequired() && (Serial.availableForWrite() > 0)) {
-		Serial.write(interconnect.getNextByteToSend());
 	}
 }
 

@@ -10,8 +10,8 @@ var electricityCostpkW = 0.4;   //default cost of 40pc per kW
 //constants
 const MASSFLOWRATE = 1.7448; //kg/s
 const WATERHEATCAPACITY = 4.184; //kJ/kg.K
-const GASEMISSION = 8.31 * timeInterval; // default 499 CO2e/kWH
-const COALEMISSION = 14.8 * timeInterval; //defualt is 888 measurement in CO2e/kWh
+const GASEMISSION = 499; // default 499 CO2e/kWH
+const COALEMISSION = 888; //defualt is 888 measurement in CO2e/kWh
 
 //COP's for the 4 kinds of heaters
 const ELECTRICHEATER1 = 5.58 //RTHP026-1
@@ -92,4 +92,4 @@ export function findGraphDataCompare(graphData, graphOption, optionChosen) {
     compareDataInfo.max = compareDataInfo.max.toFixed(1);
   
     return compareDataInfo;
-  }
+}

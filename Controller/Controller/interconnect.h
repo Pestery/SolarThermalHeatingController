@@ -1,11 +1,23 @@
 #ifndef INTERCONNECT_H
 #define INTERCONNECT_H
 
+// Include headers
+#include "ring_buffer.h"
+
 // Bit-rate for Arduino-ESP8266 serial communication
 #define SERIAL_BITRATE_ARDUINO_ESP8266 74880
 
 // Bit-rate for Arduino-PC serial communication
 #define SERIAL_BITRATE_ARDUINO_PC 9600
+
+// Interconnect buffer sizes for different connections and direction of connections
+// This should be set to reflect the expected maximum size of message to be sent on that link
+#define INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266   250
+#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 64
+#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        64
+#define INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO   64
+#define INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO 64
+#define INTERCONNECT_BUFFER_PC_TO_ARDUINO        64
 
 // Used to make communication between the Arduino and ESP8266 a bit easier
 class Interconnect {
@@ -24,367 +36,236 @@ public:
 		DataForDatabase  = 'd',
 
 		// A notification message which should be forwarded to the user, probably via the serial port
-		GeneralNotification = 'N',
+		GeneralNotification = ':',
+
+		// Set the server address
+		// Payload should be of the general format: http://localhost:5000/api/System
+		SetServerAddress = 's',
+
+		// Get the server address
+		GetServerAddress = 'S',
+
+		// A debug command used to send data to server
+		// The response will be forwarded back through to the serial port
+		DebugSendToServer = 't',
 
 		// A debug command used to echo back data to the source
 		EchoArduino = 'x',
 		EchoESP8266 = 'y',
 
-		// Used to indicate an error with the interconnect
-		TypeError = 0
+		// Used to indicate no message
+		None = 0
 	};
 
-	// Check if there is any data waiting to be sent
-	inline bool sendRequired() const __attribute__((always_inline)) {return m_sendLength > m_sendOffset;}
+	// Update the interconnect
+	// This will send and receive any waiting data in the related buffers
+	void update() {
 
-	// Check if the send buffer is empty
-	// If false then there is data waiting to be sent
-	inline bool emptySendBuffer() const __attribute__((always_inline)) {return m_sendLength <= m_sendOffset;}
-
-	// Get the next byte to send
-	// This will remove the byte from the send queue
-	uint8_t getNextByteToSend() {
-
-		// Check if there is anything to send
-		// If not then return the default character
-		if (m_sendOffset >= m_sendLength) return '\n';
-
-		// Get next byte to send
-		// Increment offset for next time
-		uint8_t result = m_sendBuffer[m_sendOffset++];
-
-		// Check if the buffer is empty
-		// If so then delete buffer
-		if (m_sendOffset >= m_sendLength) {
-			free(m_sendBuffer);
-			m_sendBuffer = nullptr;
-			m_sendAllocated = 0;
-			m_sendLength = 0;
-			m_sendOffset = 0;
+		// Receive data
+		while (m_serial.available() && !m_recv.isFull()) {
+			uint8_t c = m_serial.read();
+			m_recv.push(c);
+			if (c == '\n') m_receivedMessages++;
 		}
 
-		/* Serial.println();
-		Serial.print("Next byte to send: ");
-		if (result > 32) Serial.println((char)result); else Serial.println(String('[') + result + String(']'));
-		debugDump(); //*/
-
-		// Finish up
-		return result;
+		// Send data
+		while (!m_send.isEmpty() && (m_serial.availableForWrite() > 0)) {
+			m_serial.write(m_send.pop());
+		}
 	}
 
-	// Reset send buffer
-	// This will replace all content in the send buffer with a single byte reset marker
-	// When the other end receives the reset marker it will clear its receive buffer as well
-	// Returns true on success, or false if not enough memory was available
-	// TODO: This might need to be changed. Needs to be called if the serial buffer overflows, which is on the receive end, not send...?
-	bool reset(Type header, const String& payload = String()) {
-
-		// If a buffer exists then delete it
-		if (m_sendBuffer) free(m_sendBuffer);
-
-		// Create a new buffer
-		// Add the reset marker to the buffer
-		m_sendAllocated = 1;
-		m_sendBuffer = (uint8_t*)malloc(m_sendAllocated);
-		if (!m_sendBuffer) return false;
-		m_sendLength = 1;
-		m_sendOffset = 0;
-		m_sendBuffer[0] = '\r';
-
-		// Finish up
-		return true;
+	// Returns true if the receive buffer is full and should be emptied
+	int fullReceiveBuffer() const __attribute__((always_inline)) {
+		return m_recv.isFull();
 	}
 
-	// Output the internal state to Serial
-	void debugDump() {
-		Serial.print(F("m_sendLength=    ")); Serial.println(m_sendLength);
-		Serial.print(F("m_sendAllocated= ")); Serial.println(m_sendAllocated);
-		Serial.print(F("m_sendOffset=    ")); Serial.println(m_sendOffset);
-		Serial.print(F("m_recvLength=    ")); Serial.println(m_recvLength);
-		Serial.print(F("m_recvAllocated= ")); Serial.println(m_recvAllocated);
+	// Return true if the send buffer is empty
+	int emptySendBuffer() const __attribute__((always_inline)) {
+		return m_send.isEmpty();
+	}
 
-		Serial.print(F("m_sendBuffer=    "));
-		if (m_sendBuffer) {
-			for (int i=0; i<m_sendLength; i++) Serial.write(m_sendBuffer[i]);
-		}
-		Serial.println();
-
-		Serial.print(F("m_recvBuffer=    "));
-		if (m_recvBuffer) {
-			for (int i=0; i<m_recvLength; i++) Serial.write(m_recvBuffer[i]);
-		}
-		Serial.println();
-
-		Serial.print(F("m_recvEscapeNext=")); Serial.println(m_recvEscapeNext);
+	// Returns true if there are any received messages within the receive buffer
+	int waitingMessages() const __attribute__((always_inline)) {
+		return (m_receivedMessages > 0);
 	}
 
 	// Add data to the send queue
-	// Avoid adding new data to the queue if it already contains some unsent data
-	// Returns true on success, or false if not enough memory was available
-	bool send(Type header, const String& payload = String()) {
+	// Returns true on success, or false if there was not enough space in the buffer
+	inline bool send(Type header) __attribute__((always_inline)) {
+		return send(header, nullptr);
+	}
+	inline bool send(Type header, const String& payload) __attribute__((always_inline)) {
+		return send(header, payload.c_str());
+	}
+	bool send(Type header, const char* payload) {
 
-		// Debug output to serial
-		/*
-		#ifdef MAIN_ARDUINO_H
-		Serial.print((char)header);
-		Serial.print(':');
-		Serial.println(payload);
+		// Get the length of the payload string
+		const int payloadLength = payload ? strlen(payload) : 0;
 
-		debugDump();
-		#endif //*/
+		// Count the number of characters which need to be escaped
+		int escapedCharacters = 0;
+		for (int i=0; i<payloadLength; i++) {
+			if (getEscapedVersion(payload[i])) escapedCharacters++;
+		}
 
-
-
-		// Get length of payload
-		const uint16_t payloadLength = payload.length();
-
-		// Check if a buffer exists
-		if (!m_sendBuffer) {
-
-			// Create new buffer
-			m_sendAllocated = payloadLength + 2;
-			m_sendBuffer = (uint8_t*)malloc(m_sendAllocated);
-			if (!m_sendBuffer) return false;
-			m_sendLength = 0;
-			m_sendOffset = 0;
-
+		// Make sure there is enough space in the send buffer
+		if (m_send.freeSpace() < (2 + payloadLength + escapedCharacters)) {
+			return false;
 		} else {
 
-			// Get the total required size (new content plus existing)
-			// Resize the buffer if required
-			uint16_t newAllocated = (m_sendLength - m_sendOffset) + (payloadLength + 2);
-			if (newAllocated > m_sendAllocated) {
-				if (!resizeSendBuffer(newAllocated)) return false;
+			// Add message header
+			m_send.push(header);
+
+			// Add message body, if any
+			uint8_t c, e;
+			for (int i=0; i<payloadLength; i++) {
+				c = payload[i];
+				e = getEscapedVersion(c);
+				if (e) {
+					m_send.push('\\');
+					m_send.push(e);
+				} else {
+					m_send.push(c);
+				}
 			}
 
-			// Move any existing data to the front of the buffer
-			if (m_sendOffset > 0) {
-				for (uint16_t i=0, j=m_sendOffset; j<m_sendLength; i++, j++) m_sendBuffer[i] = m_sendBuffer[j];
-				m_sendLength -= m_sendOffset;
-				m_sendOffset = 0;
-			}
+			// Add message tail
+			m_send.push('\n');
+			return true;
+		}
+	}
+
+	// Add data to the send queue
+	// This method will always send the message, but may block if the buffer is full
+	inline void sendForce(Type header) __attribute__((always_inline)) {
+		sendForce(header, nullptr);
+	}
+	inline void sendForce(Type header, const String& payload) __attribute__((always_inline)) {
+		sendForce(header, payload.c_str());
+	}
+	void sendForce(Type header, const char* payload) {
+
+		// Send whatever data can be sent
+		while (!m_send.isEmpty() && (m_serial.availableForWrite() > 0)) {
+			m_serial.write(m_send.pop());
 		}
 
-		// Declare working variables
-		// This will allow reverting back if an error occurs
-		uint16_t newLength = m_sendLength;
+		// Add message header
+		while (!m_send.push(header)) m_serial.write(m_send.pop());
 
-		// Add header
-		// The earlier code will have ensured that there is at least enough space for the header
-		m_sendBuffer[newLength++] = header;
-
-		// Add payload
+		// Add message body, if any
+		uint8_t c, e;
+		const int payloadLength = payload ? strlen(payload) : 0;
 		for (int i=0; i<payloadLength; i++) {
-
-			// Escape any newline characters and backslashes
-			char c = payload[i];
-			switch (c) {
-				case '\n':
-					if (!reserveFreeSpaceSendBuffer(2)) return false;
-					m_sendBuffer[newLength++] = '\\';
-					m_sendBuffer[newLength++] = 'n';
-					break;
-				case '\\':
-					if (!reserveFreeSpaceSendBuffer(2)) return false;
-					m_sendBuffer[newLength++] = '\\';
-					m_sendBuffer[newLength++] = '\\';
-					break;
-				case '\r':
-					if (!reserveFreeSpaceSendBuffer(2)) return false;
-					m_sendBuffer[newLength++] = '\\';
-					m_sendBuffer[newLength++] = '\r';
-					break;
-				default:
-					if (!reserveFreeSpaceSendBuffer(1)) return false;
-					m_sendBuffer[newLength++] = c;
-					break;
+			c = payload[i];
+			e = getEscapedVersion(c);
+			if (e) {
+				while (!m_send.push('\\')) m_serial.write(m_send.pop());
+				while (!m_send.push(e)) m_serial.write(m_send.pop());
+			} else {
+				while (m_send.freeSpace() < 1) m_serial.write(m_send.pop());
+				while (!m_send.push(c)) m_serial.write(m_send.pop());
 			}
 		}
 
-		// Add tail
-		resizeSendBuffer(newLength + 1);
-		m_sendBuffer[newLength++] = '\n';
+		// Add message tail
+		while (!m_send.push('\n')) m_serial.write(m_send.pop());
+	}
 
-		// Finish up
-		m_sendLength = newLength;
+	// Extract a received message from the interconnect
+	// Returns false if no waiting messages
+	// Returns true if a message was extracted and placed in the 'out' parameters (may block if message is longer than receive buffer)
+	bool receive(Type& outHeader, String& outPayload) {
+
+		// Check if any messages are waiting
+		// Also check if the receive buffer is full
+		if ((m_receivedMessages == 0) && !m_recv.isFull()) return false;
+
+		// Reset the output payload parameter before continuing
+		outPayload = String();
+
+		// Get the message header
+		uint8_t c = m_recv.pop();
+		if (c == '\n') {
+			m_receivedMessages--;
+			return false;
+		}
+		outHeader = Type(c);
+
+		// Find the end marker and get the expected length of payload
+		int payloadLength = 0;
+		while ((payloadLength < m_recv.size()) && (m_recv.peek(payloadLength) != '\n')) payloadLength++;
+
+		// Get the message body
+		if (payloadLength > 0) {
+			bool escaped = false;
+			outPayload.reserve(payloadLength);
+			while (true) {
+
+				// Check if the receive buffer is empty
+				// If so then wait for more data to come in, because the end of this message has not been reached yet
+				while (m_recv.isEmpty()) update();
+
+				// Get next character from buffer
+				// If this is the tail character then exit here
+				c = m_recv.pop();
+				if (c == '\n') {
+					m_receivedMessages--;
+					break;
+				}
+
+				// Check for escape status
+				if (escaped) {
+					escaped = false;
+					outPayload += (char)getNonEscapedVersion(c);
+				} else if (c == '\\') {
+					escaped = true;
+				} else {
+					outPayload += (char)c;
+				}
+			}
+		}
 		return true;
 	}
 
-	// Add a byte to the receive buffer
-	// Returns true if enough data has been received to get a message, or false if no message is ready yet
-	bool receiveByte(int receivedByte) {
-		if (receivedByte == -1) return false;
-
-		/*
-		Serial.print("received: ");
-		if (receivedByte > 32) {
-			Serial.println((char)receivedByte);
-		} else {
-			Serial.print("[");
-			Serial.print(receivedByte);
-			Serial.println(']');
-		} //*/
-
-		// Check if a buffer exists
-		if (!m_recvBuffer) {
-
-			// Create new buffer
-			m_recvAllocated = 32;
-			m_recvBuffer = (uint8_t*)malloc(m_recvAllocated);
-			if (!m_recvBuffer) return false;
-			m_recvLength = 0;
-			m_recvEscapeNext = false;
-
-		} else if (m_recvLength == m_recvAllocated) {
-
-			// Buffer is full
-			// Make it larger
-			resizeRecvBuffer(m_recvAllocated + 32);
-		}
-
-		// Add the data to the buffer
-		// Check if this character needs to be escaped
-		if (m_recvEscapeNext) {
-			m_recvEscapeNext = false;
-
-			// Add the character to the buffer in its original form
-			switch (receivedByte) {
-				case 'n':
-					m_recvBuffer[m_recvLength++] = '\n';
-					break;
-				case 'r':
-					m_recvBuffer[m_recvLength++] = '\r';
-					break;
-				default:
-					m_recvBuffer[m_recvLength++] = (uint8_t)receivedByte;
-					break;
-			}
-
-		} else if (receivedByte == '\\') {
-
-			// Mark the next character as needing to be escaped
-			m_recvEscapeNext = true;
-
-		} else if (receivedByte == '\n') {
-
-			// Received end-of-message marker
-			// Return true if the message thus far is valid
-			return m_recvLength > 0;
-
-		} else if (receivedByte == '\r') {
-
-			// Received reset message
-			// An error must have occurred at the other end, so reset the receive buffer
-			free(m_recvBuffer);
-			m_recvBuffer = nullptr;
-			m_recvAllocated = 0;
-			m_recvLength = 0;
-			return false;
-
-		} else {
-
-			// If here then add the received character to the receive buffer
-			m_recvBuffer[m_recvLength++] = (uint8_t)receivedByte;
-		}
-		return false;
-	}
-
-	// Get the type of message being received
-	Type getReceivedType() const {
-		return m_recvBuffer ? Type(m_recvBuffer[0]) : Type::TypeError;
-	}
-
-	// Get the message from the receive buffer
-	// This will remove the message from the receive buffer
-	String getReceivedMessage() {
-
-		// Generate result
-		String result;
-		if (m_recvLength > 1) {
-			result.reserve(m_recvLength - 1);
-			for (int i=1; i<m_recvLength; i++) result += (char)m_recvBuffer[i];
-		}
-
-		// Remove data from buffer
-		free(m_recvBuffer);
-		m_recvBuffer = nullptr;
-		m_recvAllocated = 0;
-		m_recvLength = 0;
-
-		// Return message
-		return result;
-	}
-
 	// Default constructor
-	Interconnect() :
-		m_sendLength(0),
-		m_sendAllocated(0),
-		m_sendOffset(0),
-		m_recvLength(0),
-		m_recvAllocated(0),
-		m_sendBuffer(nullptr),
-		m_recvBuffer(nullptr),
-		m_recvEscapeNext(false) {
+	Interconnect(HardwareSerial& serial, RingBuffer::IndexType sendBufferSize, RingBuffer::IndexType recvBufferSize) :
+		m_send(sendBufferSize),
+		m_recv(recvBufferSize),
+		m_receivedMessages(0),
+		m_serial(serial) {
 	}
 
 private:
 
-	// Try to change the size of the send buffer
-	// Returns true on success, or false if a memory allocation error occurred
-	bool resizeSendBuffer(uint16_t newAllocated) {
-		if (newAllocated == m_sendAllocated) {
-			return true;
-		} else {
-			uint8_t* newBuffer = (uint8_t*)realloc(m_sendBuffer, newAllocated);
-			if (newBuffer) {
-				m_sendBuffer = newBuffer;
-				m_sendAllocated = newAllocated;
-				return true;
-			} else {
-				return false;
-			}
+	// Convert a character to its escaped version
+	// The result character should follow a backslash when placed in a byte stream ('\r' for example)
+	// Returns the escaped replacement for the input character, or zero if the character does not need to be escaped
+	uint8_t getEscapedVersion(uint8_t character) {
+		switch (character) {
+			case '\\': return '\\';
+			case '\n': return 'n';
+			case '\r': return 'r';
+			default:   return 0;
 		}
 	}
 
-	// Reserve an amount of free space within the send buffer
-	// Returns true on success, or false if a memory allocation error occurred
-	inline bool reserveFreeSpaceSendBuffer(uint16_t requiredSpace) __attribute__((always_inline)) {
-		requiredSpace += m_sendLength;
-		if (m_sendAllocated < requiredSpace) {
-			if (!resizeSendBuffer(requiredSpace + 8)) return false;
-		}
-		return true;
-	}
-
-	// Try to change the size of the receive buffer
-	// Returns true on success, or false if a memory allocation error occurred
-	bool resizeRecvBuffer(uint16_t newAllocated) {
-		if (newAllocated == m_recvAllocated) {
-			return true;
-		} else {
-			uint8_t* newBuffer = (uint8_t*)realloc(m_recvBuffer, newAllocated);
-			if (newBuffer) {
-				m_recvBuffer = newBuffer;
-				m_recvAllocated = newAllocated;
-				return true;
-			} else {
-				return false;
-			}
+	// Convert an escaped character to its non-escaped version
+	// This input character should have been preceded by a backslash when taken from a byte stream ('\r' for example)
+	uint8_t getNonEscapedVersion(uint8_t escapedCharacter) {
+		switch (escapedCharacter) {
+			case '\\': return '\\';
+			case 'n':  return '\n';
+			case 'r':  return '\r';
+			default:   return escapedCharacter;
 		}
 	}
 
 	// Private data
-	uint16_t m_sendLength;    // Amount of data in the send buffer
-	uint16_t m_sendAllocated; // Amount of memory allocated for the send buffer
-	uint16_t m_sendOffset;    // Offset of the next byte to be sent
-
-	uint16_t m_recvLength;    // Amount of data in the receive buffer
-	uint16_t m_recvAllocated; // Amount of memory allocated for the receive buffer
-
-	uint8_t* m_sendBuffer; // Send buffer
-	uint8_t* m_recvBuffer; // Receive buffer
-
-	bool m_recvEscapeNext; // Escape the next received byte
+	RingBuffer m_send;
+	RingBuffer m_recv;
+	uint8_t    m_receivedMessages;
+	HardwareSerial& m_serial;
 };
 
 
