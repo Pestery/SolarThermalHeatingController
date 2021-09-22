@@ -49,7 +49,7 @@
                 </GridLayout>
                 <GridLayout rows="*,*" columns="*" class="test"> 
                     <Label row="0" class="fa" text="&#xf057;"></Label>                     
-                    <Label row="1" class="fa" text="&#xf058;"></Label> 
+                    <Label row="1" class="fa" text="&#xf76b;"></Label> 
                 </GridLayout>
             </StackLayout>
         </StackLayout>
