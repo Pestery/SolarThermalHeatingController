@@ -13,10 +13,7 @@
 #define FLAG_PENDING_DATA_FOR_DATABASE (StateFlags::Type(1 << 0))
 
 // Declare global values
-StateFlags   stateFlags();
 Interconnect linkArduino(Serial, INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266);
-char         requestSendDataForDatabaseKey = 0;
-String       dataForDatabase;
 ServerLink   linkServer;
 
 // Runs once at Arduino power-up
@@ -53,23 +50,32 @@ void loop() {
 		// Process received message
 		switch (header) {
 
-			case Interconnect::DataForDatabase: {
+			case Interconnect::SendToDatabaseRequest:
+
+				// Received a request to be allowed to send data to the database
+				// A key will have been sent with this message
+				// If able to send then reply with the key
+				if (WiFi.status() == WL_CONNECTED) {
+					linkArduino.send(Interconnect::SendToDatabaseAllow, payload);
+				} else {
+					payload = F("Wifi not connected");
+					linkArduino.send(Interconnect::SendToDatabaseDisallow, payload);
+				}
+				break;
+
+			case Interconnect::SendToDatabase: {
 
 				// Received data which needs to be sent to the database
 				// Try to send the data
 				// Record the data if not sent
 				String reply;
-				if (!linkServer.sendJson(payload, reply)) dataForDatabase = payload;
+				if (linkServer.sendJson(payload, reply)) {
+					linkArduino.sendForce(Interconnect::SendToDatabaseSuccess, reply);
+				} else {
+					linkArduino.sendForce(Interconnect::SendToDatabaseFailure, reply);
+				}
 				break;
 			}
-
-			case Interconnect::RequestSendDataForDatabase:
-
-				// Received a request to be allowed to send a large message
-				// A key will have been sent with this message
-				// Record the key for later
-				requestSendDataForDatabaseKey = payload[0];
-				break;
 
 			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer: {
@@ -117,25 +123,6 @@ void loop() {
 			default:
 				break;
 		}
-	}
-
-	// Check if there is anything which needs to be done
-	if (dataForDatabase.length() > 0) {
-
-		// There is data waiting to be sent to the database
-		// Try to send it and clear the buffer value if successful
-		String reply;
-		if (linkServer.sendJson(dataForDatabase, reply)) {
-			dataForDatabase = String();
-		}
-
-	} else if (requestSendDataForDatabaseKey && linkArduino.emptySendBuffer()) {
-
-		// There is a request-to-send-data-key
-		// If here then everything else must have been finished, so send a reply and clear the key
-		// Send the synchronisation key back with the allow message
-		linkArduino.send(Interconnect::AllowSendDataForDatabase, String(requestSendDataForDatabaseKey));
-		requestSendDataForDatabaseKey = 0;
 	}
 }
 

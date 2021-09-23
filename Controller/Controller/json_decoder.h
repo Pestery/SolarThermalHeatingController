@@ -1,6 +1,9 @@
 #ifndef JSON_DECODER_H
 #define JSON_DECODER_H
 
+// Include headers
+#include "misc.h"
+
 // The JsonDecoder class is used to decode JSON strings.
 class JsonDecoder {
 public:
@@ -81,8 +84,8 @@ public:
 
 								// Check the lengths of the name and value strings
 								if ((nameStart < nameEnd) && (valueStart < valueEnd)) {
-									m_name = String(m_source + nameStart, nameEnd - nameStart);
-									m_value = String(m_source + valueStart, valueEnd - valueStart);
+									m_name = Misc::makeString(m_source + nameStart, nameEnd - nameStart);
+									m_value = Misc::makeString(m_source + valueStart, valueEnd - valueStart);
 									m_index = m_length; // Reached end of data
 									return true;
 								}
@@ -132,8 +135,8 @@ public:
 
 							// Check the lengths of the name and value strings
 							if ((nameStart < nameEnd) && (valueStart < valueEnd)) {
-								m_name = String(m_source + nameStart, nameEnd - nameStart);
-								m_value = String(m_source + valueStart, valueEnd - valueStart);
+								m_name = Misc::makeString(m_source + nameStart, nameEnd - nameStart);
+								m_value = Misc::makeString(m_source + valueStart, valueEnd - valueStart);
 								return true;
 							}
 						}

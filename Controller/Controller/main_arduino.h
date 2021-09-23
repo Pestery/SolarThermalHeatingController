@@ -8,23 +8,40 @@
 #include "timer.h"
 #include "interconnect.h"
 #include "state_flags.h"
+#include "settings.h"
 #include "bluetooth_interconnect.h"
 
-// State flags
-#define FLAG_PENDING_SENSOR_RECORD     (StateFlags::Type(1 << 0))
-#define FLAG_PENDING_CURRENT_STATUS    (StateFlags::Type(1 << 1))
-#define FLAG_PENDING_DATA_FOR_DATABASE (FLAG_PENDING_SENSOR_RECORD | FLAG_PENDING_CURRENT_STATUS)
+// Current controller settings and status
+Settings settings;
 
-// Declare global values
-StateFlags            stateFlags;
-SensorRecord          sensorRecord;
+// Sensor record buffer
+constexpr int           sensorRecordMax = 8;
+int                     sensorRecordCount = 0;
+SensorRecord            sensorRecord[sensorRecordMax];
+SensorRecord::IndexType sensorRecordIndex = 1;
+
+// Controller timers
+// The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
+Timer timerReadSensors(5 * 1000);
+Timer timerSendToDatabase(2 * 1000);
+
+// A synchronisation-key used when requesting to send data to the database
+char sendToDatabaseSyncKey = '0';
+
+// Interconnect buffers
+// Used for managing data transfer between different components, such as the Wifi or Bluetooth modules
 Interconnect          linkWifi(Serial3, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266,   INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO);
 Interconnect          linkPC(Serial,    INTERCONNECT_BUFFER_ARDUINO_TO_PC,        INTERCONNECT_BUFFER_PC_TO_ARDUINO);
 BluetoothInterconnect linkBT(Serial1,   INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH, INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO);
-Timer                 timerReadSensors(5 * 1000);
-Timer                 timerCheckForCommands(60 * 1000);
-Timer                 timerLargeMessageReminder(2500);
-char                  sendLargeMessageSyncKey = '0';
+
+// A list of interconnects
+// Used when checking who sent a message
+enum class LinkId {
+	None,
+	Wifi,
+	PC,
+	BT
+};
 
 // Runs once at Arduino power-up
 // This function is used to setup all data before loop() is called
@@ -43,42 +60,101 @@ void setup() {
 // This function will only run after setup() has completed
 void loop() {
 
+	// Get current time in milliseconds
+	// This value will overflow (go back to zero) roughly every 50 days
+	// It will also reset (go back to zero) if the Arduino is powered off
+	unsigned long currentTime = millis();
+
+	// Check if the sensors need to be read
+	// Also check if there is enough buffer space to make a new sensor record
+	if (timerReadSensors.triggered(currentTime)) {
+		if ((sensorRecordCount < sensorRecordMax)) {
+			sensorRecord[sensorRecordCount].readAll();
+			sensorRecord[sensorRecordCount].index = sensorRecordIndex++;
+			//sensorRecord[sensorRecordCount].dateTime = currentTime; // TODO
+			sensorRecordCount++;
+		}
+	}
+
+	// Check if it is time to send data to the database
+	// Also check if there is actually any data to send
+	if (timerSendToDatabase.triggered(currentTime)) {
+		if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
+			linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+		}
+	}
+
 	// Update interconnects
 	linkWifi.update();
 	linkPC.update();
 	linkBT.update();
 
-	// Check for received messages
+	// Try to receive any pending messages
+	LinkId sender = LinkId::None;
 	Interconnect::Type header = Interconnect::None;
 	String payload;
-	if (linkWifi.receive(header, payload) || linkPC.receive(header, payload) || linkBT.receive(header, payload)) {
+	if (linkWifi.receive(header, payload)) sender = LinkId::Wifi;
+	else if (linkPC.receive(header, payload)) sender = LinkId::PC;
+	else if (linkBT.receive(header, payload)) sender = LinkId::BT;
 
-		// Process received message
+	// Process any received message
+	if (sender != LinkId::None) {
 		switch (header) {
 
-			case Interconnect::AllowSendDataForDatabase:
+			case Interconnect::SendToDatabaseAllow:
+				if (sender == LinkId::Wifi) {
 
-				// Check the synchronisation key
-				// If not as expected then this might be an old acknowledgement
-				if (sendLargeMessageSyncKey == payload[0]) {
+					// Check the synchronisation key
+					// If not as expected then this might be an old acknowledgement
+					if (sendToDatabaseSyncKey == payload[0]) {
 
-					// Increment synchronisation key for next time
-					sendLargeMessageSyncKey = '0' + ((sendLargeMessageSyncKey + 1 - '0') % ('Z' - '0'));
+						// Increment synchronisation key for next time
+						sendToDatabaseSyncKey = '0' + ((sendToDatabaseSyncKey + 1 - '0') % ('Z' - '0'));
 
-					// Allowed to send data for database to the ESP8266
-					if (stateFlags.anySet(FLAG_PENDING_SENSOR_RECORD)) {
-						if (linkWifi.send(Interconnect::DataForDatabase, sensorRecord.toJSON())) {
-							stateFlags.reset(FLAG_PENDING_SENSOR_RECORD);
-						} else {
-							Serial.println(F("Failed to add sensor data to Interconnect"));
+						// Make sure there is actually data to send
+						if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
+
+							// Generate JSON payload
+							// This will contain the controller status and/or a list of sensor records
+							payload = F("{\"Guid\":\"");
+							payload += settings.systemGuid();
+							payload += F("\",\"Status\":");
+							if (!settings.isServerInformed()) {
+								settings.toJson(payload);
+								settings.setServerInformed();
+							} else {
+								payload += F("null");
+							}
+							payload += F(",\"Records\":[");
+							while (sensorRecordCount > 0) {
+								sensorRecord[--sensorRecordCount].toJson(payload);
+								if (sensorRecordCount) payload += ',';
+							}
+							payload += F("]}");
+
+							// Send data to ESP8266, so that it can forward it to the database
+							linkWifi.sendForce(Interconnect::SendToDatabase, payload);
 						}
-					} else if (stateFlags.anySet(FLAG_PENDING_CURRENT_STATUS)) {
-						// TODO: Add code to send current controller status
-						stateFlags.reset(FLAG_PENDING_CURRENT_STATUS);
 					}
+				}
+				break;
 
-					// Now that data has been added to the send queue, reset the large data timer
-					timerLargeMessageReminder.reset(millis());
+			case Interconnect::SendToDatabaseSuccess:
+				if (sender == LinkId::Wifi) {
+
+					// Received notification that the last SendToDatabase was successful
+					// Any reply may contain new settings for the server, so check for that
+					if (payload.length() > 2) {
+						settings.fromJson(payload);
+					}
+				}
+				break;
+
+			case Interconnect::SendToDatabaseFailure:
+				if (sender == LinkId::Wifi) {
+
+					// TODO: Improve this. Add better error handling or something
+					linkPC.sendForce(Interconnect::GeneralNotification, String(F("SendToDatabaseFailure: ")) + payload);
 				}
 				break;
 
@@ -104,47 +180,47 @@ void loop() {
 				}
 				break;
 
-			case Interconnect::DebugSendToServerKeepHeaders:
-			case Interconnect::DebugSendToServer:
+			case Interconnect::SetSettings:
 
-				// Received a request to send data to the server
-				// This command should come from the serial port and is intended for debugging only
-				// Try to forward the request to the ESP8266
-				if (!linkWifi.send(header, payload)) {
-					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Failed to pass data to server"));
+				// Received new settings
+				if (payload.length() > 2) {
+					payload = settings.fromJson(payload) ? F("Ok") : F("Error");
+
+					// Send reply
+					switch (sender) {
+						case LinkId::PC: linkPC.sendForce(header, payload); break;
+						case LinkId::BT: linkBT.sendForce(header, payload); break;
+					}
 				}
 				break;
 
-			case Interconnect::SetServerAddress:
 
-				// Received a request to change the server address
-				// Try to forward the request to the ESP8266
-				if (!linkWifi.send(header, payload)) {
-					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Failed to change server address"));
+				break;
+
+			case Interconnect::GetSettings:
+
+				// Settings data was requested
+				switch (sender) {
+					case LinkId::PC: linkPC.sendForce(header, settings.toJson()); break;
+					case LinkId::BT: linkBT.sendForce(header, settings.toJson()); break;
+				}
+				break;
+
+			case Interconnect::DebugSendToServerKeepHeaders:
+			case Interconnect::DebugSendToServer:
+			case Interconnect::SetServerAddress:
+			case Interconnect::GetServerAddress:
+
+				// Received a command which needs to be forwarded to the ESP8266
+				if (sender != LinkId::Wifi) {
+					if (!linkWifi.send(header, payload)) {
+						linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Interconnect buffer is full"));
+					}
 				}
 				break;
 
 			default:
 				break;
-		}
-	}
-
-	// Get current time in milliseconds
-	// This value will overflow (go back to zero) roughly every 50 days
-	// It will also reset (go back to zero) if the Arduino is powered off
-	unsigned long currentTime = millis();
-
-	// Check if time to read sensors
-	if (timerReadSensors.triggered(currentTime)) {
-		sensorRecord.readAll();
-		stateFlags.set(FLAG_PENDING_SENSOR_RECORD);
-		//Serial.println(F("Read sensors"));
-	}
-
-	// Check if any data needs to be sent to the database, via the ESP8266
-	if (stateFlags.anySet(FLAG_PENDING_DATA_FOR_DATABASE)) {
-		if (linkWifi.emptySendBuffer() && timerLargeMessageReminder.triggered(currentTime)) {
-			linkWifi.send(Interconnect::RequestSendDataForDatabase, String(sendLargeMessageSyncKey));
 		}
 	}
 }

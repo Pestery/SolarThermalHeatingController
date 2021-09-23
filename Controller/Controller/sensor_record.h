@@ -8,8 +8,11 @@
 // Holds information about all sensors at a single moment in time.
 struct SensorRecord {
 
+	// The type of value used for the sensor index
+	typedef uint32_t IndexType;
+
 	// Data
-	unsigned int index;
+	IndexType index;
 	DateTime dateTime;
 	float temperatureIn;
 
@@ -42,27 +45,37 @@ struct SensorRecord {
 	}
 
 	// Generate a JSON-string representation of the data within this class
-	String toJSON() const {
+	String toJson() const {
 		String result;
-		result.reserve(200); // Adjust this to best guess of number of bytes required
-
-		result = F("{\"id\":");
-		result += String(index);
-
-		result += F(",\"readDate\":");
-		result += dateTime.toString();
-
-		result += F(",\"value\":");
-		result += String(temperatureIn);
-
-		result += '}';
+		toJson(result);
 		return result;
+	}
+
+	// Generate a JSON-string representation of the data within this class
+	// The generated JSON data will be added to the end of the string 'outAppend'
+	void toJson(String& outAppend) const {
+
+		outAppend += F("{\"Id\":");
+		outAppend += String(index);
+
+		outAppend += F(",\"Date\":");
+		outAppend += dateTime.toString();
+
+		outAppend += F(",\"Tin\":");
+		outAppend += String(temperatureIn);
+
+		outAppend += F(",\"Tout\":");
+		outAppend += String(temperatureIn);
+
+		outAppend += F(",\"Troof\":");
+		outAppend += String(temperatureIn);
+
+		outAppend += '}';
 	}
 
 	// Read the value of all connected sensors and store it within this class
 	// This will also increment the index value
 	void readAll() {
-		index++;
 		temperatureIn = readThermistor(A0); // A0 seems to be defined
 	}
 

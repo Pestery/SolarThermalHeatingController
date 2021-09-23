@@ -14,7 +14,7 @@ TEST(Interconnect) {
 	String payload;
 
 	// Setup test data
-	const Interconnect::Type testHeader = Interconnect::Type::DataForDatabase;
+	const Interconnect::Type testHeader = Interconnect::Type::SendToDatabase;
 	const std::string testPayload = "TestDataBlah";
 	const std::string testMessage = (char)testHeader + testPayload + '\n';
 	serial.debugSetReadBuffer(testMessage + testMessage);
