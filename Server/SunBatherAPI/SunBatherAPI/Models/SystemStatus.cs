@@ -13,7 +13,8 @@ namespace SunBatherAPI.Models
         public int Id { get; set; }
         public int SystemIdentityID { get; set; }
         public bool PumpMode { get; set; }
-        public double SetTemperature { get; set; }
+        public float SetTemperature { get; set; }
+        public bool ManualPumpOn { get; set; }
         public bool PumpStatus { get; set; } 
         public SystemIdentity SystemIdentity { get; set; }
     }

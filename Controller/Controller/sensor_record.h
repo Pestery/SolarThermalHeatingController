@@ -58,8 +58,9 @@ struct SensorRecord {
 		outAppend += F("{\"Id\":");
 		outAppend += String(index);
 
-		outAppend += F(",\"Date\":");
+		outAppend += F(",\"Date\":\"");
 		outAppend += dateTime.toString();
+		outAppend += '\"';
 
 		outAppend += F(",\"Tin\":");
 		outAppend += String(temperatureIn);

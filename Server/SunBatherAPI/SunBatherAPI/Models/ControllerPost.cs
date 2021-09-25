@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace SunBatherAPI.Models
 {
     /// <summary>
-    /// This class is sent by the Arduino to the database.
+    /// This class is sent by the Controller/Arduino, to the database.
     /// </summary>
     public class ControllerPost
     {
@@ -19,27 +19,27 @@ namespace SunBatherAPI.Models
             /// <summary>
             /// Record index as described by the controller
             /// </summary>
-            public int Id;
+            public int Id { get; set; }
 
             /// <summary>
             /// Date and time when the record was created
             /// </summary>
-            public DateTime Date;
+            public DateTime Date { get; set; }
 
             /// <summary>
             /// Temperature at inlet.
             /// </summary>
-            public float Tin;
+            public float Tin { get; set; }
 
             /// <summary>
             /// Temperature at outlet.
             /// </summary>
-            public float Tout;
+            public float Tout { get; set; }
 
             /// <summary>
             /// Temperature of roof.
             /// </summary>
-            public float Troof;
+            public float Troof { get; set; }
         }
 
         /// <summary>
@@ -48,10 +48,10 @@ namespace SunBatherAPI.Models
         public class Settings
         {
             /// <summary>
-            /// System automatic mode setting.
-            /// True for automatic mode, or false for manual mode.
+            /// Current pump status.
+            /// True if the pump is currently running, or false if not.
             /// </summary>
-            public bool? Auto { get; set; }
+            public bool? PumpOn { get; set; }
         }
 
         /// <summary>

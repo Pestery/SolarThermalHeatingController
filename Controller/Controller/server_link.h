@@ -15,6 +15,11 @@ Content-Length: 81
 }
 ***********************/
 
+// Compile target check
+#if !defined(ESP8266)
+#error "This file should ONLY be included with ESP8266 code"
+#endif
+
 // Include headers
 #include <WiFiClientSecure.h>
 #include <EEPROM.h>
@@ -27,9 +32,6 @@ public:
 
 	// The EEPROM address used for storing server info
 	static constexpr int EepromAddress = 0;
-
-	// The size required for this class within the EEPROM
-	static constexpr int EepromSize = sizeof(ServerAddress);
 
 	// Send some data to the database
 	// A POST request is used as the container, and the data must be in JSON format
@@ -137,8 +139,16 @@ private:
 		int statusCode = 0;
 		if (processReplyJson(client, statusCode, reply, keepHeaders)) result = true;
 
+		// Check the status code
 		// Return result
-		return (statusCode == 200) ? result : false;
+		switch (statusCode) {
+			case 200:
+				return result;
+			case 204: // TODO: This could probably be handled better
+				result = F("{}");
+				return result;
+		}
+		return false;
 	}
 
 	// Send some data to the database

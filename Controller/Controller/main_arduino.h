@@ -52,6 +52,9 @@ void setup() {
 	Serial3.begin(SERIAL_BITRATE_ARDUINO_ESP8266); // For ESP8266 connection
 	Serial1.begin(9600); // For Bluetooth module
 
+	// Initialise settings data
+	settings.init();
+
 	// Debug message
 	//Serial.println(F("Arduino starting..."));
 }
@@ -99,6 +102,10 @@ void loop() {
 
 	// Process any received message
 	if (sender != LinkId::None) {
+		//Serial.print("header: '");
+		//Serial.print((char)header);
+		//Serial.print("', payload: ");
+		//Serial.println(payload);
 		switch (header) {
 
 			case Interconnect::SendToDatabaseAllow:
@@ -194,15 +201,34 @@ void loop() {
 				}
 				break;
 
-
-				break;
-
 			case Interconnect::GetSettings:
 
 				// Settings data was requested
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, settings.toJson()); break;
-					case LinkId::BT: linkBT.sendForce(header, settings.toJson()); break;
+					case LinkId::PC: linkPC.sendForce(header, settings.toJson(true)); break;
+					case LinkId::BT: linkBT.sendForce(header, settings.toJson(true)); break;
+				}
+				break;
+
+			case Interconnect::SetGuid:
+
+				// Save new GUID
+				// Send reply
+				settings.systemGuid(payload);
+				settings.save();
+				payload = F("Ok");
+				switch (sender) {
+					case LinkId::PC: linkPC.sendForce(header, payload); break;
+					case LinkId::BT: linkBT.sendForce(header, payload); break;
+				}
+				break;
+
+			case Interconnect::GetGuid:
+
+				// GUID was requested
+				switch (sender) {
+					case LinkId::PC: linkPC.sendForce(header, settings.systemGuid()); break;
+					case LinkId::BT: linkBT.sendForce(header, settings.systemGuid()); break;
 				}
 				break;
 

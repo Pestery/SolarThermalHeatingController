@@ -92,6 +92,15 @@ public:
 		// No payload
 		GetWifiInfo = 'W',
 
+		// Set the GUID of the system
+		// The payload should be the GUID string which the database expects
+		// The GUID string should be a hexadecimal string similar to: 12345678-1234-1234-1234-123456789012
+		SetGuid = 'g',
+
+		// Request the wifi status
+		// No payload
+		GetGuid = 'G',
+
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
 		// Payload is the (probably JSON) message to be sent to the server

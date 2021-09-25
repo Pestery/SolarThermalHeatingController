@@ -24,7 +24,9 @@ public:
 
 	// Generate a string representation of this data within this class
 	String toString() const {
-		return String(m_time);
+		//return String(m_time);
+		// TODO: Make this better
+		return F("2021-09-25T11:10:45");
 	}
 
 	// A constructor which uses a string in the same format as that returned by toString()
