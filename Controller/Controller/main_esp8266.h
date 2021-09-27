@@ -4,6 +4,8 @@
 // Include headers
 #include <ESP8266WiFi.h>
 #include <EEPROM.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 #include "interconnect.h"
 #include "state_flags.h"
 #include "server_link.h"
@@ -15,6 +17,10 @@
 // Declare global values
 Interconnect linkArduino(Serial, INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266);
 ServerLink   linkServer;
+bool         expectSendToDatabase = false;
+WiFiUDP      ntpUDP;
+NTPClient    ntpClient(ntpUDP, "au.pool.ntp.org", 0, 60 * 60 * 24);
+bool         ntpClientValid = false;
 
 // Runs once at Arduino power-up
 // This function is used to setup all data before loop() is called
@@ -33,11 +39,19 @@ void setup() {
 
 	// Initialise server data
 	linkServer.init();
+
+	// Initialise the NTP Client
+	ntpClient.begin();
 }
 
 // Runs repeatedly once the Arduino has finished initialisation
 // This function will only run after setup() has completed
 void loop() {
+
+	// Update current time, but only if idle
+	if (!expectSendToDatabase) {
+		ntpClientValid |= ntpClient.update();
+	}
 
 	// Update interconnect
 	linkArduino.update();
@@ -57,6 +71,7 @@ void loop() {
 				// If able to send then reply with the key
 				if (WiFi.status() == WL_CONNECTED) {
 					linkArduino.send(Interconnect::SendToDatabaseAllow, payload);
+					expectSendToDatabase = true;
 				} else {
 					payload = F("Wifi not connected");
 					linkArduino.send(Interconnect::SendToDatabaseDisallow, payload);
@@ -74,6 +89,7 @@ void loop() {
 				} else {
 					linkArduino.sendForce(Interconnect::SendToDatabaseFailure, reply);
 				}
+				expectSendToDatabase = false;
 				break;
 			}
 
@@ -114,6 +130,10 @@ void loop() {
 
 			case Interconnect::GetServerAddress:
 				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Server address: ")) + linkServer.getAddress());
+				break;
+
+			case Interconnect::GetTime:
+				if (ntpClientValid) linkArduino.send(Interconnect::SetTime, String(ntpClient.getEpochTime()));
 				break;
 
 			case Interconnect::EchoESP8266:

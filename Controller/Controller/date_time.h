@@ -6,15 +6,7 @@ class DateTime {
 public:
 
 	// Type used to store Unix time stamp (number of seconds since 1/1/1970 at UTC)
-	typedef uint32_t Type;
-
-	// Conversion factors
-	static constexpr Type secondsPerMinute() {return 60;}
-	static constexpr Type secondsPerHour() {return 3600;}
-	static constexpr Type secondsPerDay() {return 86400;}
-	static constexpr Type secondsPerWeek() {return 604800;}
-	static constexpr Type secondsPerMonth() {return 2629743;}
-	static constexpr Type secondsPerYear() {return 31556926;}
+	typedef uint32_t Type; // TODO: Change this to 64-bit, and propagate any other required changes
 
 	// Reset the time value
 	void reset() {m_time = 0;}
@@ -24,9 +16,7 @@ public:
 
 	// Generate a string representation of this data within this class
 	String toString() const {
-		//return String(m_time);
-		// TODO: Make this better
-		return F("2021-09-25T11:10:45");
+		return String(m_time);
 	}
 
 	// A constructor which uses a string in the same format as that returned by toString()
@@ -100,6 +90,8 @@ public:
 	DateTime& operator -= (const DateTime& rhs) {m_time -= rhs.m_time; return *this;}
 
 private:
+
+	// Local data for this class
 	Type m_time; // Unix time stamp. Number of seconds since 1/1/1970 at UTC
 };
 

@@ -30,6 +30,9 @@ namespace SunBatherAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ControllerReply>> Post(ControllerPost param)
         {
+            // Make sure that something was posted
+            if (param == null) return NoContent();
+
             //var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == 3);
             //System.Diagnostics.Debug.WriteLine("GUID: " + temp.ProductId);
 
@@ -64,7 +67,7 @@ namespace SunBatherAPI.Controllers
                             Cost = 0,
                             Emissions = 0,
                             EnergyAdsorbed = 0,
-                            ReadDateTime = record.Date,
+                            ReadDateTime = DateTimeOffset.FromUnixTimeSeconds(record.Date).DateTime,
                             SystemIdentity = systemId
                         }
                     );

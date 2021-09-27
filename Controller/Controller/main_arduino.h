@@ -10,6 +10,7 @@
 #include "state_flags.h"
 #include "settings.h"
 #include "bluetooth_interconnect.h"
+#include "time_keeper.h"
 
 // Current controller settings and status
 Settings settings;
@@ -24,6 +25,10 @@ SensorRecord::IndexType sensorRecordIndex = 1;
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
 Timer timerReadSensors(5 * 1000);
 Timer timerSendToDatabase(2 * 1000);
+Timer timerUpdateCurrentTime(1 * 1000);
+
+// A record of the current Epoch time
+TimeKeeper timeKeeper;
 
 // A synchronisation-key used when requesting to send data to the database
 char sendToDatabaseSyncKey = '0';
@@ -72,10 +77,12 @@ void loop() {
 	// Also check if there is enough buffer space to make a new sensor record
 	if (timerReadSensors.triggered(currentTime)) {
 		if ((sensorRecordCount < sensorRecordMax)) {
-			sensorRecord[sensorRecordCount].readAll();
-			sensorRecord[sensorRecordCount].index = sensorRecordIndex++;
-			//sensorRecord[sensorRecordCount].dateTime = currentTime; // TODO
-			sensorRecordCount++;
+			if (timeKeeper.isValid()) {
+				sensorRecord[sensorRecordCount].readAll();
+				sensorRecord[sensorRecordCount].index = sensorRecordIndex++;
+				sensorRecord[sensorRecordCount].dateTime = timeKeeper.current();
+				sensorRecordCount++;
+			}
 		}
 	}
 
@@ -85,6 +92,11 @@ void loop() {
 		if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
 			linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
 		}
+	}
+
+	// Check if it is time to update the reference for the current time
+	if (timerUpdateCurrentTime.triggered(currentTime)) {
+		linkWifi.send(Interconnect::GetTime);
 	}
 
 	// Update interconnects
@@ -229,6 +241,27 @@ void loop() {
 				switch (sender) {
 					case LinkId::PC: linkPC.sendForce(header, settings.systemGuid()); break;
 					case LinkId::BT: linkBT.sendForce(header, settings.systemGuid()); break;
+				}
+				break;
+
+			case Interconnect::SetTime:
+
+				// Update the reference for calculating the current time
+				timeKeeper.current(payload);
+				switch (sender) {
+					case LinkId::PC: linkPC.sendForce(header, String(F("Ok"))); break;
+					case LinkId::BT: linkBT.sendForce(header, String(F("Ok"))); break;
+				}
+				break;
+
+			case Interconnect::GetTime:
+
+				// Current time was requested
+				if (timeKeeper.isValid()) {
+					switch (sender) {
+						case LinkId::PC: linkPC.sendForce(header, timeKeeper.current().toString()); break;
+						case LinkId::BT: linkBT.sendForce(header, timeKeeper.current().toString()); break;
+					}
 				}
 				break;
 

@@ -24,7 +24,7 @@ namespace SunBatherAPI.Models
             /// <summary>
             /// Date and time when the record was created
             /// </summary>
-            public DateTime Date { get; set; }
+            public long Date { get; set; }
 
             /// <summary>
             /// Temperature at inlet.

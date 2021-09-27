@@ -101,6 +101,14 @@ public:
 		// No payload
 		GetGuid = 'G',
 
+		// Request the current time
+		// No payload
+		GetTime = 'E',
+
+		// Set the current time
+		// Payload is the current Epoch time as a string
+		SetTime = 'e',
+
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
 		// Payload is the (probably JSON) message to be sent to the server
