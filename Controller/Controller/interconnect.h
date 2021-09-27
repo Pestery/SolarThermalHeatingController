@@ -27,14 +27,37 @@ public:
 	// Note: An upper-case 'O' must not be used for any command letter, as it is used for Bluetooth module messages
 	enum Type : uint8_t {
 
-		// A small request to allow a DataForDatabase command to be sent
-		RequestSendDataForDatabase = 'r',
+		// A small request send from the Arduino to the ESP8266
+		// Used to request permission to send a SendToDatabase message
+		// These messages might saturate the send buffer and must be processed in a timely fashion
+		// Payload is a single byte, used to match against SendToDatabaseAllow, to identify duplicate requests
+		SendToDatabaseRequest = 'r',
 
-		// A small acknowledgement in reply to RequestSendDataForDatabase, and allowing a DataForDatabase command to be sent
-		AllowSendDataForDatabase = 'a',
+		// A small acknowledgement sent from the ESP8266 to the Arduino
+		// Used in response to a SendToDatabaseRequest, to allow the requested SendToDatabase message
+		// Payload is a single byte, the same as sent with SendToDatabaseRequest
+		SendToDatabaseAllow = 'a',
 
-		// The header for a large message which contains data destined for the database
-		DataForDatabase  = 'd',
+		// A small reply sent from the ESP8266 to the Arduino
+		// Used in response to a SendToDatabaseRequest, to disallow the requested SendToDatabase message
+		// This message might be sent if, for example, the wifi is not currently connected
+		// No payload
+		SendToDatabaseDisallow = 'n',
+
+		// The header for a message which contain data destined for the database
+		// Sent from the Arduino to the ESP8266
+		// The payload must be a JSON string
+		SendToDatabase  = 'd',
+
+		// A header used to indicate that an error occurred while sending data to database
+		// Sent by the the ESP8266 to the Arduino, in response to a SendToDatabase message
+		// Payload (optional) may contain information about the error
+		SendToDatabaseFailure = 'f',
+
+		// A header used to indicate a successful database transaction
+		// Sent by the the ESP8266 to the Arduino, in response to a SendToDatabase message
+		// Payload (optional) may contain a reply from the server in the form of a JSON string
+		SendToDatabaseSuccess = 'k',
 
 		// A notification message which should be forwarded to the user, probably via the serial port
 		// Do not use. Intended for system messages back to user
@@ -50,6 +73,15 @@ public:
 		// No payload
 		GetServerAddress = 'S',
 
+		// Set the controller settings/configuration data
+		// Payload is a JSON object with the settings to be changed
+		// For example: {"auto":true}
+		SetSettings = 'c',
+
+		// Get the controller settings/configuration and status data
+		// No payload
+		GetSettings = 'C',
+
 		// Set the wifi SSID name and password
 		// The payload should be either:
 		//  - The wifi name
@@ -59,6 +91,15 @@ public:
 		// Request the wifi status
 		// No payload
 		GetWifiInfo = 'W',
+
+		// Set the GUID of the system
+		// The payload should be the GUID string which the database expects
+		// The GUID string should be a hexadecimal string similar to: 12345678-1234-1234-1234-123456789012
+		SetGuid = 'g',
+
+		// Request the wifi status
+		// No payload
+		GetGuid = 'G',
 
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port

@@ -15,6 +15,11 @@ Content-Length: 81
 }
 ***********************/
 
+// Compile target check
+#if !defined(ESP8266)
+#error "This file should ONLY be included with ESP8266 code"
+#endif
+
 // Include headers
 #include <WiFiClientSecure.h>
 #include <EEPROM.h>
@@ -28,72 +33,57 @@ public:
 	// The EEPROM address used for storing server info
 	static constexpr int EepromAddress = 0;
 
-	// The size required for this class within the EEPROM
-	static constexpr int EepromSize = sizeof(ServerAddress);
-
 	// Send some data to the database
 	// A POST request is used as the container, and the data must be in JSON format
+	// Any reply from the server is stored in the 'reply' parameter
+	// In the case of an error, the error message maybe stored in the 'reply' parameter
 	// Returns true on success, or false on failure
 	bool sendJson(const String& payload, String& reply, bool keepHeaders = false) {
 
 		// Make sure the wifi is currently connected
-		if (WiFi.status() == WL_CONNECTED) {
+		if (WiFi.status() != WL_CONNECTED) {
+			reply = F("Wifi not connected");
+			return false;
+		}
 
-			// Check if using a secure connection
-			if (m_address.secure()) {
+		// Check if using a secure connection
+		if (m_address.secure()) {
 
-				// Define the WiFiClientSecure class, which is used to create a secure TCP connection
-				WiFiClientSecure client;
+			// Define the WiFiClientSecure class, which is used to create a secure TCP connection
+			WiFiClientSecure client;
 
-				// Set the connection as insecure
-				// This will allow an SSL connection, but will not validate the certificate of the server
-				// TODO: This is VERY insecure and should be changed in future!!!
-				client.setInsecure(); // <---- VERY INSECURE!!!
+			// Set the connection as insecure
+			// This will allow an SSL connection, but will not validate the certificate of the server
+			// TODO: This is VERY insecure and should be changed in future!!!
+			client.setInsecure(); // <---- VERY INSECURE!!!
 
-				// Try to connect to the server
-				if (client.connect(m_address.host(), m_address.port())) {
-					bool result = false;
+			// Try to connect to the server
+			if (client.connect(m_address.host(), m_address.port())) {
 
-					// Send message to the server
-					if (client.connected()) {
-						result = sendJsonInternal(client, payload, reply, keepHeaders);
-					}
+				// Send message to the server, receive the reply, and close the connection
+				bool result = internalSendJson(client, payload, reply, keepHeaders);
+				client.stop();
+				return result;
+			}
 
-					// Close the connection
-					// Return success
-					client.stop();
-					return result;
+		} else {
 
-				} else {
-					if (keepHeaders) reply = F("Failed to connect securely");
-				}
+			// Define the WiFiClient class, which is used to create an insecure TCP connection
+			WiFiClient client;
 
-			} else {
+			// Try to connect to the server
+			if (client.connect(m_address.host(), m_address.port())) {
 
-				// Define the WiFiClient class, which is used to create an insecure TCP connection
-				WiFiClient client;
-
-				// Try to connect to the server
-				if (client.connect(m_address.host(), m_address.port())) {
-					bool result = false;
-
-					// Send message to the server
-					if (client.connected()) {
-						result = sendJsonInternal(client, payload, reply, keepHeaders);
-					}
-
-					// Close the connection
-					// Return success
-					client.stop();
-					return result;
-
-				} else {
-					if (keepHeaders) reply = F("Failed to connect");
-				}
+				// Send message to the server, receive the reply, and close the connection
+				bool result = internalSendJson(client, payload, reply, keepHeaders);
+				client.stop();
+				return result;
 			}
 		}
 
+		// If here then failed to connect to server
 		// Return failed to send data
+		reply = F("Failed to connect to server");
 		return false;
 	}
 
@@ -139,49 +129,61 @@ private:
 	// A POST request is used as the container, and the data must be in JSON format
 	// This method is used internally by sendJson() to manage sending and receiving data from the server
 	// Returns true on success, or false on failure
-	bool sendJsonInternal(WiFiClient& client, const String& payload, String& reply, bool keepHeaders) {
+	bool internalSendJson(WiFiClient& client, const String& payload, String& reply, bool keepHeaders) {
 		bool result = false;
 
 		// Send POST request
-		client.print(generateHeaderJsonPost(payload));
-		client.println(payload);
+		sendPostRequestJson(client, payload);
 
 		// Wait for and process reply
 		int statusCode = 0;
 		if (processReplyJson(client, statusCode, reply, keepHeaders)) result = true;
 
+		// Check the status code
 		// Return result
-		return (statusCode == 200) ? result : false;
+		switch (statusCode) {
+			case 200:
+				return result;
+			case 204: // TODO: This could probably be handled better
+				result = F("{}");
+				return result;
+		}
+		return false;
 	}
 
-	// Generate header for post requests which send JSON data
-	String generateHeaderJsonPost(const String& payload) {
-		String result;
-		result.reserve(95 + strlen(m_address.host()) + strlen(m_address.path()));
+	// Send some data to the database
+	// A POST request is used as the container, and the data must be in JSON format
+	// This method is used internally by sendJson() to manage sending data to the server
+	void sendPostRequestJson(WiFiClient& client, const String& payload) {
 
 		// POST /echo/post/json HTTP/1.1
-		result = F("POST "); // 5 characters
-		result += m_address.path();
-		result += F(" HTTP/1.1\r\n"); // 11 characters
+		client.print(F("POST "));
+		client.print(m_address.path());
+		client.print(F(" HTTP/1.1\r\n"));
 
 		// Host: website.com
-		result += F("Host: "); // 6 characters
-		result += m_address.host();
-		result += ':';
-		result += m_address.port(); // Estimate length of 5 characters
-		result += F("\r\n"); // 2 characters
+		client.print(F("Host: "));
+		client.print(m_address.host());
+		client.print(':');
+		client.print(m_address.port());
+		client.print(F("\r\n"));
 
 		// Accept: application/json
 		// Content-Type: application/json
-		result += F("Accept: application/json\r\n" // 26 characters
-		            "Content-Type: application/json\r\n"); // 32 characters
+		client.print(F("Accept: application/json\r\n"));
+		client.print(F("Content-Type: application/json\r\n"));
 
-		// Content-Length: xxx
-		result += F("Content-Length: ");
-		result += payload.length(); // Estimate length of 3 characters
-		result += F("\r\n\r\n"); // Two end lines for end of header. 4 characters
+		// Content-Length: (some length)
+		client.print(F("Content-Length: "));
+		client.print(payload.length());
+		client.print(F("\r\n"));
 
-		return result;
+		// Empty line which marks the end of the header
+		client.print(F("\r\n"));
+
+		// Payload
+		client.print(payload);
+		client.print(F("\r\n"));
 	}
 
 	// Process the reply after sending JSON data via sendJson()
@@ -197,11 +199,14 @@ private:
 		// Get the status line of the response
 		// This is the first line returned
 		temp = getNextLine(client);
-		if (keepHeaders) {reply += temp; reply += '\n';}
+		if (keepHeaders) {reply = temp; reply += '\n';}
 
 		// Get status code, from the status line
 		statusCode = getStatusCode(temp.c_str());
-		if (!statusCode) return false;
+		if (!statusCode) {
+			if (!keepHeaders) reply = F("Failed to get status-code from reply");
+			return false;
+		}
 
 		// Loop through headers
 		// This section will end when an empty line is found
@@ -235,6 +240,7 @@ private:
 					if (temp == F("chunked")) {
 						chunkedReply = true;
 					} else {
+						if (!keepHeaders) reply = F("Server sent unrecognised format in reply");
 						return false;
 					}
 				}

@@ -14,9 +14,9 @@ TEST(Interconnect) {
 	String payload;
 
 	// Setup test data
-	const Interconnect::Type testHeader = Interconnect::Type::DataForDatabase;
-	const std::string testPayload = "TestDataBlah";
-	const std::string testMessage = (char)testHeader + testPayload + '\n';
+	const Interconnect::Type testHeader = Interconnect::Type::SendToDatabase;
+	std::string testPayload = "TestDataBlah";
+	std::string testMessage = (char)testHeader + testPayload + '\n';
 	serial.debugSetReadBuffer(testMessage + testMessage);
 
 	// Check initial conditions
@@ -63,7 +63,24 @@ TEST(Interconnect) {
 	t.sendForce(testHeader, testPayload);
 	t.sendForce(testHeader, testPayload);
 	t.update();
-	CHECK_EQUAL(testMessage + testMessage + testMessage, serial.debugGetWriteBuffer());
+	CHECK_EQUAL_SHOW(testMessage + testMessage + testMessage, serial.debugGetWriteBuffer());
+	serial.debugResetWriteBuffer();
+
+	// Send an extremely long message
+	testPayload = "TestDataBlah123TestDataBlah456TestDataBlah789TestDataBlah!!!";
+	testMessage = (char)testHeader + testPayload + '\n';
+	t.sendForce(testHeader, testPayload);
+	t.update();
+	CHECK_EQUAL_SHOW(testMessage, serial.debugGetWriteBuffer());
+	serial.debugResetWriteBuffer();
+
+	// Send a message with characters which need to be escaped
+	testPayload = "Test\nHello\nWorld\n\rBlahBlah!!!";
+	testMessage = (char)testHeader + std::string("Test\\nHello\\nWorld\\n\\rBlahBlah!!!") + '\n';
+	t.sendForce(testHeader, testPayload);
+	t.update();
+	CHECK_EQUAL_SHOW(testMessage, serial.debugGetWriteBuffer());
+	serial.debugResetWriteBuffer();
 }
 
 #endif

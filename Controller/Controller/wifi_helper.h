@@ -1,6 +1,11 @@
 #ifndef WIFI_HELPER_H
 #define WIFI_HELPER_H
 
+// Compile target check
+#if !defined(ESP8266)
+#error "This file should ONLY be included with ESP8266 code"
+#endif
+
 // Include headers
 #include <ESP8266WiFi.h>
 #include <EEPROM.h>
