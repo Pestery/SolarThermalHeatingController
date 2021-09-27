@@ -1,4 +1,4 @@
-var commonFunction = require("../shared/commonFunctions");
+var commonFunction = require("./commonFunctionsMod");
 
 //assumptions
 var timeInterval = 1; // Default sensor reading is 15 min
@@ -53,7 +53,7 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
     return arrayDataInfo;
 }
 
-export function findGraphDataCompare(graphData, graphOption, optionChosen) {
+function findGraphDataCompare(graphData, graphOption, optionChosen) {
     var compareDataInfo = {};
 
     switch (optionChosen.idName) {
@@ -93,3 +93,5 @@ export function findGraphDataCompare(graphData, graphOption, optionChosen) {
   
     return compareDataInfo;
 }
+
+module.exports = { getThermalPower, loopThroughData, findGraphDataCompare };

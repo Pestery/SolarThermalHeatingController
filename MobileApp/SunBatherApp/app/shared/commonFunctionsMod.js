@@ -1,9 +1,9 @@
 // File contains all common functions used by most classes
 
 // converts string to bool
-export function convertToBool(message) {
+function convertToBool(message) {
   if (message != undefined)
-  {
+    {
     if (message.toLowerCase() == "auto" || message.toLowerCase() == "on") {
       return true;
     }
@@ -13,7 +13,7 @@ export function convertToBool(message) {
 }
 
 // convers true/false to on/off
-export function convertOnOff(message) {
+function convertOnOff(message) {
   var sentence;
   if (message) {
     sentence = "On";
@@ -23,7 +23,7 @@ export function convertOnOff(message) {
   return sentence;
 }
 
-export function convertAutoManual(message) {
+function convertAutoManual(message) {
   var sentence;
   if (message) {
     sentence = "Auto"; 
@@ -34,19 +34,19 @@ export function convertAutoManual(message) {
 }
 
 // adds celcius to the value
-export function addCelcius(message) {
+function addCelcius(message) {
   message = message + " C"
   return message;
 }
   
 // adds UV to the value
-export function addUV(message) {
+function addUV(message) {
   message = message + " W/M^2"
   return message;
 }
 
 // finds average and rounds it to 1 decimal place
-export function averageRound(average, count) {
+function averageRound(average, count) {
   if (count < 1) {
     return 0;
   } else {
@@ -55,8 +55,9 @@ export function averageRound(average, count) {
   }
 }
 
+
 // finds min value 
-export function findMin(newMin, originalMin) {
+function findMin(newMin, originalMin) {
   if (newMin < originalMin) {
     originalMin = newMin;
   } 
@@ -64,7 +65,7 @@ export function findMin(newMin, originalMin) {
 }
 
 // finds max value 
-export function findMax(newMax, originalMax) {
+function findMax(newMax, originalMax) {
   if (newMax > originalMax) {
     originalMax = newMax;
   } 
@@ -99,63 +100,68 @@ function loopThroughData(arrayData, databaseField) {
 
 // if else can be optimized - JACK
 function timePeriod(dateFrom, dateTo, graphDataInfo) {
-  var dateFromConverted = new Date(dateFrom);
-  var dateToConvert = new Date(dateTo);
-  var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
-  var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
-  console.log(dateFrom)
-  console.log(dateFromConverted)
-  if(dateToConvert.getDate() < dateFromConverted.getDate()){
-    monthDifference--;
-  }
+  if (dateFrom < dateTo) {
+    var dateFromConverted = new Date(dateFrom);
+    var dateToConvert = new Date(dateTo);
+    var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
+    var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
 
-  if (dateDifference < 0) {
-    dateDifference += 30;
-  }
+    if(dateToConvert.getDate() < dateFromConverted.getDate()){
+      monthDifference--;
+    }
 
-  if ((dateDifference <= 1) && (monthDifference <= 0)) {
+    if (dateDifference < 0) {
+      dateDifference += 30;
+    }
+
+    if ((dateDifference <= 1) && (monthDifference <= 0)) {
+      graphDataInfo.xAxisInterval = 6;
+      graphDataInfo.xAxisUnit = "Hour";
+      graphDataInfo.xAxisFormat = "HH:mm";
+    } else if ((dateDifference > 1) && (dateDifference <= 3) && (monthDifference <= 0)) {
+      graphDataInfo.xAxisInterval = 12;
+      graphDataInfo.xAxisUnit = "Hour";
+      graphDataInfo.xAxisFormat = "dd/MM HH:mm";
+    } else if ((dateDifference > 3) && (dateDifference <= 10) && (monthDifference <= 0)){
+      graphDataInfo.xAxisInterval = 2;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } else if ((dateDifference > 10) && (monthDifference <= 0)){
+      graphDataInfo.xAxisInterval = 5;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } else if (monthDifference == 1) {
+      graphDataInfo.xAxisInterval = 6;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } else if (monthDifference > 1) {
+      graphDataInfo.xAxisInterval = 15;
+      graphDataInfo.xAxisUnit = "Day";
+      graphDataInfo.xAxisFormat = "dd/MM";
+    } 
+  } else {
     graphDataInfo.xAxisInterval = 6;
     graphDataInfo.xAxisUnit = "Hour";
     graphDataInfo.xAxisFormat = "HH:mm";
-  } else if ((dateDifference > 1) && (dateDifference <= 3) && (monthDifference <= 0)) {
-    graphDataInfo.xAxisInterval = 12;
-    graphDataInfo.xAxisUnit = "Hour";
-    graphDataInfo.xAxisFormat = "dd/MM HH:mm";
-  } else if ((dateDifference > 3) && (dateDifference <= 10) && (monthDifference <= 0)){
-    graphDataInfo.xAxisInterval = 2;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } else if ((dateDifference > 10) && (monthDifference <= 0)){
-    graphDataInfo.xAxisInterval = 5;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } else if (monthDifference == 1) {
-    graphDataInfo.xAxisInterval = 6;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } else if (monthDifference > 1) {
-    graphDataInfo.xAxisInterval = 15;
-    graphDataInfo.xAxisUnit = "Day";
-    graphDataInfo.xAxisFormat = "dd/MM";
-  } 
+  }
 
   return graphDataInfo;
 }
 
+
 // converts datetime to time
-export function findGraphData(dateFrom, dateTo, graphData, graphOption) {
-  console.log(graphOption)
+function findGraphData(dateFrom, dateTo, graphData, graphOption) {
   var graphDataInfo = {};
   graphDataInfo = loopThroughData(graphData, graphOption.databaseField);
 
   // store data in array
   graphDataInfo.yAxisInterval = ((graphDataInfo.max - graphDataInfo.min) / 3).toFixed(0);
   graphDataInfo = timePeriod(dateFrom, dateTo, graphDataInfo);
-
+  
   return graphDataInfo;
 }
 
-export function isLiveData(liveData) {
+function isLiveData(liveData) {
   var dateInfo = {};
 
    // iso string is good and prevents time zone hassle when converting to C#
@@ -174,3 +180,4 @@ export function isLiveData(liveData) {
   return dateInfo;
 }
 
+module.exports = { convertToBool, convertOnOff, convertAutoManual, addCelcius, addUV, averageRound, findMin, findMax, loopThroughData, timePeriod, findGraphData, isLiveData } ;
