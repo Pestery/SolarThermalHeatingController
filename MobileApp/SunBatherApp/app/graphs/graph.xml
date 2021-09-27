@@ -4,7 +4,7 @@
             <comps:header />
         </StackLayout>
         <StackLayout row="1" height="82%" class="layout-scheme">
-            <StackLayout class="{{ minimiseGraph ? 'graph-data-page-selected' : 'graph-data-page'}}">
+             <StackLayout class="{{ minimiseGraph ? 'graph-data-page-selected' : 'graph-data-page'}}">
                 <StackLayout class="graph-header">
                     <Label text="{{ graphHeader }}" textWrap="true" />
                 </StackLayout>

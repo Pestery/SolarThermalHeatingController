@@ -14,13 +14,22 @@
                     <Label col="2" text="Pool Temperature" textWrap="true" />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="system-datafield-data">
-                    <Label col="0" text="{{ pumpStatus }}" textWrap="true" />                     
+                    <Label col="0" text="{{ pumpsStatus }}" textWrap="true" />                     
                     <Label col="1" text="{{ setTemp }}" textWrap="true" /> 
-                    <Label col="2" text="{{ poolTemp }}" textWrap="true" />              
+                    <Label col="2" text="{{ poolTemp }}" textWrap="true" />            
                 </GridLayout>
-                <GridLayout rows="*" columns="*" class="system-data-header-conditions">
+
+                <AbsoluteLayout>
+                    <Label text="hello" />
+
+                </AbsoluteLayout>
+
+
+                <!--<GridLayout rows="*" columns="*" class="system-data-header-conditions">
                     <Label col="0" text="Current Conditions" textWrap="true"/>
-                </GridLayout>
+                </GridLayout> -->
+
+
                 <GridLayout rows="*" columns="*,*" class="system-datafield">
                     <Label col="0" text="Current Roof Temperature" textWrap="true" class="system-data-sub-header" />
                     <Label col="1" text="Current UV" textWrap="true" class="system-data-sub-header" />
