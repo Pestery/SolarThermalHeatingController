@@ -4,7 +4,7 @@
             <comps:header />
         </StackLayout>
         <StackLayout row="1" height="82%" class="layout-scheme">
-            <StackLayout class="{{ minimiseGraph ? 'graph-data-page-selected' : 'graph-data-page'}}">
+             <StackLayout class="{{ minimiseGraph ? 'graph-data-page-selected' : 'graph-data-page'}}">
                 <StackLayout class="graph-header">
                     <Label text="{{ graphHeader }}" textWrap="true" />
                 </StackLayout>
@@ -17,13 +17,13 @@
                             <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}" class="vertical-Axis"/>
                         </chart:RadCartesianChart.verticalAxis>
                         <chart:RadCartesianChart.series>
-                            <chart:LineSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}">
-                            </chart:LineSeries>
+                            <chart:AreaSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}">
+                            </chart:AreaSeries>
                         </chart:RadCartesianChart.series>
                         <chart:RadCartesianChart.palettes>
-                            <chart:Palette >
+                            <chart:Palette>
                                 <chart:Palette.entries>
-                                    <chart:PaletteEntry  strokeColor="#1e73be" />
+                                    <chart:PaletteEntry  fillColor="#d8e3f2" strokeColor="#1e73be" />
                                 </chart:Palette.entries>
                             </chart:Palette>
                         </chart:RadCartesianChart.palettes>

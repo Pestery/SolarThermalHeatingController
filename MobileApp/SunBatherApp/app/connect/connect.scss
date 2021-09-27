@@ -34,6 +34,7 @@
         margin-top: 230;
         margin-bottom: 1;
         background-color: #1e73be;
+        color: white;
     }
 
     .button-connect {
@@ -47,6 +48,7 @@
         @extend .field-header;
         margin-top: 10;
         margin-bottom: 1;
+        color: white;
         background-color: #1e73be;
         opacity: 0.5;
     }
@@ -83,5 +85,6 @@
 
     .test {
         color: black;
+        font-size: 30px;
     }
 }
