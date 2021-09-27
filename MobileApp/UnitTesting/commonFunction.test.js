@@ -84,7 +84,7 @@ test('Test Maxiumim function', () => {
 });
 
 // loops through data array
-(test('Test Maxiumim function', () => {
+(test('Test array sorter function for graphs', () => {
   // Initialise Array
   var testArray = [
       { ID: 1, name: "temp1", readDateTime: new Date("07/11/2021 12:00"), temperatureIn: 10, temperatureOut: 5 },
