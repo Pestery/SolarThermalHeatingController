@@ -76,6 +76,8 @@
         @extend .field-header;    
         margin-top: 2;
         background-color: #1e73be;
+        border-width: 1;
+        border-color: white;
     }
 
     .list-data {

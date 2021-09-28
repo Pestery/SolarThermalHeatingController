@@ -27,6 +27,7 @@
         @extend .field-data-header;
         background-color: white;
         color: black;
+        font-size: 15;
     }
 
     .system-datafield-data {
@@ -36,7 +37,7 @@
 
     .graph-data {
         margin-top: 2;
-        height: 309;
+        height: 349;
     }
 
     .graph-data-header {
@@ -52,9 +53,11 @@
         font-size: 18;
         margin-top: 3;
         padding-top: 3;
+        padding-bottom: 3;
         background-color: #1e73be;
         color: #FFF;
-        border-width: 0; //changed this width from 2 to 0, hopefully doesnt break button.
+        border-width: 1; //changed this width from 2 to 0, hopefully doesnt break button.
+        border-color: white;
         height: 40;
     }
 

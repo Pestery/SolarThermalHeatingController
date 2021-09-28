@@ -1,7 +1,10 @@
 <Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true">
-    <GridLayout columns="*" rows="*,auto" width="100%" class="controller-page-styles" >
+    <GridLayout columns="*" rows="*,auto,auto" width="100%" class="controller-page-styles" >
         <StackLayout row="0" >
             <comps:header />
+        </StackLayout>
+        <StackLayout row="2" >
+            <comps:footer />
         </StackLayout>
         <StackLayout row="1" height="82%" class="layout-scheme">
             <StackLayout>
