@@ -13,7 +13,7 @@
                     <Label col="0" text="System Status" textWrap="true"/>
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="system-datafield">
-                    <Label col="0" text="&#xf011;" textWrap="true" class="fa"/>
+                    <Label col="0" text="&#xf011;" textWrap="true" class="fas"/>
                     <Label col="1" text="&#xf140;" textWrap="true" class="fa"/>
                     <Label col="2" text="&#xf2c7;" textWrap="true" class="fa"  />
                 </GridLayout>
