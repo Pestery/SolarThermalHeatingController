@@ -30,7 +30,7 @@
 
                 <GridLayout rows="*" columns="*,*" class="system-datafield">
                     <Label col="0" text="Current Roof Temperature" textWrap="true" class="system-data-sub-header" />
-                    <Label col="1" text="&#xf5ba;" textWrap="true" class="fa" />
+                    <Label col="1" text="&#xf185;" textWrap="true" class="fas" />
                   
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*" class="system-datafield-data">
