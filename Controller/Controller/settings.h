@@ -41,7 +41,6 @@ public:
 
 		// Check if any changes are being made
 		if (strcmp(m_systemGuid, newValue.c_str())) {
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 
 			// Copy new value to internal buffer
@@ -66,7 +65,6 @@ public:
 	void modeAutomatic(bool newValue) {
 		if (m_modeAutomatic != newValue) {
 			m_modeAutomatic = newValue;
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 		}
 	}
@@ -79,7 +77,6 @@ public:
 	void manualPumpOn(bool newValue) {
 		if (m_manualPumpOn != newValue) {
 			m_manualPumpOn = newValue;
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 		}
 
@@ -94,7 +91,6 @@ public:
 		if (m_pumpStatus != newValue) {
 			m_pumpStatus = newValue;
 			m_isServerInformed = false;
-			// This value does not need to be saved to EEPROM
 		}
 
 	}
@@ -118,7 +114,6 @@ public:
 
 		// Check if any changes were made
 		if (oldValue == m_targetTemperature) {
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 		}
 	}
@@ -126,6 +121,18 @@ public:
 		return m_targetTemperature;
 	}
 
+	// Automatic data upload
+	// True if the controller will try to send data to the server, or false if not
+	void autoUpload(bool newValue) {
+		if (m_autoUpload != newValue) {
+			m_autoUpload = newValue;
+			m_unsavedSettings = true;
+		}
+
+	}
+	bool autoUpload() const {
+		return m_autoUpload;
+	}
 
 	// Generate a JSON-string representation of the data within this class
 	String toJson(bool getAll = false) const {
@@ -154,14 +161,9 @@ public:
 			outAppend += m_systemGuid;
 			outAppend += '\"';
 
-	m_targetTemperature;
-	bool m_modeAutomatic;
-	bool m_manualPumpOn;
-	bool m_pumpStatus;
-	bool m_isServerInformed;
-	bool m_unsavedSettings; // Only use for settings which *need* to survive a device reset
-	char m_systemGuid[guidMaxLength];
-
+			outAppend += F(",\"upload\":\"");
+			outAppend += m_autoUpload;
+			outAppend += '\"';
 		}
 
 		outAppend += '}';
@@ -198,7 +200,8 @@ public:
 		m_modeAutomatic(false),
 		m_manualPumpOn(false),
 		m_isServerInformed(false),
-		m_unsavedSettings(false) {
+		m_unsavedSettings(false),
+		m_autoUpload(true) {
 	}
 
 
@@ -240,10 +243,11 @@ private:
 
 	// Settings which need to be saved to EEPROM
 	// The order of these settings should be kept the same, if possible
-	char m_systemGuid[guidMaxLength]; // Leave in first slot
-	bool m_modeAutomatic;
-	bool m_manualPumpOn;
+	char  m_systemGuid[guidMaxLength]; // Leave in first slot
+	bool  m_modeAutomatic;
+	bool  m_manualPumpOn;
 	float m_targetTemperature;
+	bool  m_autoUpload;
 
 	// Settings which do NOT need to be saved to EEPROM
 	bool m_pumpStatus; // This value MUST be first in the not-saved values. If changed then update init() and save()

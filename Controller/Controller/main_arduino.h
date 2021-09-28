@@ -53,8 +53,8 @@ enum class LinkId {
 void setup() {
 
 	// Setup serial connections
-	Serial.begin(SERIAL_BITRATE_ARDUINO_PC); // For PC connection
-	Serial3.begin(SERIAL_BITRATE_ARDUINO_ESP8266); // For ESP8266 connection
+	Serial.begin(SERIAL_BITRATE); // For PC connection
+	Serial3.begin(SERIAL_BITRATE); // For ESP8266 connection
 	Serial1.begin(9600); // For Bluetooth module
 
 	// Initialise settings data
@@ -90,7 +90,9 @@ void loop() {
 	// Also check if there is actually any data to send
 	if (timerSendToDatabase.triggered(currentTime)) {
 		if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
-			linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+			if (settings.autoUpload()) {
+				linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+			}
 		}
 	}
 
@@ -238,9 +240,37 @@ void loop() {
 			case Interconnect::GetGuid:
 
 				// GUID was requested
+				payload = F("GUID:");
+				payload += settings.systemGuid();
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, settings.systemGuid()); break;
-					case LinkId::BT: linkBT.sendForce(header, settings.systemGuid()); break;
+					case LinkId::PC: linkPC.sendForce(header, payload); break;
+					case LinkId::BT: linkBT.sendForce(header, payload); break;
+				}
+				break;
+
+			case Interconnect::SetAutoUpload: {
+
+				// Save new auto-upload state
+				// Send reply
+				char c = (payload.length() > 0) ? payload[0] : 0;
+				settings.autoUpload((c != '0') && (c != 'f') && (c != 'F'));
+				settings.save();
+				payload = F("Ok");
+				switch (sender) {
+					case LinkId::PC: linkPC.sendForce(header, payload); break;
+					case LinkId::BT: linkBT.sendForce(header, payload); break;
+				}
+				break;
+			}
+
+			case Interconnect::GetAutoUnload:
+
+				// Current auto-upload state was requested
+				payload = F("AutoUpload:");
+				payload += settings.autoUpload();
+				switch (sender) {
+					case LinkId::PC: linkPC.sendForce(header, payload); break;
+					case LinkId::BT: linkBT.sendForce(header, payload); break;
 				}
 				break;
 
@@ -269,6 +299,7 @@ void loop() {
 			case Interconnect::DebugSendToServer:
 			case Interconnect::SetServerAddress:
 			case Interconnect::GetServerAddress:
+			case Interconnect::GetWifiInfo:
 
 				// Received a command which needs to be forwarded to the ESP8266
 				if (sender != LinkId::Wifi) {

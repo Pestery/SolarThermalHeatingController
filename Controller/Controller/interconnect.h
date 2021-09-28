@@ -4,17 +4,16 @@
 // Include headers
 #include "ring_buffer.h"
 
-// Bit-rate for Arduino-ESP8266 serial communication
-#define SERIAL_BITRATE_ARDUINO_ESP8266 74880
-
-// Bit-rate for Arduino-PC serial communication
-#define SERIAL_BITRATE_ARDUINO_PC 9600
+// Bit-rate for serial communication between Arduino, ESP8266 and PC
+// Must be kept the same for all serial connections because otherwise buffer overflows may
+// occur when forwarding from one serial to another, if one bit-rate is higher than the another
+#define SERIAL_BITRATE 9600
 
 // Interconnect buffer sizes for different connections and direction of connections
 // This should be set to reflect the expected maximum size of message to be sent on that link
-#define INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266   250
-#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 32
-#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        32
+#define INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266   128
+#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 64
+#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        64
 #define INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO   64
 #define INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO 32
 #define INTERCONNECT_BUFFER_PC_TO_ARDUINO        32
@@ -108,6 +107,11 @@ public:
 		// Set the current time
 		// Payload is the current Epoch time as a string
 		SetTime = 'e',
+
+		// A debug command used to toggle automatic uploading of data to database
+		// Payload should be either a '0' or '1', to represent either false or true respectively
+		SetAutoUpload = 'u',
+		GetAutoUnload = 'U',
 
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port

@@ -28,7 +28,7 @@ bool         ntpClientValid = false;
 void setup() {
 
 	// Open a serial connection to the Arduino chip
-	Serial.begin(SERIAL_BITRATE_ARDUINO_ESP8266);
+	Serial.begin(SERIAL_BITRATE);
 
 	// Setup the EEPROM data
 	// This will use a buffer of 512 bytes
