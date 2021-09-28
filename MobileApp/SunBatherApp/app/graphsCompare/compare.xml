@@ -1,9 +1,13 @@
 <Page xmlns:comps="components" navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" xmlns:chart="nativescript-ui-chart" >
-    <GridLayout columns="*" rows="*,auto" width="100%" class="compare-page-styles">
+    <GridLayout columns="*" rows="*,auto, auto" width="100%" class="compare-page-styles">
         <StackLayout row="0" >
             <comps:header />
         </StackLayout>
-        <StackLayout row="1" height="82%" class="layout-scheme">
+        <StackLayout row="2" >
+            <comps:footer />
+        </StackLayout>
+
+        <StackLayout row="1" class="layout-scheme">
             <StackLayout class="{{ showDatePicker ? 'graph-data-page-selected' : 'graph-data-page'}}">
                 <StackLayout class="graph-header">
                     <Label text="{{ graphHeader }}" textWrap="true" />

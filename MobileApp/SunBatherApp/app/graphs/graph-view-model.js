@@ -35,7 +35,7 @@ function graphPageIntialize(viewModel) {
   viewModel.set('graphOptionSelected', 1)
   var graphOptionList = graphOptions();
   graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
-  viewModel.set('graphSelected', graphOptionList[1].nameAbbreviated); // needed so a default graph type is selected
+  //viewModel.set('graphSelected', graphOptionList[1].nameAbbreviated); // needed so a default graph type is selected
   viewModel.set('graphOptions', graphOptionList);
 
   // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done
@@ -51,7 +51,7 @@ function graphPageIntialize(viewModel) {
   viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
 
   // populates data on graph
-  //apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true, "Null");
+  apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true, "Null");
 }
 
 export function GraphViewModel() {
