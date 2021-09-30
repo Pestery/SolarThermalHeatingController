@@ -13,7 +13,7 @@
 bool isWhitespace(char c) {return std::isspace(c);}
 #define F(string) (string)
 
-// A minimal replacement for the String class within the
+// A minimal replacement for the String class within the Arduino SDK
 class String {
 	std::string m_data;
 public:

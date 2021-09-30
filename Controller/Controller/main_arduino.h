@@ -1,6 +1,9 @@
 #ifndef MAIN_ARDUINO_H
 #define MAIN_ARDUINO_H
 
+// Debug toggle of verbose interlink comments
+#define VERBOSE_INTERLINK 0
+
 // Include headers
 //#include <math.h>
 #include "date_time.h"
@@ -35,9 +38,9 @@ char sendToDatabaseSyncKey = '0';
 
 // Interconnect buffers
 // Used for managing data transfer between different components, such as the Wifi or Bluetooth modules
-Interconnect          linkWifi(Serial3, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266,   INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO);
-Interconnect          linkPC(Serial,    INTERCONNECT_BUFFER_ARDUINO_TO_PC,        INTERCONNECT_BUFFER_PC_TO_ARDUINO);
-BluetoothInterconnect linkBT(Serial1,   INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH, INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO);
+Interconnect          linkWifi(Serial3);
+Interconnect          linkPC(Serial);
+BluetoothInterconnect linkBT(Serial1);
 
 // A list of interconnects
 // Used when checking who sent a message
@@ -92,6 +95,9 @@ void loop() {
 		if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
 			if (settings.autoUpload()) {
 				linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+				#if VERBOSE_INTERLINK
+				linkPC.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+				#endif
 			}
 		}
 	}
@@ -99,6 +105,9 @@ void loop() {
 	// Check if it is time to update the reference for the current time
 	if (timerUpdateCurrentTime.triggered(currentTime)) {
 		linkWifi.send(Interconnect::GetTime);
+		#if VERBOSE_INTERLINK
+		linkPC.send(Interconnect::GetTime);
+		#endif
 	}
 
 	// Update interconnects
@@ -109,17 +118,13 @@ void loop() {
 	// Try to receive any pending messages
 	LinkId sender = LinkId::None;
 	Interconnect::Type header = Interconnect::None;
-	String payload;
+	ByteQueue payload;
 	if (linkWifi.receive(header, payload)) sender = LinkId::Wifi;
 	else if (linkPC.receive(header, payload)) sender = LinkId::PC;
 	else if (linkBT.receive(header, payload)) sender = LinkId::BT;
 
 	// Process any received message
 	if (sender != LinkId::None) {
-		//Serial.print("header: '");
-		//Serial.print((char)header);
-		//Serial.print("', payload: ");
-		//Serial.println(payload);
 		switch (header) {
 
 			case Interconnect::SendToDatabaseAllow:
@@ -127,7 +132,7 @@ void loop() {
 
 					// Check the synchronisation key
 					// If not as expected then this might be an old acknowledgement
-					if (sendToDatabaseSyncKey == payload[0]) {
+					if (sendToDatabaseSyncKey == payload.read()) {
 
 						// Increment synchronisation key for next time
 						sendToDatabaseSyncKey = '0' + ((sendToDatabaseSyncKey + 1 - '0') % ('Z' - '0'));
@@ -137,24 +142,32 @@ void loop() {
 
 							// Generate JSON payload
 							// This will contain the controller status and/or a list of sensor records
-							payload = F("{\"Guid\":\"");
-							payload += settings.systemGuid();
-							payload += F("\",\"Status\":");
+							payload.clear();
+							payload.print(F("{\"Guid\":\""));
+							payload.print(settings.systemGuid());
+							payload.print(F("\",\"Status\":"));
 							if (!settings.isServerInformed()) {
 								settings.toJson(payload);
-								settings.setServerInformed();
 							} else {
-								payload += F("null");
+								payload.print(F("null"));
 							}
-							payload += F(",\"Records\":[");
+							payload.print(F(",\"Records\":["));
 							while (sensorRecordCount > 0) {
 								sensorRecord[--sensorRecordCount].toJson(payload);
-								if (sensorRecordCount) payload += ',';
+								if (sensorRecordCount) payload.print(',');
 							}
-							payload += F("]}");
+							payload.print(F("]}"));
+
+							// Output a copy of the data to the console, if required
+							#if VERBOSE_INTERLINK
+							{ByteQueue temp(payload.duplicate()); linkPC.send(header, temp);}
+							#endif
 
 							// Send data to ESP8266, so that it can forward it to the database
-							linkWifi.sendForce(Interconnect::SendToDatabase, payload);
+							if (linkWifi.send(Interconnect::SendToDatabase, payload)) {
+								settings.setServerInformed();
+							}
+
 						}
 					}
 				}
@@ -163,64 +176,87 @@ void loop() {
 			case Interconnect::SendToDatabaseSuccess:
 				if (sender == LinkId::Wifi) {
 
+					// Output a copy of the data to the console, if required
+					#if VERBOSE_INTERLINK
+					{ByteQueue temp(payload.duplicate()); linkPC.send(header, temp);}
+					#endif
+
 					// Received notification that the last SendToDatabase was successful
 					// Any reply may contain new settings for the server, so check for that
-					if (payload.length() > 2) {
-						settings.fromJson(payload);
-					}
+					settings.fromJson(payload);
 				}
+
+				// Output a copy of the data to the console, if required
+				#if VERBOSE_INTERLINK
+				else linkPC.send(header, payload);
+				#endif
 				break;
 
 			case Interconnect::SendToDatabaseFailure:
 				if (sender == LinkId::Wifi) {
 
 					// TODO: Improve this. Add better error handling or something
-					linkPC.sendForce(Interconnect::GeneralNotification, String(F("SendToDatabaseFailure: ")) + payload);
+					String msg(F("SendFailure: "));
+					msg += payload.convertToString();
+					linkPC.send(Interconnect::GeneralNotification, msg);
+
+					// Output a copy of the data to the console, if required
+					#if VERBOSE_INTERLINK
+					linkPC.send(header, msg);
+				} else {
+					linkPC.send(header, payload);
+					#endif
 				}
 				break;
 
-			case Interconnect::GeneralNotification:
+			case Interconnect::GeneralNotification: {
 
 				// Received a status message from the ESP8266 which should be passed to the serial port for debugging
-				linkPC.sendForce(Interconnect::GeneralNotification, String(F("ESP8266: ")) + payload);
+				String msg(F("ESP8266: "));
+				msg += payload.convertToString();
+				linkPC.send(header, msg);
 				break;
+			}
 
-			case Interconnect::EchoArduino:
+			case Interconnect::EchoArduino: {
 
 				// Received an echo request from the serial port (used for debugging)
 				// Return the same message
-				linkPC.sendForce(Interconnect::GeneralNotification, String(F("Arduino: Echo: ")) + payload);
+				String msg(F("Arduino: Echo: "));
+				msg += payload.convertToString();
+				linkPC.send(header, msg);
 				break;
+			}
 
-			case Interconnect::EchoESP8266:
-
-				// Received an echo request from the serial port, directed toward the ESP8266 (used for debugging)
-				// Try to forward the request to the ESP8266
-				if (!linkWifi.send(header, payload)) {
-					linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Failed to echo to ESP8266"));
-				}
-				break;
-
-			case Interconnect::SetSettings:
+			case Interconnect::SetSettings: {
 
 				// Received new settings
-				if (payload.length() > 2) {
-					payload = settings.fromJson(payload) ? F("Ok") : F("Error");
+				bool result = settings.fromJson(payload);
+				payload.clear();
+				payload.print(result ? F("Ok") : F("Error"));
 
-					// Send reply
-					switch (sender) {
-						case LinkId::PC: linkPC.sendForce(header, payload); break;
-						case LinkId::BT: linkBT.sendForce(header, payload); break;
-					}
+				// Send reply
+				switch (sender) {
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
 				}
 				break;
+			}
 
 			case Interconnect::GetSettings:
 
 				// Settings data was requested
+				payload.clear();
+				settings.toJson(payload);
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, settings.toJson(true)); break;
-					case LinkId::BT: linkBT.sendForce(header, settings.toJson(true)); break;
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
 				}
 				break;
 
@@ -228,23 +264,31 @@ void loop() {
 
 				// Save new GUID
 				// Send reply
-				settings.systemGuid(payload);
+				settings.systemGuid(payload.convertToString());
 				settings.save();
-				payload = F("Ok");
+				payload.clear();
+				payload.print(F("Ok"));
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, payload); break;
-					case LinkId::BT: linkBT.sendForce(header, payload); break;
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
 				}
 				break;
 
 			case Interconnect::GetGuid:
 
 				// GUID was requested
-				payload = F("GUID:");
-				payload += settings.systemGuid();
+				payload.clear();
+				payload.print(F("GUID:"));
+				payload.print(settings.systemGuid());
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, payload); break;
-					case LinkId::BT: linkBT.sendForce(header, payload); break;
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
 				}
 				break;
 
@@ -252,13 +296,17 @@ void loop() {
 
 				// Save new auto-upload state
 				// Send reply
-				char c = (payload.length() > 0) ? payload[0] : 0;
+				char c = (payload.available() > 0) ? payload.read() : 0;
 				settings.autoUpload((c != '0') && (c != 'f') && (c != 'F'));
 				settings.save();
-				payload = F("Ok");
+				payload.clear();
+				payload.print(F("Ok"));
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, payload); break;
-					case LinkId::BT: linkBT.sendForce(header, payload); break;
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
 				}
 				break;
 			}
@@ -266,21 +314,31 @@ void loop() {
 			case Interconnect::GetAutoUnload:
 
 				// Current auto-upload state was requested
-				payload = F("AutoUpload:");
-				payload += settings.autoUpload();
+				payload.clear();
+				payload.print(F("AutoUpload:"));
+				payload.print(settings.autoUpload());
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, payload); break;
-					case LinkId::BT: linkBT.sendForce(header, payload); break;
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
 				}
 				break;
 
 			case Interconnect::SetTime:
 
+				// Output a copy of the data to the console, if required
+				#if VERBOSE_INTERLINK
+				{ByteQueue temp(payload.duplicate()); linkPC.send(header, temp);}
+				#endif
+
 				// Update the reference for calculating the current time
-				timeKeeper.current(payload);
+				timeKeeper.current(payload.convertToString());
+				timerUpdateCurrentTime.setInterval(60 * 1000);
 				switch (sender) {
-					case LinkId::PC: linkPC.sendForce(header, String(F("Ok"))); break;
-					case LinkId::BT: linkBT.sendForce(header, String(F("Ok"))); break;
+					case LinkId::PC: linkPC.send(header, String(F("Ok"))); break;
+					case LinkId::BT: linkBT.send(header, String(F("Ok"))); break;
 				}
 				break;
 
@@ -289,12 +347,16 @@ void loop() {
 				// Current time was requested
 				if (timeKeeper.isValid()) {
 					switch (sender) {
-						case LinkId::PC: linkPC.sendForce(header, timeKeeper.current().toString()); break;
-						case LinkId::BT: linkBT.sendForce(header, timeKeeper.current().toString()); break;
+						case LinkId::PC: linkPC.send(header, timeKeeper.current().toString()); break;
+						case LinkId::BT: linkBT.send(header, timeKeeper.current().toString()); break;
+						#if VERBOSE_INTERLINK
+						default: linkPC.send(header, timeKeeper.current().toString()); break;
+						#endif
 					}
 				}
 				break;
 
+			case Interconnect::EchoESP8266:
 			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer:
 			case Interconnect::SetServerAddress:
@@ -304,7 +366,7 @@ void loop() {
 				// Received a command which needs to be forwarded to the ESP8266
 				if (sender != LinkId::Wifi) {
 					if (!linkWifi.send(header, payload)) {
-						linkPC.sendForce(Interconnect::GeneralNotification, F("Arduino: Interconnect buffer is full"));
+						linkPC.send(Interconnect::GeneralNotification, F("Arduino: Interconnect buffer is full"));
 					}
 				}
 				break;

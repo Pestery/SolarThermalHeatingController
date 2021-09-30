@@ -9,6 +9,7 @@
 // Include headers
 #include <EEPROM.h>
 #include "json_decoder.h"
+#include "byte_queue.h"
 
 // The Settings class holds information about the controller settings and current status.
 class Settings {
@@ -135,8 +136,8 @@ public:
 	}
 
 	// Generate a JSON-string representation of the data within this class
-	String toJson(bool getAll = false) const {
-		String result;
+	ByteQueue toJson(bool getAll = false) const {
+		ByteQueue result;
 		toJson(result, getAll);
 		return result;
 	}
@@ -144,35 +145,35 @@ public:
 	// Generate a JSON-string representation of the data within this class
 	// The generated JSON data will be added to the end of the string 'outAppend'
 	// Note: This is the data which is sent to the server, from the controller
-	void toJson(String& outAppend, bool getAll = false) const {
+	void toJson(ByteQueue& outAppend, bool getAll = false) const {
 
-		outAppend += F("{\"pumpOn\":");
-		outAppend += m_pumpStatus ? F("true") : F("false");
+		outAppend.print(F("{\"pumpOn\":"));
+		outAppend.print(m_pumpStatus ? F("true") : F("false"));
 
 		if (getAll) {
 
-			outAppend += F(",\"auto\":");
-			outAppend += m_modeAutomatic ? F("true") : F("false");
+			outAppend.print(F(",\"auto\":"));
+			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
 
-			outAppend += F(",\"setTemp\":");
-			outAppend += m_targetTemperature;
+			outAppend.print(F(",\"setTemp\":"));
+			outAppend.print(m_targetTemperature);
 
-			outAppend += F(",\"guid\":\"");
-			outAppend += m_systemGuid;
-			outAppend += '\"';
+			outAppend.print(F(",\"guid\":\""));
+			outAppend.print(m_systemGuid);
+			outAppend.print('\"');
 
-			outAppend += F(",\"upload\":\"");
-			outAppend += m_autoUpload;
-			outAppend += '\"';
+			outAppend.print(F(",\"upload\":\""));
+			outAppend.print(m_autoUpload);
+			outAppend.print('\"');
 		}
 
-		outAppend += '}';
+		outAppend.print('}');
 		return outAppend;
 	}
 
 	// Setup the data within this class using a JSON-string
 	// Note: This is the data which the server may send, to the controller
-	bool fromJson(const String& in) {
+	bool fromJson(const ByteQueue& in) {
 		JsonDecoder decoder(in);
 		while (decoder.fetch()) {
 

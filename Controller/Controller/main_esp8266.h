@@ -10,17 +10,21 @@
 #include "state_flags.h"
 #include "server_link.h"
 #include "wifi_helper.h"
+#include "byte_queue.h"
+#include "timer.h"
 
 // State flags transmitting
 #define FLAG_PENDING_DATA_FOR_DATABASE (StateFlags::Type(1 << 0))
 
 // Declare global values
-Interconnect linkArduino(Serial, INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO, INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266);
+Interconnect linkArduino(Serial);
 ServerLink   linkServer;
-bool         expectSendToDatabase = false;
 WiFiUDP      ntpUDP;
 NTPClient    ntpClient(ntpUDP, "au.pool.ntp.org", 0, 60 * 60 * 24);
 bool         ntpClientValid = false;
+bool         expectSendToDatabase = false;
+Timer        timerUpdateTimeClient(1 * 1000);
+Timer        timerLastSend(5 * 1000);
 
 // Runs once at Arduino power-up
 // This function is used to setup all data before loop() is called
@@ -48,17 +52,12 @@ void setup() {
 // This function will only run after setup() has completed
 void loop() {
 
-	// Update current time, but only if idle
-	if (!expectSendToDatabase) {
-		ntpClientValid |= ntpClient.update();
-	}
-
 	// Update interconnect
 	linkArduino.update();
 
 	// Check for received messages
 	Interconnect::Type header = Interconnect::None;
-	String payload;
+	ByteQueue payload;
 	if (linkArduino.receive(header, payload)) {
 
 		// Process received message
@@ -73,7 +72,8 @@ void loop() {
 					linkArduino.send(Interconnect::SendToDatabaseAllow, payload);
 					expectSendToDatabase = true;
 				} else {
-					payload = F("Wifi not connected");
+					payload.clear();
+					payload.print(F("Wifi not connected"));
 					linkArduino.send(Interconnect::SendToDatabaseDisallow, payload);
 				}
 				break;
@@ -83,11 +83,11 @@ void loop() {
 				// Received data which needs to be sent to the database
 				// Try to send the data
 				// Record the data if not sent
-				String reply;
-				if (linkServer.sendJson(payload, reply)) {
-					linkArduino.sendForce(Interconnect::SendToDatabaseSuccess, reply);
+				ByteQueue reply;
+				if (linkServer.sendJson(payload.convertToString(), reply)) {
+					linkArduino.send(Interconnect::SendToDatabaseSuccess, reply);
 				} else {
-					linkArduino.sendForce(Interconnect::SendToDatabaseFailure, reply);
+					linkArduino.send(Interconnect::SendToDatabaseFailure, reply);
 				}
 				expectSendToDatabase = false;
 				break;
@@ -99,50 +99,65 @@ void loop() {
 				// Received data which needs to be sent to the database
 				// Try to send the data
 				// Record the data if not sent
-				String reply;
-				if (linkServer.sendJson(payload, reply, header == Interconnect::DebugSendToServerKeepHeaders)) {
-					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Sent to server. Reply: ")) + reply);
+				ByteQueue reply;
+				if (linkServer.sendJson(payload.convertToString(), reply, header == Interconnect::DebugSendToServerKeepHeaders)) {
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Sent to server. Reply: ")) + reply.convertToString());
 				} else {
-					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Error sending to server. Reply: ")) + reply);
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Error sending to server. Reply: ")) + reply.convertToString());
 				}
 				break;
 			}
 
 			case Interconnect::SetWifiInfo:
-				if (WifiHelper::changeConnectionInfo(payload)) {
-					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Changed Wifi: ")));
+				if (WifiHelper::changeConnectionInfo(payload.convertToString())) {
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Changed Wifi: ")));
 				} else {
-					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Error changing wifi")));
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Error changing wifi")));
 				}
 				break;
 
 			case Interconnect::GetWifiInfo:
-				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Wifi info: ")) + WifiHelper::getInfoAsJson());
+				linkArduino.send(Interconnect::GeneralNotification, String(F("Wifi info: ")) + WifiHelper::getInfoAsJson());
 				break;
 
 			case Interconnect::SetServerAddress:
-				if (linkServer.changeAddress(payload)) {
-					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Server address changed to: ")) + payload);
+				if (linkServer.changeAddress(payload.convertToString())) {
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Server address changed to: ")) + payload.convertToString());
 				} else {
-					linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Error changing server address to: ")) + payload);
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Error changing server address to: ")) + payload.convertToString());
 				}
 				break;
 
 			case Interconnect::GetServerAddress:
-				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Server address: ")) + linkServer.getAddress());
+				linkArduino.send(Interconnect::GeneralNotification, String(F("Server address: ")) + linkServer.getAddress());
 				break;
 
 			case Interconnect::GetTime:
 				if (ntpClientValid) linkArduino.send(Interconnect::SetTime, String(ntpClient.getEpochTime()));
 				break;
 
-			case Interconnect::EchoESP8266:
-				linkArduino.sendForce(Interconnect::GeneralNotification, String(F("Echo: ")) + payload);
+			case Interconnect::EchoESP8266: {
+				String msg(F("Echo: "));
+				msg += payload.convertToString();
+				msg += " : expectSendToDatabase=";
+				msg += expectSendToDatabase;
+				msg += ", ntpClientValid=";
+				msg += ntpClientValid;
+				linkArduino.send(Interconnect::GeneralNotification, msg);
 				break;
+			}
 
 			default:
 				break;
 		}
+	} else {
+
+		// If here then there are no commands which need processing
+		// Update current time, but only if idle
+		if (!expectSendToDatabase && timerUpdateTimeClient.triggered(millis())) {
+			ntpClientValid |= ntpClient.update();
+		}
+
 	}
 }
 

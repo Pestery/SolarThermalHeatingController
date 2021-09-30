@@ -4,6 +4,7 @@
 // Include headers
 #include "misc.h"
 #include "date_time.h"
+#include "byte_queue.h"
 
 // Holds information about all sensors at a single moment in time.
 struct SensorRecord {
@@ -45,33 +46,33 @@ struct SensorRecord {
 	}
 
 	// Generate a JSON-string representation of the data within this class
-	String toJson() const {
-		String result;
+	ByteQueue toJson() const {
+		ByteQueue result;
 		toJson(result);
 		return result;
 	}
 
 	// Generate a JSON-string representation of the data within this class
 	// The generated JSON data will be added to the end of the string 'outAppend'
-	void toJson(String& outAppend) const {
+	void toJson(ByteQueue& outAppend) const {
 
-		outAppend += F("{\"Id\":");
-		outAppend += String(index);
+		outAppend.print(F("{\"Id\":"));
+		outAppend.print(index);
 
-		outAppend += F(",\"Date\":\"");
-		outAppend += dateTime.toString();
-		outAppend += '\"';
+		outAppend.print(F(",\"Date\":\""));
+		outAppend.print(dateTime.toString());
+		outAppend.print('\"');
 
-		outAppend += F(",\"Tin\":");
-		outAppend += String(temperatureIn);
+		outAppend.print(F(",\"Tin\":"));
+		outAppend.print(temperatureIn);
 
-		outAppend += F(",\"Tout\":");
-		outAppend += String(temperatureIn);
+		outAppend.print(F(",\"Tout\":"));
+		outAppend.print(temperatureIn);
 
-		outAppend += F(",\"Troof\":");
-		outAppend += String(temperatureIn);
+		outAppend.print(F(",\"Troof\":"));
+		outAppend.print(temperatureIn);
 
-		outAppend += '}';
+		outAppend.print('}');
 	}
 
 	// Read the value of all connected sensors and store it within this class
