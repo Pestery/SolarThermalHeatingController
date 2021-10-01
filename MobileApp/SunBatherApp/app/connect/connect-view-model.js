@@ -1,6 +1,5 @@
 import { Observable } from '@nativescript/core'
 import { Bluetooth } from '@nativescript-community/ble';
-import { selectedIndexProperty } from '@nativescript/core/ui/list-picker/list-picker-common';
 var bluetooth = new Bluetooth();
 
 // TODO 
@@ -34,11 +33,51 @@ function connectPageIntialize(viewModel, blueToothList) {
 // for some reason the only way to get the list to refresh is to create a new object array, this function does that
 function getBlueToothList(viewModel) {
     var blueToothList = viewModel.get('devicesFound');
-    var bluetoothRefreshList = []
+    var bluetoothRefreshList = [];
     for (var i = 0; i < blueToothList.length; i++) {
         bluetoothRefreshList[i] = { bluetoothID: blueToothList[i].bluetoothID, isSelected: false };
     }
     return bluetoothRefreshList;
+}
+
+function deviceFound(viewModel, peripheral) {
+    var blueToothList = viewModel.get('devicesFound');
+    console.log("bluetoottH: " + blueToothList.length)
+    console.log("bluetoottH Descrip: " + blueToothList)
+    var bluetoothRefreshList = [];
+    if (blueToothList.length != 0) {
+        console.log(blueToothList[0].bluetoothID.UUID)
+        for (var i = 0; i < blueToothList.length; i++) {
+            if (blueToothList[i].bluetoothID.UUID != peripheral.UUID){
+                bluetoothRefreshList[i] = { bluetoothID: peripheral, isSelected: false };
+            }
+        }
+    } else {
+        bluetoothRefreshList[0] = { bluetoothID: peripheral, isSelected: false };
+    }
+    console.log(bluetoothRefreshList[0])
+    viewModel.set('devicesFound', bluetoothRefreshList);
+}
+
+function scanStarted(viewModel) {
+    var intialiseList = [];
+    viewModel.set('devicesFound', intialiseList);
+    viewModel.set('showBluetoothList', true);
+    viewModel.set('findController', false);
+    viewModel.set('stopController', true);
+    viewModel.set('searchedDevices', true);
+    viewModel.set('deviceSelected', false);
+}
+
+function scanStopped(viewModel) {
+    viewModel.set('findController', true);
+    viewModel.set('stopController', false); // to remove
+    if (viewModel.get('devicesFound').length > 0) {
+        viewModel.set('showBluetoothList', true);
+    } else {
+        viewModel.set('showBluetoothList', false)
+        viewModel.set('searchedDevices', false);
+    }
 }
 
 function changeViewModel(viewModel) {
@@ -55,18 +94,19 @@ export function ConnectViewModel() {
     var blueToothList = [];
 
     viewModel.connectController = () => {
-        /*bluetooth.isBluetoothEnabled().then(enabled => {
+        bluetooth.isBluetoothEnabled().then(enabled => {
             console.log("Enabled? " + enabled)
             if (!enabled) {
                 alert("Please Turn on Bluetooth")
             } else {
-                viewModel.set('isBusy', true);
+                scanStarted(viewModel);
                 bluetooth.startScanning({
-                    filters: [{serviceUUID:'61fe'}],
+                    filters: [{deviceName:'HMSoft'}], // MY DEFAULT BLUETOOTH NAME
                     seconds: 4,
                     onDiscovered: function (peripheral) {
                         console.log("Periperhal found with UUID: " + peripheral.UUID );
                         console.log("Periperhal found with Name: " + peripheral.name );
+                        deviceFound(viewModel, peripheral);
                     }
                 }).then(function() {
                     console.log("scanning complete");
@@ -78,8 +118,8 @@ export function ConnectViewModel() {
             }
         }, error => {
             console.log(error);
-        });*/
-        for (var i = 0; i < 10; i++)
+        });
+        /*for (var i = 0; i < 10; i++)
         {
             blueToothList[i] = { bluetoothID: "Bluetooth Item: " + i, isSelected: false };        
         }
@@ -89,18 +129,19 @@ export function ConnectViewModel() {
         viewModel.set('findController', false);
         viewModel.set('stopController', true);
         viewModel.set('searchedDevices', true);
-        viewModel.set('deviceSelected', false);
+        viewModel.set('deviceSelected', false);*/
     }
     
     viewModel.stopScan = () => {
-        viewModel.set('findController', true);
+        /*viewModel.set('findController', true);
         viewModel.set('stopController', false); // to remove
         if (viewModel.get('devicesFound').length > 0) {
             viewModel.set('showBluetoothList', true);
         } else {
             viewModel.set('showBluetoothList', false)
             viewModel.set('searchedDevices', false);
-        }
+        }*/
+        scanStopped(viewModel);
         bluetooth.stopScanning().then(function() {
             console.log("scanning stopped");
         });

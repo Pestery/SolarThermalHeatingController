@@ -16,6 +16,13 @@ public:
 	// Update the Bluetooth interconnect
 	// This will send and receive any waiting data in the related buffers
 	void update() {
+		/*
+		while (Serial1.available()) {
+            uint8_t c = Serial1.read();
+            Serial.write(c);
+        }
+        return; //*/
+		//Serial.println("test");
 
 		// Update the interconnect
 		// This will send and receive any pending data

@@ -246,7 +246,6 @@ public:
 	// Returns false if no waiting messages
 	// Returns true if a message was extracted and placed in the 'out' parameters (may block if message is longer than receive buffer)
 	bool receive(Type& outHeader, String& outPayload) {
-
 		// Check if any messages are waiting
 		// Also check if the receive buffer is full
 		if ((m_receivedMessages == 0) && !m_recv.isFull()) return false;
@@ -256,6 +255,7 @@ public:
 
 		// Get the message header
 		uint8_t c = m_recv.pop();
+		//Serial.println(c);
 		if (c == '\n') {
 			m_receivedMessages--;
 			return false;
