@@ -35,6 +35,7 @@ function graphPageIntialize(viewModel) {
   viewModel.set('graphOptionSelected', 1)
   var graphOptionList = graphOptions();
   graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
+  //viewModel.set('graphSelected', graphOptionList[1].nameAbbreviated); // needed so a default graph type is selected
   viewModel.set('graphOptions', graphOptionList);
 
   // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done

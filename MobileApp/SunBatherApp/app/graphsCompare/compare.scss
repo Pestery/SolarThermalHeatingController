@@ -41,6 +41,7 @@
     .graph-header {
         @extend .field-header;
         background-color: #1e73be;
+        color: white;
     }
 
     .graph-stats-title {
@@ -91,6 +92,8 @@
         margin-top: 3;
         background-color: #1e73be;
         color: white;
+        border-width: 1;
+        border-color: white;
     }
 
     .list-data {
