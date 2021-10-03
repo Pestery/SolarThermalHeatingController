@@ -18,7 +18,7 @@
                     <ListView items="{{ devicesFound }}" itemTap="{{ onItemTap }}">
                         <ListView.itemTemplate>
                             <FlexboxLayout flexDirection="row">
-                                <Label text="{{ bluetoothID }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>
+                                <Label text="{{ bluetoothID.name }}"  verticalAlignment="center" style="width: 100%" class="{{ isSelected ? 'active' : 'nonActive' }}"/>
                             </FlexboxLayout>
                         </ListView.itemTemplate>
                     </ListView>
@@ -28,9 +28,6 @@
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="search-logo" > 
                     <ActivityIndicator busy="{{ isConnecting }}" />
-                </GridLayout>
-                <GridLayout rows="*" columns="*" class="button-connect"  visibility="{{ showBluetoothList ? 'visible' : 'collapse'}}">
-                    <Label col="0" text="Disconnect" textWrap="true" tap="{{ disConnect }}"/>
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="wifi-settings" visibility="{{ showWifiInput ? 'visible' : 'collapse'}}">
                     <Label col="0" text="Enter Wifi details for controller" textWrap="true"/>
@@ -42,14 +39,16 @@
                     <TextField row="0" hint="Enter Password" text="{{ WifiPassword }}" class="wifi-input" textWrap="true" returnPress="{{ wifiCredUpdate }}" autocorrect="false" autocapitalizationType="none" secure="true"/>
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="button-connect" visibility="{{ showWifiInput ? 'visible' : 'collapse'}}" >
-                    <Label col="0" text="Save" textWrap="true" tap="{{ wifiPasswordUpdate }}"/>
+                    <Label col="0" text="Save Details" textWrap="true" tap="{{ wifiPasswordUpdate }}"/>
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="search-logo" > 
                     <ActivityIndicator busy="{{ isConnectingWifi }}" />
                 </GridLayout>
-                <GridLayout rows="*,*" columns="*" class="test"> 
-                    <Label row="0" class="fa" text="&#xf057;"></Label>                     
-                    <Label row="1" class="fa" text="&#xf015;"></Label> 
+                <GridLayout rows="*" columns="*" class="success-logo" >
+                    <Label text="&#xf057;" class="fas" />                    
+                </GridLayout>
+                <GridLayout rows="*" columns="*" class="button-disconnect" visibility="{{ showWifiInput ? 'visible' : 'collapse'}}" > 
+                    <Label col="0" text="Disconnect From Device" textWrap="true" tap="{{ disConnect }}"/>
                 </GridLayout>
             </StackLayout>
         </StackLayout>

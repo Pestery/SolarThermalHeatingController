@@ -1,6 +1,7 @@
-import { Observable } from '@nativescript/core'
-import { Bluetooth } from '@nativescript-community/ble';
-var bluetooth = new Bluetooth();
+import { Observable, ApplicationSettings } from '@nativescript/core'
+import { Bluetooth, getBluetoothInstance } from '@nativescript-community/ble';
+//var bluetooth = new Bluetooth();
+var bluetooth = getBluetoothInstance();
 
 // TODO 
 // Add found counter
@@ -13,21 +14,7 @@ var bluetooth = new Bluetooth();
 // write to device
 // Disconnect
 
-function connectPageIntialize(viewModel, blueToothList) {
-    viewModel.set('headerSelected', 4); // needed for underline in header
-    viewModel.set('findController', true);
-    viewModel.set('stopController', false);
-    viewModel.set('foundDevicesCount', 0);
-    viewModel.set('showBluetoothList', false);
-    viewModel.set('devicesFound', blueToothList);
-    viewModel.set('searchedDevices', false);
-    viewModel.set('deviceSelected', false);
-    viewModel.set('showWifiInput', false);
-    viewModel.set('isConnecting', false);
-    viewModel.set('WifiName', "");
-    viewModel.set('WifiPassword', "");
-    viewModel.set('isConnectingWifi', false);
-}
+
 
 // This function has some uneccesary steps in it such as the for loop putting the array into another arry
 // for some reason the only way to get the list to refresh is to create a new object array, this function does that
@@ -40,22 +27,37 @@ function getBlueToothList(viewModel) {
     return bluetoothRefreshList;
 }
 
-function deviceFound(viewModel, peripheral) {
+// finds the selected item
+function findSelectedDevice(viewModel) {
     var blueToothList = viewModel.get('devicesFound');
-    console.log("bluetoottH: " + blueToothList.length)
-    console.log("bluetoottH Descrip: " + blueToothList)
-    var bluetoothRefreshList = [];
-    if (blueToothList.length != 0) {
-        console.log(blueToothList[0].bluetoothID.UUID)
-        for (var i = 0; i < blueToothList.length; i++) {
-            if (blueToothList[i].bluetoothID.UUID != peripheral.UUID){
-                bluetoothRefreshList[i] = { bluetoothID: peripheral, isSelected: false };
-            }
+    var bluetoothDevice = [{ isSelected: false }];
+    for (let blueToothDevices of blueToothList) {
+        if (blueToothDevices.isSelected) { 
+            return blueToothDevices;
         }
+    }
+    return bluetoothDevice;
+}
+
+// stores devices found in an array
+function deviceFound(viewModel, peripheral) {
+    // gets devices found array
+    var blueToothList = viewModel.get('devicesFound');
+    var bluetoothRefreshList = [];
+
+    // if none found yet, initialise array
+    if (blueToothList.length != 0) {
+        // check if already exists
+        if (!blueToothList.some(l => l.bluetoothID.UUID == peripheral.UUID)) {
+            blueToothList.push({ bluetoothID: peripheral, isSelected: false });
+        } 
+        bluetoothRefreshList = blueToothList;
     } else {
         bluetoothRefreshList[0] = { bluetoothID: peripheral, isSelected: false };
     }
-    console.log(bluetoothRefreshList[0])
+
+    // add back to view model, BLUETOOTHREFRESHLIST IS REQUIRED TO REFRESH LISTVIEW IN XML
+    // it is unnesseasry but its the only way to refresh it
     viewModel.set('devicesFound', bluetoothRefreshList);
 }
 
@@ -80,18 +82,68 @@ function scanStopped(viewModel) {
     }
 }
 
-function changeViewModel(viewModel) {
+function stopScanning(viewModel) {
+    bluetooth.stopScanning().then(function() {
+        scanStopped(viewModel);
+        console.log("scanning stopped");
+    });
+}
+
+function wifiDetailsViewModel(viewModel) {
+    viewModel.set('WifiName', "");
+    viewModel.set('WifiPassword', "");
     viewModel.set('isConnecting', false);
     viewModel.set('showWifiInput', true);
     viewModel.set('findController', false);
-    viewModel.set('stopController', false); // to remove
-    console.log('function entered')
+    viewModel.set('showBluetoothList', false);
+}
+
+function updateStoredDevice(appSet, pUUID, sUUID, cUUID) {
+    appSet.setString("pUUID", pUUID);
+    appSet.setString("sUUID", sUUID);
+    appSet.setString("cUUID", cUUID);
+}
+
+function searchBluetoothViewModel(viewModel) {
+    var blueToothList = [];
+    viewModel.set('findController', true);
+    viewModel.set('showBluetoothList', false);
+    viewModel.set('devicesFound', blueToothList);
+    viewModel.set('searchedDevices', false);
+    viewModel.set('deviceSelected', false);
+    viewModel.set('showWifiInput', false);
+    viewModel.set('isConnecting', false);
+    viewModel.set('isConnectingWifi', false);
+}
+
+function connectPageIntialize(viewModel, isConnected) {
+    var getPUUID = isConnected.getString("pUUID"); // gets stored string
+    viewModel.set('headerSelected', 4); // needed for underline in header
+    console.log(getPUUID)
+    if (getPUUID != undefined && getPUUID != "") {
+        bluetooth.isConnected({ 
+            UUID: getPUUID
+            }).then(connected => {
+                console.log("Connected? " + connected)
+                if (connected) {
+                    wifiDetailsViewModel(viewModel);
+                } else {
+                    searchBluetoothViewModel(viewModel);
+                }
+            }, error => {
+                console.log(error);
+                searchBluetoothViewModel(viewModel);
+            });
+    } else {
+        searchBluetoothViewModel(viewModel);
+    }
 }
 
 export function ConnectViewModel() {
     const viewModel = new Observable();
-    connectPageIntialize(viewModel, blueToothList);
-    var blueToothList = [];
+    const appSet = ApplicationSettings;
+    const delay = ms => new Promise(res => setTimeout(res, ms)); // for delays
+    connectPageIntialize(viewModel, appSet);
 
     viewModel.connectController = () => {
         bluetooth.isBluetoothEnabled().then(enabled => {
@@ -110,41 +162,19 @@ export function ConnectViewModel() {
                     }
                 }).then(function() {
                     console.log("scanning complete");
-                    viewModel.set('isBusy', false);
+                    scanStopped(viewModel);
                 }, function (err) {
                     console.log("error while scanning: " + err);
-                    viewModel.set('isBusy', false);
+                    scanStopped(viewModel);
                 });
             }
         }, error => {
             console.log(error);
         });
-        /*for (var i = 0; i < 10; i++)
-        {
-            blueToothList[i] = { bluetoothID: "Bluetooth Item: " + i, isSelected: false };        
-        }
-        console.log(blueToothList)
-        viewModel.set('devicesFound', blueToothList);
-        viewModel.set('showBluetoothList', true);
-        viewModel.set('findController', false);
-        viewModel.set('stopController', true);
-        viewModel.set('searchedDevices', true);
-        viewModel.set('deviceSelected', false);*/
     }
     
     viewModel.stopScan = () => {
-        /*viewModel.set('findController', true);
-        viewModel.set('stopController', false); // to remove
-        if (viewModel.get('devicesFound').length > 0) {
-            viewModel.set('showBluetoothList', true);
-        } else {
-            viewModel.set('showBluetoothList', false)
-            viewModel.set('searchedDevices', false);
-        }*/
-        scanStopped(viewModel);
-        bluetooth.stopScanning().then(function() {
-            console.log("scanning stopped");
-        });
+        stopScanning(viewModel);
     }
 
     viewModel.onItemTap = (args) => {
@@ -155,18 +185,22 @@ export function ConnectViewModel() {
     }
 
     viewModel.connect = () => {
-        viewModel.set('isConnecting', true);
-        viewModel.set('showBluetoothList', false);
+        var uuidID = findSelectedDevice(viewModel);
+        //console.log(uuidID);
 
-        if (viewModel.get('deviceSelected')) {
+        if (uuidID.isSelected) {
+            stopScanning(viewModel);
             console.log('Connecting...');
-            changeViewModel(viewModel);
-            viewModel.set('wifiName', "Enter Password for 'Perhaps'");
+            viewModel.set('isConnecting', true);
+
             bluetooth.connect({
-                UUID: 'C0:28:8D:4A:BC:AA',
+                UUID: uuidID.bluetoothID.UUID,
                 onConnected: function (peripheral) {
                     console.log("Periperhal connected with UUID: " + peripheral.UUID);
-                    //changeViewModel(viewModel);
+                    console.log("sUUDD: " + peripheral.services[2].UUID)
+                    console.log("CUUDD: " + peripheral.services[2].characteristics[0].UUID)
+                    updateStoredDevice(appSet, peripheral.UUID, peripheral.services[2].UUID, peripheral.services[2].characteristics[0].UUID);
+                    wifiDetailsViewModel(viewModel);
                     // the peripheral object now has a list of available services:
                     peripheral.services.forEach(function(service) {
                         console.log("service found: " + JSON.stringify(service));
@@ -180,34 +214,49 @@ export function ConnectViewModel() {
     }
 
     viewModel.disConnect = () => {
-        console.log('Disconnecting...')
+        console.log(appSet.getString("pUUID"));
+        var getUUID = appSet.getString("pUUID");
+
         bluetooth.disconnect({
-            UUID: 'C0:28:8D:4A:BC:AA'
+            UUID: getUUID
         }).then(function() {
             console.log("disconnected successfully");
+            updateStoredDevice(appSet, "", "", "");
+            searchBluetoothViewModel(viewModel);
         }, function (err) {
             // in this case you're probably best off treating this as a disconnected peripheral though
             console.log("disconnection error: " + err);
         });
     }
 
-    viewModel.wifiPasswordUpdate = () => {
+    viewModel.wifiPasswordUpdate = async () => {
         var name = viewModel.get('WifiName');
         var Password = viewModel.get('WifiPassword');
-        viewModel.set('isConnectingWifi', true);
+        var transmissionString = "w" + name + "+" + Password + "\n";
+        var pUUID = appSet.getString("pUUID");
+        var sUUID = appSet.getString("sUUID");
+        var cUUID = appSet.getString("cUUID");
 
-        console.log(name)
-        console.log(Password)
+        viewModel.set('isConnectingWifi', true);
+        var i = 0;
+        console.log(transmissionString);
         bluetooth.write({
-            peripheralUUID: '34134-5453-4453-54545',
-            serviceUUID: '180e',
-            characteristicUUID: '3424-45234-34324-2343',
-            value: [1] 
-          }).then(function(result) {
-            console.log("value written");
-          }, function (err) {
-            console.log("write error: " + err);
-          });
+            peripheralUUID: pUUID,
+            serviceUUID: sUUID,
+            characteristicUUID: cUUID,
+            value: transmissionString
+            }).then(async function(result) {
+                console.log("value written");
+                // USEFUL WHEN DOING FEED BACK
+                /*while (i<5) {
+                    i++
+                    console.log('attempt: ' + i);
+                    await delay(2000)
+                }*/
+            }, function (err) {
+                console.log("write error: " + err);
+        });
+
     }
 
     return viewModel
