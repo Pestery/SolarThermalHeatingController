@@ -17,11 +17,6 @@ namespace SunBatherAPI.Models
         public class Record
         {
             /// <summary>
-            /// Record index as described by the controller
-            /// </summary>
-            public int Id { get; set; }
-
-            /// <summary>
             /// Date and time when the record was created
             /// </summary>
             public long Date { get; set; }

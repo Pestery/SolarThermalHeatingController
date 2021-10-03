@@ -8,6 +8,7 @@
 #include "arduino_stream.h"
 #include "arduino_pins.h"
 #include "arduino_string.h"
+#include "arduino_misc.h"
 
 // Include headers which contain test code
 #include "test_misc.h"
@@ -27,6 +28,53 @@ std::stringstream& exceptionToStream(const std::exception& error, std::stringstr
 /* Main function */
 int main() {
 	try {
+
+
+
+		// Define values
+		uint32_t min = 0;
+		uint32_t max = ~min;
+		uint32_t id;
+		String filename;
+
+		for (int i=0; i<100; i++) {
+		uint32_t highestWhichExists = i;
+
+		// Find file
+		do {
+
+			// Get next number to check
+			id = min + ((max - min) / 2);
+
+			// Build file name
+			filename = F("records/");
+			filename += id;
+			filename += F(".csv");
+
+			//std::cout << "min=" << min << ", id=" << id << ", max=" << max << std::endl;
+
+			// Check if file exists
+			// Adjust search range accordingly
+			if (id <= highestWhichExists) {
+				min = id + 1;
+			} else {
+				max = id;
+			}
+
+		} while (min != max);
+
+		std::cout << "min=" << min << ", id=" << id << ", max=" << max << ", highestWhichExists=" << (highestWhichExists==(min-1)) << std::endl;
+	}
+
+		return EXIT_SUCCESS;
+
+
+
+
+
+
+
+
 		UnitTest::runAllTests();
 		return EXIT_SUCCESS;
 	} catch(const std::exception& e) {

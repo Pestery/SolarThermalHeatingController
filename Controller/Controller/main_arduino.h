@@ -5,9 +5,12 @@
 #define VERBOSE_INTERLINK 0
 
 // Include headers
-//#include <math.h>
+#include <SoftwareSerial.h>
+#include <SPI.h>
+#include <SD.h>
+#include "board_config.h"
 #include "date_time.h"
-#include "sensor_record.h"
+#include "sensor_log.h"
 #include "timer.h"
 #include "interconnect.h"
 #include "state_flags.h"
@@ -18,11 +21,13 @@
 // Current controller settings and status
 Settings settings;
 
+// Sensor log
+SensorLog sensorLog;
+
 // Sensor record buffer
 constexpr int           sensorRecordMax = 8;
 int                     sensorRecordCount = 0;
 SensorRecord            sensorRecord[sensorRecordMax];
-SensorRecord::IndexType sensorRecordIndex = 1;
 
 // Controller timers
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
@@ -38,9 +43,10 @@ char sendToDatabaseSyncKey = '0';
 
 // Interconnect buffers
 // Used for managing data transfer between different components, such as the Wifi or Bluetooth modules
-Interconnect          linkWifi(Serial3);
-Interconnect          linkPC(Serial);
-BluetoothInterconnect linkBT(Serial1);
+Interconnect          linkPC(SERIAL_PC);
+Interconnect          linkWifi(SERIAL_WIFI);
+BluetoothInterconnect linkBT(SERIAL_BLUETOOTH);
+
 
 // A list of interconnects
 // Used when checking who sent a message
@@ -55,16 +61,51 @@ enum class LinkId {
 // This function is used to setup all data before loop() is called
 void setup() {
 
-	// Setup serial connections
-	Serial.begin(SERIAL_BITRATE); // For PC connection
-	Serial3.begin(SERIAL_BITRATE); // For ESP8266 connection
-	Serial1.begin(9600); // For Bluetooth module
+	// Setup serial port for PC connection
+	Serial.begin(SERIAL_BITRATE);
+	while (!Serial) {}
+	Serial.println();
+
+	// Setup serial port for ESP8266 connection
+	SERIAL_WIFI.begin(SERIAL_BITRATE); // For ESP8266 connection
+	while (!SERIAL_WIFI) {}
+
+	// Setup serial port for Bluetooth module connection
+	SERIAL_BLUETOOTH.begin(9600); // For Bluetooth module
+	while (!SERIAL_BLUETOOTH) {}
 
 	// Initialise settings data
+	Serial.print(F("Loading settings..."));
 	settings.init();
+	Serial.println(F("Done"));
 
-	// Debug message
-	//Serial.println(F("Arduino starting..."));
+	// Setup SD card functionality
+	Serial.print(F("Initialising SD card..."));
+	if (!SD.begin(SD_PIN_CS)) {
+		Serial.println(F("Failed"));
+		Serial.println(F("Is a card inserted? Is the wiring and pin select correct?"));
+		while (true) {}
+	} else {
+		Serial.println(F("Done"));
+	}
+
+	// Setup the sensor log
+	Serial.print(F("Initialising sensor log..."));
+	if (!sensorLog.begin()) {
+		Serial.println(F("Failed"));
+		while (true) {}
+	} else {
+		Serial.println(F("Done"));
+	}
+
+	// Output a list of files for debugging
+	//Serial.println(F("List of files on the SD card:"));
+	//SensorLog::listAllFiles();
+	//Serial.println();
+
+	// Final message
+	Serial.println(F("Arduino setup finished."));
+	Serial.println();
 }
 
 // Runs repeatedly once the Arduino has finished initialisation
@@ -81,10 +122,15 @@ void loop() {
 	if (timerReadSensors.triggered(currentTime)) {
 		if ((sensorRecordCount < sensorRecordMax)) {
 			if (timeKeeper.isValid()) {
+
+				sensorLog.record(timeKeeper);
+
+				/*
 				sensorRecord[sensorRecordCount].readAll();
 				sensorRecord[sensorRecordCount].index = sensorRecordIndex++;
 				sensorRecord[sensorRecordCount].dateTime = timeKeeper.current();
 				sensorRecordCount++;
+				//*/
 			}
 		}
 	}
@@ -126,6 +172,75 @@ void loop() {
 	// Process any received message
 	if (sender != LinkId::None) {
 		switch (header) {
+
+			case Interconnect::ListFiles:
+				sensorLog.listAllFiles();
+				break;
+			case Interconnect::ReadFile:
+				if (payload.available()) {
+					String s(payload.convertToString());
+					Serial.print(F("Read file: "));
+					Serial.print(s);
+					Serial.println(F("..."));
+					bool success = false;
+					File f = SD.open(s, FILE_READ);
+					if (f) {
+						while (f.available()) Serial.write(f.read());
+						f.close();
+					}
+					Serial.println();
+					Serial.println(F(" --- End of file ---"));
+				} else {
+					Serial.print(F("Usage: "));
+					Serial.print((char)header);
+					Serial.println(F("[filename]"));
+				}
+				break;
+			case Interconnect::DeleteFile:
+				if (payload.available()) {
+					String s(payload.convertToString());
+					Serial.print(F("Removing file: "));
+					Serial.print(s);
+					Serial.print(F("..."));
+					bool success = false;
+					File f = SD.open(s);
+					if (f) {
+						if (f.isDirectory()) {
+							f.close();
+							success = SD.rmdir(s);
+						} else {
+							f.close();
+							success = SD.remove(s);
+						}
+					}
+					Serial.println(success ? F("Done") : F("Failed"));
+				} else {
+					Serial.print(F("Usage: "));
+					Serial.print((char)header);
+					Serial.println(F("[filename]"));
+				}
+				break;
+			case Interconnect::GetRecord:
+				if (payload.available()) {
+					DateTime dt(payload.convertToString());
+					SensorRecord r[4];
+					unsigned found = sensorLog.fetch(dt, r, 4);
+					Serial.print(F("Found records: "));
+					Serial.println(found);
+					for (unsigned i=0; i<found; i++) {
+						Serial.print(" r[");
+						Serial.print(i);
+						Serial.print("]: ");
+						Serial.println(r[i].toCsv());
+					}
+				} else {
+					Serial.print(F("Usage: "));
+					Serial.print((char)header);
+					Serial.println(F("[dateTime]"));
+				}
+				break;
+
+
 
 			case Interconnect::SendToDatabaseAllow:
 				if (sender == LinkId::Wifi) {

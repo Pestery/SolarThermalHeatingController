@@ -9,37 +9,64 @@
 // Holds information about all sensors at a single moment in time.
 struct SensorRecord {
 
-	// The type of value used for the sensor index
-	typedef uint32_t IndexType;
-
 	// Data
-	IndexType index;
 	DateTime dateTime;
 	float temperatureIn;
 
 	// Reset all values to default
 	void reset() {
-		index = 0;
 		dateTime.reset();
 		temperatureIn = 0;
 	}
 
 	// Initialise this class by decoding a CSV-string representation of the data.
 	// The string should have been generated using a previous call to toString().
-	void fromCSV(const String& data) {
+	// Returns true on success, or false on failure
+	bool fromCsv(const String& data) {
+		bool result = true;
 		int start = 0;
-		index = Misc::getNextSubString(data, start).toInt();
-		dateTime = DateTime(Misc::getNextSubString(data, start));
-		temperatureIn = Misc::getNextSubString(data, start).toFloat();
+		String s;
+
+		// Enter a loop just for the scope
+		do {
+
+			// Get dateTime
+			s = Misc::getNextSubString(data, start, ',');
+			s.trim();
+			if (s.length() == 0) break;
+			dateTime = DateTime(s);
+			if (dateTime == 0) break;
+
+			// Get temperatureIn
+			s = Misc::getNextSubString(data, start, ',');
+			s.trim();
+			if (s.length() == 0) break;
+			temperatureIn = s.toFloat();
+			if (temperatureIn == 0) break;
+
+			// If here then success
+			return true;
+		} while (false);
+
+		// If here then there was an error
+		reset();
+		return false;
+	}
+
+	// Generate the headers for the CSV-string representation of the data within this class
+	static String toCsvHeaders() {
+		return String(F("DateTime,TempInput,TempOutput,TempRoof"));
 	}
 
 	// Generate a CSV-string representation of the data within this class
-	String toCSV() const {
+	String toCsv() const {
 		String result;
 		result.reserve(20); // Adjust this to best guess of number of bytes required
-		result = String(index);
-		result += ',';
 		result += dateTime.toString();
+		result += ',';
+		result += String(temperatureIn);
+		result += ',';
+		result += String(temperatureIn);
 		result += ',';
 		result += String(temperatureIn);
 		return result;
@@ -55,9 +82,6 @@ struct SensorRecord {
 	// Generate a JSON-string representation of the data within this class
 	// The generated JSON data will be added to the end of the string 'outAppend'
 	void toJson(ByteQueue& outAppend) const {
-
-		outAppend.print(F("{\"Id\":"));
-		outAppend.print(index);
 
 		outAppend.print(F(",\"Date\":\""));
 		outAppend.print(dateTime.toString());
@@ -97,17 +121,20 @@ struct SensorRecord {
 		return temp - 273.15;
 	}
 
+	// Boolean cast operator
+	// Returns true if the record is valid, or false if not
+	operator bool() const {return dateTime != 0;}
+
 	// Constructors and operators
 	SensorRecord() {}
 	SensorRecord(const String& data) {
-		fromCSV(data);
+		fromCsv(data);
 	}
 	SensorRecord(const SensorRecord& rhs) {
 		*this = rhs; // Redirect to below: operator = (...)
 	}
 	SensorRecord& operator = (const SensorRecord& rhs) {
 		if (this != &rhs) {
-			index = rhs.index;
 			dateTime = rhs.dateTime;
 			temperatureIn = rhs.temperatureIn;
 		}

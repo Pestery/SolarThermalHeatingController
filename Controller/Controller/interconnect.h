@@ -2,21 +2,8 @@
 #define INTERCONNECT_H
 
 // Include headers
+#include "board_config.h"
 #include "byte_queue.h"
-
-// Bit-rate for serial communication between Arduino, ESP8266 and PC
-// Must be kept the same for all serial connections because otherwise buffer overflows may
-// occur when forwarding from one serial to another, if one bit-rate is higher than the another
-#define SERIAL_BITRATE 9600
-
-// Interconnect buffer sizes for different connections and direction of connections
-// This should be set to reflect the expected maximum size of message to be sent on that link
-#define INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266   128
-#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 64
-#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        64
-#define INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO   64
-#define INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO 32
-#define INTERCONNECT_BUFFER_PC_TO_ARDUINO        32
 
 // Used to make communication between the Arduino and ESP8266 a bit easier
 class Interconnect {
@@ -122,6 +109,13 @@ public:
 		// Payload is the (probably JSON) message to be sent to the server
 		DebugSendToServerKeepHeaders = 'T',
 		DebugSendToServer = 't',
+
+
+		ListFiles = 'l',
+		ReadFile = 'L',
+		DeleteFile = 'D',
+		GetRecord = 'R',
+
 
 		// A debug command used to echo back data to the source
 		// Payload is the test message

@@ -6,6 +6,7 @@
 #include <EEPROM.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include "board_config.h"
 #include "interconnect.h"
 #include "state_flags.h"
 #include "server_link.h"

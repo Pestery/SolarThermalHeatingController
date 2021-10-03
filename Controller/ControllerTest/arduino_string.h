@@ -31,7 +31,14 @@ public:
 	String& operator = (const String& rhs) = default;
 
 	String& operator += (char rhs) {m_data += rhs; return *this;}
-	String& operator += (int rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (int8_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (int16_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (int32_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (int64_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (uint8_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (uint16_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (uint32_t rhs) {m_data += std::to_string(rhs); return *this;}
+	String& operator += (uint64_t rhs) {m_data += std::to_string(rhs); return *this;}
 	String& operator += (const char* rhs) {m_data += rhs; return *this;}
 	String& operator += (const std::string& rhs) {m_data += rhs; return *this;}
 	String& operator += (const String& rhs) {m_data += rhs.m_data; return *this;}
