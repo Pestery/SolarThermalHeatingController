@@ -6,6 +6,7 @@
 #include <SD.h>
 #include "sensor_record.h"
 #include "time_keeper.h"
+#include "byte_queue.h"
 
 // Holds information about all sensors at a single moment in time.
 class SensorLog {
@@ -16,7 +17,43 @@ public:
 
 	// Maximum allowed file size
 	// When a file exceeds this size a new file will be started
-	static constexpr unsigned long maxFileSize = 10 * 1024 * 1024; // Size in bytes
+	static constexpr uint32_t maxFileSize = 10ul * 1024ul * 1024ul; // Size in bytes
+
+	// Get the DateTime of the last created record
+	DateTime lastCreated() const {
+		return m_lastCreated;
+	}
+
+	// Get or set the DateTime of the last record which was successfully uploaded to the server
+	void lastUploaded(DateTime dt) {
+		m_lastUploaded = (dt > 0) ? dt : DateTime(1);
+	}
+	DateTime lastUploaded() const {
+		m_lastUploaded;
+	}
+
+	// Check if an upload is required
+	// Returns true if there is any data which has not yet been uploaded, or false if everything is already uploaded
+	bool isUploadRequired() const {
+		return m_lastCreated > m_lastUploaded;
+	}
+
+	// Check if the last-uploaded value has been set
+	// Returns true if it has been set, or false if not yet
+	bool lastUploadedIsSet() const {
+		return m_lastUploaded > 0;
+	}
+
+	// Update the sensor log using a key and value pair
+	// Returns true if the key-value was used, or false if it does not apply to this class
+	bool updateWithKeyValue(String& key, String& value) {
+		if (key == F("\"lastRecord\"")) {
+			lastUploaded(DateTime(value));
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	// Generate a new record and store it on the SD card
 	bool record(TimeKeeper& timeKeeper) {
@@ -31,7 +68,7 @@ public:
 
 		// Save record on SD card
 		String fileName = fileNameFromId(m_fileId);
-		File f = SD.open(fileName, FILE_WRITE);
+		File f = SD.open(fileName, O_READ | O_WRITE | O_CREAT);
 		if (f) {
 
 			// Check if the file has reached the maximum size allowed
@@ -42,25 +79,20 @@ public:
 
 				// Increment file ID and open a new file
 				fileName = fileNameFromId(++m_fileId);
-				f = SD.open(fileName, FILE_WRITE);
+				f = SD.open(fileName, O_READ | O_WRITE | O_CREAT);
 			}
 
 			// Check that file is still open
 			// Might have got closed in previous section
 			if (f) {
 
-				// Check if the file is empty
-				// If so then the file must be new and will need headers added
-				String header = SensorRecord::toCsvHeaders();
-				if (f.size() < (header.length() + 1)) {
-					f.seek(0);
-					f.println(header);
-				} else {
+				// Check if the file is empty or the last record is invalid
+				// In either case, assume the whole file is garbage and start again
+				if ((f.size() == 0) || !getRecordLast(f)) {
 
-					// Move to just after the previous newline character
-					// This will ensure that if the Arduino lost power part way through saving
-					// then the partly completed line will be replaced with this new data
-					moveToPreviousNewLine(f);
+					// Move to start of file and write headers
+					f.seek(0);
+					f.println(SensorRecord::toCsvHeaders());
 				}
 
 				// Save the sensor record
@@ -68,8 +100,18 @@ public:
 
 				// Close file
 				f.close();
+
+				// Record time of new record
+				// Return success
+				m_lastCreated = r.dateTime;
+				return true;
 			}
+		} else {
+			Serial.println("Failed to open file");
 		}
+
+		// If here the return failure
+		return false;
 	}
 
 	// Get a number of records from the SD card
@@ -116,6 +158,38 @@ public:
 		return found;
 	}
 
+	// Add a number of not-yet-uploaded records to the provided buffer
+	// The records will be uploaded in the form of a JSON array
+	void fetchForUpload(ByteQueue& outBuffer, int maxRecordsToAdd = 4) {
+
+		// Error check
+		if (maxRecordsToAdd < 1) maxRecordsToAdd = 1;
+
+		// Add start-of-array marker
+		outBuffer.print('[');
+
+		// Get some records to upload
+		SensorRecord records[maxRecordsToAdd];
+		unsigned found = fetch(m_lastUploaded + DateTime::Type(1), records, maxRecordsToAdd);
+		if (found > 0) {
+
+			// Loop through found records
+			bool anythingAdded = false;
+			for (unsigned i=0; i<found; i++) {
+
+				// If the record is newer than the last uploaded, then add it to the buffer
+				if (records[i].dateTime > m_lastUploaded) {
+					if (anythingAdded) outBuffer.print(',');
+					records[i].toJson(outBuffer);
+					anythingAdded = true;
+				}
+			}
+		}
+
+		// Add end-of-array marker
+		outBuffer.print(']');
+	}
+
 	// List all files on the SD card
 	static void listAllFiles() {
 		File f = SD.open("/");
@@ -160,16 +234,47 @@ public:
 		// New records will be added to this file
 		m_fileId = latestFileId();
 
+		// Get the last record from within the file, if any
+		// If the file does not contain any records then erase it and move to the previous file, if any
+		while(true) {
+
+			// Try to get record from latest file
+			SensorRecord sr = getRecordLast(m_fileId);
+			if (sr) {
+
+				// Record exists
+				// Record time and exit loop
+				m_lastCreated = sr.dateTime;
+				break;
+
+			} else {
+
+				// File does not contain any records, so delete it
+				SD.remove(fileNameFromId(m_fileId));
+				if (m_fileId > 1) {
+
+					// Move to the previous file
+					m_fileId--;
+
+				} else {
+
+					// There are no previous files
+					// Use a default time and exit loop
+					m_lastCreated = 0;
+					break;
+				}
+			}
+		}
+
 		// Return success
 		return true;
 	}
 
 	// Default constructor
 	SensorLog() :
-		m_lastUploaded(0) {
-
-		// Zero the memory used for the loaded records
-		memset(m_record, 0, sizeof(SensorRecord) * maxLoadedRecords);
+		m_lastUploaded(0),
+		m_lastCreated(0),
+		m_fileId(1) {
 	}
 
 private:
@@ -180,7 +285,7 @@ private:
 
 		// Get current position
 		// If already at the start of the file then exit here
-		unsigned long p = f.position();
+		uint32_t p = f.position();
 		if (p == 0) return;
 
 		// Check if the cursor is at the end of the file
@@ -212,6 +317,7 @@ private:
 
 	// Read the next line from the file
 	// If the line does not end with a newline character then it will be treated as incomplete and not returned
+	// Leaves the file cursor on the next line after the line
 	String readLine(File& f) {
 		String s;
 		int c;
@@ -224,7 +330,8 @@ private:
 	}
 
 	// Get the first record from within a given file
-	SensorRecord getRecordFirst(uint32_t fileId, unsigned long* outPosition = nullptr) {
+	// Leaves the file cursor on the next line after the record
+	SensorRecord getRecordFirst(uint32_t fileId, uint32_t* outPosition = nullptr) {
 		File f = SD.open(fileNameFromId(fileId));
 		SensorRecord out;
 		out.dateTime = 0;
@@ -234,7 +341,7 @@ private:
 		}
 		return out;
 	}
-	SensorRecord getRecordFirst(File& f, unsigned long* outPosition = nullptr) {
+	SensorRecord getRecordFirst(File& f, uint32_t* outPosition = nullptr) {
 		SensorRecord sr;
 
 		// Move to start of file
@@ -259,7 +366,8 @@ private:
 	}
 
 	// Get the last record from within a given file
-	SensorRecord getRecordLast(uint32_t fileId, unsigned long* outPosition = nullptr) {
+	// Leaves the file cursor on the next line after the record
+	SensorRecord getRecordLast(uint32_t fileId, uint32_t* outPosition = nullptr) {
 		File f = SD.open(fileNameFromId(fileId));
 		SensorRecord out;
 		out.dateTime = 0;
@@ -269,12 +377,12 @@ private:
 		}
 		return out;
 	}
-	SensorRecord getRecordLast(File& f, unsigned long* outPosition = nullptr) {
+	SensorRecord getRecordLast(File& f, uint32_t* outPosition = nullptr) {
 		SensorRecord sr;
 
 		// Move to end of file
 		// Then move backward at avoid any newline and carriage return characters
-		unsigned long p = f.size();
+		uint32_t p = f.size();
 		while (p > 0) {
 			f.seek(--p);
 			int c = f.peek();
@@ -375,7 +483,7 @@ private:
 	// Get a record from a file using a DateTime
 	// If an exact match for the DateTime is not found then get the closest value
 	// Return zero if found, -1 if the DateTime is before the first record (copy first record), +1 if the DateTime is after the last record (copy last record)
-	int getRecord(uint32_t fileId, DateTime dt, SensorRecord& out, unsigned long* outPosition = nullptr) {
+	int getRecord(uint32_t fileId, DateTime dt, SensorRecord& out, uint32_t* outPosition = nullptr) {
 		File f = SD.open(fileNameFromId(fileId));
 		int res = -2;
 		if (f) {
@@ -384,8 +492,8 @@ private:
 		}
 		return res;
 	}
-	int getRecord(File& f, DateTime dt, SensorRecord& out, unsigned long* outPosition = nullptr) {
-		unsigned long p, pMin, pMax;
+	int getRecord(File& f, DateTime dt, SensorRecord& out, uint32_t* outPosition = nullptr) {
+		uint32_t p, pMin, pMax;
 
 		// Check the first record within the file
 		out = getRecordFirst(f, &pMin);
@@ -518,9 +626,9 @@ private:
 	}
 
 	// Private data
-	SensorRecord m_record[maxLoadedRecords];
-	DateTime     m_lastUploaded;
-	uint32_t     m_fileId;
+	DateTime m_lastUploaded;
+	DateTime m_lastCreated;
+	uint32_t m_fileId;
 };
 
 #endif

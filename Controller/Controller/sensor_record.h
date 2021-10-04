@@ -11,19 +11,22 @@ struct SensorRecord {
 
 	// Data
 	DateTime dateTime;
-	float temperatureIn;
+	float temperatureInlet;
+	float temperatureOutlet;
+	float temperatureRoof;
 
 	// Reset all values to default
 	void reset() {
 		dateTime.reset();
-		temperatureIn = 0;
+		temperatureInlet = 0;
+		temperatureOutlet = 0;
+		temperatureRoof = 0;
 	}
 
 	// Initialise this class by decoding a CSV-string representation of the data.
 	// The string should have been generated using a previous call to toString().
 	// Returns true on success, or false on failure
 	bool fromCsv(const String& data) {
-		bool result = true;
 		int start = 0;
 		String s;
 
@@ -35,14 +38,25 @@ struct SensorRecord {
 			s.trim();
 			if (s.length() == 0) break;
 			dateTime = DateTime(s);
-			if (dateTime == 0) break;
+			if (dateTime == 0) break; // A dateTime of zero is invalid
 
-			// Get temperatureIn
+			// Get temperatureInlet
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
 			if (s.length() == 0) break;
-			temperatureIn = s.toFloat();
-			if (temperatureIn == 0) break;
+			temperatureInlet = s.toFloat();
+
+			// Get temperatureOutlet
+			s = Misc::getNextSubString(data, start, ',');
+			s.trim();
+			if (s.length() == 0) break;
+			temperatureOutlet = s.toFloat();
+
+			// Get temperatureRoof
+			s = Misc::getNextSubString(data, start, ',');
+			s.trim();
+			if (s.length() == 0) break;
+			temperatureRoof = s.toFloat();
 
 			// If here then success
 			return true;
@@ -55,7 +69,7 @@ struct SensorRecord {
 
 	// Generate the headers for the CSV-string representation of the data within this class
 	static String toCsvHeaders() {
-		return String(F("DateTime,TempInput,TempOutput,TempRoof"));
+		return String(F("DateTime,TempInlet,TempOutlet,TempRoof"));
 	}
 
 	// Generate a CSV-string representation of the data within this class
@@ -64,11 +78,11 @@ struct SensorRecord {
 		result.reserve(20); // Adjust this to best guess of number of bytes required
 		result += dateTime.toString();
 		result += ',';
-		result += String(temperatureIn);
+		result += String(temperatureInlet);
 		result += ',';
-		result += String(temperatureIn);
+		result += String(temperatureOutlet);
 		result += ',';
-		result += String(temperatureIn);
+		result += String(temperatureRoof);
 		return result;
 	}
 
@@ -83,18 +97,18 @@ struct SensorRecord {
 	// The generated JSON data will be added to the end of the string 'outAppend'
 	void toJson(ByteQueue& outAppend) const {
 
-		outAppend.print(F(",\"Date\":\""));
+		outAppend.print(F("{\"Date\":\""));
 		outAppend.print(dateTime.toString());
 		outAppend.print('\"');
 
 		outAppend.print(F(",\"Tin\":"));
-		outAppend.print(temperatureIn);
+		outAppend.print(temperatureInlet);
 
 		outAppend.print(F(",\"Tout\":"));
-		outAppend.print(temperatureIn);
+		outAppend.print(temperatureOutlet);
 
 		outAppend.print(F(",\"Troof\":"));
-		outAppend.print(temperatureIn);
+		outAppend.print(temperatureRoof);
 
 		outAppend.print('}');
 	}
@@ -102,7 +116,9 @@ struct SensorRecord {
 	// Read the value of all connected sensors and store it within this class
 	// This will also increment the index value
 	void readAll() {
-		temperatureIn = readThermistor(A0); // A0 seems to be defined
+		temperatureInlet = readThermistor(A0); // A0 seems to be defined
+		temperatureOutlet = 0;
+		temperatureRoof = 0;
 	}
 
 	// Convert the raw analogue input from a thermistor temperature sensor to a temperature value in Celsius
@@ -136,7 +152,9 @@ struct SensorRecord {
 	SensorRecord& operator = (const SensorRecord& rhs) {
 		if (this != &rhs) {
 			dateTime = rhs.dateTime;
-			temperatureIn = rhs.temperatureIn;
+			temperatureInlet = rhs.temperatureInlet;
+			temperatureOutlet = rhs.temperatureOutlet;
+			temperatureRoof = rhs.temperatureRoof;
 		}
 		return *this;
 	}

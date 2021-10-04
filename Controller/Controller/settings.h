@@ -171,21 +171,31 @@ public:
 		return outAppend;
 	}
 
+	// Update the settings class using a key and value pair
+	// Returns true if the key-value was used, or false if it does not apply to this class
+	bool updateWithKeyValue(String& key, String& value) {
+
+		if (key == F("\"auto\"")) {
+			modeAutomatic(value == F("true"));
+
+		} else if (key == F("\"pumpOn\"")) {
+			manualPumpOn(value == F("true"));
+
+		} else if (key == F("\"setTemp\"")) {
+			targetTemperature(value.toFloat());
+
+		} else {
+			return false;
+		}
+		return true;
+	}
+
 	// Setup the data within this class using a JSON-string
 	// Note: This is the data which the server may send, to the controller
 	bool fromJson(const ByteQueue& in) {
 		JsonDecoder decoder(in);
 		while (decoder.fetch()) {
-
-			if (decoder.name() == F("\"auto\"")) {
-				modeAutomatic(decoder.value() == F("true"));
-
-			} else if (decoder.name() == F("\"pumpOn\"")) {
-				manualPumpOn(decoder.value() == F("true"));
-
-			} else if (decoder.name() == F("\"setTemp\"")) {
-				targetTemperature(decoder.value().toFloat());
-			}
+			updateWithKeyValue(decoder.name(), decoder.value());
 		}
 		if (decoder.hadError()) {
 			return false;

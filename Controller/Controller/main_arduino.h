@@ -32,7 +32,7 @@ SensorRecord            sensorRecord[sensorRecordMax];
 // Controller timers
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
 Timer timerReadSensors(5 * 1000);
-Timer timerSendToDatabase(2 * 1000);
+Timer timerSendToDatabase(10 * 1000);
 Timer timerUpdateCurrentTime(1 * 1000);
 
 // A record of the current Epoch time
@@ -47,7 +47,6 @@ Interconnect          linkPC(SERIAL_PC);
 Interconnect          linkWifi(SERIAL_WIFI);
 BluetoothInterconnect linkBT(SERIAL_BLUETOOTH);
 
-
 // A list of interconnects
 // Used when checking who sent a message
 enum class LinkId {
@@ -56,6 +55,7 @@ enum class LinkId {
 	PC,
 	BT
 };
+LinkId linkLastRequestToWifi = LinkId::PC;
 
 // Runs once at Arduino power-up
 // This function is used to setup all data before loop() is called
@@ -120,25 +120,15 @@ void loop() {
 	// Check if the sensors need to be read
 	// Also check if there is enough buffer space to make a new sensor record
 	if (timerReadSensors.triggered(currentTime)) {
-		if ((sensorRecordCount < sensorRecordMax)) {
-			if (timeKeeper.isValid()) {
-
-				sensorLog.record(timeKeeper);
-
-				/*
-				sensorRecord[sensorRecordCount].readAll();
-				sensorRecord[sensorRecordCount].index = sensorRecordIndex++;
-				sensorRecord[sensorRecordCount].dateTime = timeKeeper.current();
-				sensorRecordCount++;
-				//*/
-			}
+		if (timeKeeper.isValid()) {
+			sensorLog.record(timeKeeper);
 		}
 	}
 
 	// Check if it is time to send data to the database
 	// Also check if there is actually any data to send
 	if (timerSendToDatabase.triggered(currentTime)) {
-		if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
+		if (sensorLog.isUploadRequired() || !settings.isServerInformed()) {
 			if (settings.autoUpload()) {
 				linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
 				#if VERBOSE_INTERLINK
@@ -171,7 +161,11 @@ void loop() {
 
 	// Process any received message
 	if (sender != LinkId::None) {
+		Serial.print("Header:");
+		Serial.println((char)header);
 		switch (header) {
+
+
 
 			case Interconnect::ListFiles:
 				sensorLog.listAllFiles();
@@ -242,6 +236,7 @@ void loop() {
 
 
 
+
 			case Interconnect::SendToDatabaseAllow:
 				if (sender == LinkId::Wifi) {
 
@@ -253,25 +248,31 @@ void loop() {
 						sendToDatabaseSyncKey = '0' + ((sendToDatabaseSyncKey + 1 - '0') % ('Z' - '0'));
 
 						// Make sure there is actually data to send
-						if ((sensorRecordCount > 0) || !settings.isServerInformed()) {
+						if (sensorLog.isUploadRequired() || !settings.isServerInformed()) {
 
 							// Generate JSON payload
 							// This will contain the controller status and/or a list of sensor records
 							payload.clear();
+
+							// Add the system GUID
 							payload.print(F("{\"Guid\":\""));
 							payload.print(settings.systemGuid());
-							payload.print(F("\",\"Status\":"));
+							payload.print('\"');
+
+							// Add the system status, if required
 							if (!settings.isServerInformed()) {
+								payload.print(F(",\"Status\":"));
 								settings.toJson(payload);
-							} else {
-								payload.print(F("null"));
 							}
-							payload.print(F(",\"Records\":["));
-							while (sensorRecordCount > 0) {
-								sensorRecord[--sensorRecordCount].toJson(payload);
-								if (sensorRecordCount) payload.print(',');
+
+							// Add any records which need to be uploaded
+							if (sensorLog.isUploadRequired() && sensorLog.lastUploadedIsSet()) {
+								payload.print(F(",\"Records\":"));
+								sensorLog.fetchForUpload(payload, 16);
 							}
-							payload.print(F("]}"));
+
+							// Finish up
+							payload.print('}');
 
 							// Output a copy of the data to the console, if required
 							#if VERBOSE_INTERLINK
@@ -282,7 +283,6 @@ void loop() {
 							if (linkWifi.send(Interconnect::SendToDatabase, payload)) {
 								settings.setServerInformed();
 							}
-
 						}
 					}
 				}
@@ -297,14 +297,23 @@ void loop() {
 					#endif
 
 					// Received notification that the last SendToDatabase was successful
-					// Any reply may contain new settings for the server, so check for that
-					settings.fromJson(payload);
-				}
+					// Any reply may contain new information from the server
+					// Loop through the data and try to apply it
+					JsonDecoder decoder(payload);
+					while (decoder.fetch()) {
+						settings.updateWithKeyValue(decoder.name(), decoder.value()) ||
+						sensorLog.updateWithKeyValue(decoder.name(), decoder.value());
+					}
 
-				// Output a copy of the data to the console, if required
-				#if VERBOSE_INTERLINK
-				else linkPC.send(header, payload);
-				#endif
+					// Check if there is more data to be uploaded
+					if (sensorLog.isUploadRequired()) timerSendToDatabase.reset(millis());
+
+					// Output a copy of the data to the console, if required
+					#if VERBOSE_INTERLINK
+				} else {
+					linkPC.send(header, payload);
+					#endif
+				}
 				break;
 
 			case Interconnect::SendToDatabaseFailure:
@@ -339,7 +348,13 @@ void loop() {
 				// Return the same message
 				String msg(F("Arduino: Echo: "));
 				msg += payload.convertToString();
-				linkPC.send(header, msg);
+				switch (sender) {
+					case LinkId::PC: linkPC.send(header, msg); break;
+					case LinkId::BT: linkBT.send(header, msg); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, msg); break;
+					#endif
+				}
 				break;
 			}
 
@@ -480,8 +495,17 @@ void loop() {
 
 				// Received a command which needs to be forwarded to the ESP8266
 				if (sender != LinkId::Wifi) {
-					if (!linkWifi.send(header, payload)) {
-						linkPC.send(Interconnect::GeneralNotification, F("Arduino: Interconnect buffer is full"));
+					if (linkWifi.send(header, payload)) {
+						linkLastRequestToWifi = sender;
+					} else {
+						String temp(F("Arduino: Interconnect buffer is full"));
+						switch (sender) {
+							case LinkId::PC: linkPC.send(Interconnect::GeneralNotification, temp); break;
+							case LinkId::BT: linkBT.send(Interconnect::GeneralNotification, temp); break;
+							#if VERBOSE_INTERLINK
+							default: linkPC.send(Interconnect::GeneralNotification, temp); break;
+							#endif
+						}
 					}
 				}
 				break;
