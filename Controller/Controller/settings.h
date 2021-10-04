@@ -9,6 +9,7 @@
 // Include headers
 #include <EEPROM.h>
 #include "json_decoder.h"
+#include "byte_queue.h"
 
 // The Settings class holds information about the controller settings and current status.
 class Settings {
@@ -41,7 +42,6 @@ public:
 
 		// Check if any changes are being made
 		if (strcmp(m_systemGuid, newValue.c_str())) {
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 
 			// Copy new value to internal buffer
@@ -66,7 +66,6 @@ public:
 	void modeAutomatic(bool newValue) {
 		if (m_modeAutomatic != newValue) {
 			m_modeAutomatic = newValue;
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 		}
 	}
@@ -79,7 +78,6 @@ public:
 	void manualPumpOn(bool newValue) {
 		if (m_manualPumpOn != newValue) {
 			m_manualPumpOn = newValue;
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 		}
 
@@ -94,7 +92,6 @@ public:
 		if (m_pumpStatus != newValue) {
 			m_pumpStatus = newValue;
 			m_isServerInformed = false;
-			// This value does not need to be saved to EEPROM
 		}
 
 	}
@@ -118,7 +115,6 @@ public:
 
 		// Check if any changes were made
 		if (oldValue == m_targetTemperature) {
-			m_isServerInformed = false;
 			m_unsavedSettings = true;
 		}
 	}
@@ -126,10 +122,22 @@ public:
 		return m_targetTemperature;
 	}
 
+	// Automatic data upload
+	// True if the controller will try to send data to the server, or false if not
+	void autoUpload(bool newValue) {
+		if (m_autoUpload != newValue) {
+			m_autoUpload = newValue;
+			m_unsavedSettings = true;
+		}
+
+	}
+	bool autoUpload() const {
+		return m_autoUpload;
+	}
 
 	// Generate a JSON-string representation of the data within this class
-	String toJson(bool getAll = false) const {
-		String result;
+	ByteQueue toJson(bool getAll = false) const {
+		ByteQueue result;
 		toJson(result, getAll);
 		return result;
 	}
@@ -137,52 +145,57 @@ public:
 	// Generate a JSON-string representation of the data within this class
 	// The generated JSON data will be added to the end of the string 'outAppend'
 	// Note: This is the data which is sent to the server, from the controller
-	void toJson(String& outAppend, bool getAll = false) const {
+	void toJson(ByteQueue& outAppend, bool getAll = false) const {
 
-		outAppend += F("{\"pumpOn\":");
-		outAppend += m_pumpStatus ? F("true") : F("false");
+		outAppend.print(F("{\"pumpOn\":"));
+		outAppend.print(m_pumpStatus ? F("true") : F("false"));
 
 		if (getAll) {
 
-			outAppend += F(",\"auto\":");
-			outAppend += m_modeAutomatic ? F("true") : F("false");
+			outAppend.print(F(",\"auto\":"));
+			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
 
-			outAppend += F(",\"setTemp\":");
-			outAppend += m_targetTemperature;
+			outAppend.print(F(",\"setTemp\":"));
+			outAppend.print(m_targetTemperature);
 
-			outAppend += F(",\"guid\":\"");
-			outAppend += m_systemGuid;
-			outAppend += '\"';
+			outAppend.print(F(",\"guid\":\""));
+			outAppend.print(m_systemGuid);
+			outAppend.print('\"');
 
-	m_targetTemperature;
-	bool m_modeAutomatic;
-	bool m_manualPumpOn;
-	bool m_pumpStatus;
-	bool m_isServerInformed;
-	bool m_unsavedSettings; // Only use for settings which *need* to survive a device reset
-	char m_systemGuid[guidMaxLength];
-
+			outAppend.print(F(",\"upload\":\""));
+			outAppend.print(m_autoUpload);
+			outAppend.print('\"');
 		}
 
-		outAppend += '}';
+		outAppend.print('}');
 		return outAppend;
+	}
+
+	// Update the settings class using a key and value pair
+	// Returns true if the key-value was used, or false if it does not apply to this class
+	bool updateWithKeyValue(String& key, String& value) {
+
+		if (key == F("\"auto\"")) {
+			modeAutomatic(value == F("true"));
+
+		} else if (key == F("\"pumpOn\"")) {
+			manualPumpOn(value == F("true"));
+
+		} else if (key == F("\"setTemp\"")) {
+			targetTemperature(value.toFloat());
+
+		} else {
+			return false;
+		}
+		return true;
 	}
 
 	// Setup the data within this class using a JSON-string
 	// Note: This is the data which the server may send, to the controller
-	bool fromJson(const String& in) {
+	bool fromJson(const ByteQueue& in) {
 		JsonDecoder decoder(in);
 		while (decoder.fetch()) {
-
-			if (decoder.name() == F("\"auto\"")) {
-				modeAutomatic(decoder.value() == F("true"));
-
-			} else if (decoder.name() == F("\"pumpOn\"")) {
-				manualPumpOn(decoder.value() == F("true"));
-
-			} else if (decoder.name() == F("\"setTemp\"")) {
-				targetTemperature(decoder.value().toFloat());
-			}
+			updateWithKeyValue(decoder.name(), decoder.value());
 		}
 		if (decoder.hadError()) {
 			return false;
@@ -198,7 +211,8 @@ public:
 		m_modeAutomatic(false),
 		m_manualPumpOn(false),
 		m_isServerInformed(false),
-		m_unsavedSettings(false) {
+		m_unsavedSettings(false),
+		m_autoUpload(true) {
 	}
 
 
@@ -240,10 +254,11 @@ private:
 
 	// Settings which need to be saved to EEPROM
 	// The order of these settings should be kept the same, if possible
-	char m_systemGuid[guidMaxLength]; // Leave in first slot
-	bool m_modeAutomatic;
-	bool m_manualPumpOn;
+	char  m_systemGuid[guidMaxLength]; // Leave in first slot
+	bool  m_modeAutomatic;
+	bool  m_manualPumpOn;
 	float m_targetTemperature;
+	bool  m_autoUpload;
 
 	// Settings which do NOT need to be saved to EEPROM
 	bool m_pumpStatus; // This value MUST be first in the not-saved values. If changed then update init() and save()

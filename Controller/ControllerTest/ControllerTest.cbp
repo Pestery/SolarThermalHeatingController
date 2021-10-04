@@ -22,6 +22,8 @@
 		</Compiler>
 		<Unit filename="../Controller/Controller.ino" />
 		<Unit filename="../Controller/bluetooth_interconnect.h" />
+		<Unit filename="../Controller/board_config.h" />
+		<Unit filename="../Controller/byte_queue.h" />
 		<Unit filename="../Controller/date_time.h" />
 		<Unit filename="../Controller/interconnect.h" />
 		<Unit filename="../Controller/json_decoder.h" />
@@ -29,17 +31,22 @@
 		<Unit filename="../Controller/main_esp8266.h" />
 		<Unit filename="../Controller/misc.h" />
 		<Unit filename="../Controller/ring_buffer.h" />
+		<Unit filename="../Controller/sensor_log.h" />
 		<Unit filename="../Controller/sensor_record.h" />
 		<Unit filename="../Controller/server_address.h" />
 		<Unit filename="../Controller/server_link.h" />
 		<Unit filename="../Controller/settings.h" />
 		<Unit filename="../Controller/state_flags.h" />
+		<Unit filename="../Controller/time_keeper.h" />
 		<Unit filename="../Controller/timer.h" />
 		<Unit filename="../Controller/wifi_helper.h" />
+		<Unit filename="arduino_misc.h" />
 		<Unit filename="arduino_pins.h" />
+		<Unit filename="arduino_print.h" />
 		<Unit filename="arduino_stream.h" />
 		<Unit filename="arduino_string.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="test_byte_queue.h" />
 		<Unit filename="test_date_time.h" />
 		<Unit filename="test_interconnect.h" />
 		<Unit filename="test_json_decoder.h" />

@@ -4,9 +4,11 @@
 #include "unit_test.h"
 
 // Include headers which contain replacement Arduino functions used for testing
+#include "arduino_print.h"
 #include "arduino_stream.h"
 #include "arduino_pins.h"
 #include "arduino_string.h"
+#include "arduino_misc.h"
 
 // Include headers which contain test code
 #include "test_misc.h"
@@ -18,6 +20,7 @@
 #include "test_sensor_record.h"
 #include "test_interconnect.h"
 #include "test_server_address.h"
+#include "test_byte_queue.h"
 
 // Declare functions
 std::stringstream& exceptionToStream(const std::exception& error, std::stringstream& stream, unsigned indentLevel, bool indentAutoIncrement) noexcept;

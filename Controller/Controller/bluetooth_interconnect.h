@@ -23,7 +23,7 @@ public:
 
 		// Enter a loop to check for messages from the Bluetooth module
 		if (m_interconnect.receivedAnything()) {
-			while (!m_interconnect.receiveBuffer().isEmpty()) {
+			while (m_interconnect.receiveBuffer().available()) {
 
 				// Any messages from the Bluetooth module will start with "OK"
 				if (m_interconnect.receiveBuffer().peek() == 'O') {
@@ -37,7 +37,7 @@ public:
 							// Bluetooth connection lost message
 							// This occurs when the connected device disconnects from the Bluetooth module
 							m_connected = false;
-							m_interconnect.sendBuffer().reset();
+							m_interconnect.sendBuffer().clear();
 
 						} else {
 
@@ -53,7 +53,7 @@ public:
 							// Bluetooth connected message
 							// This is when something connects to the Bluetooth module
 							m_connected = true;
-							m_interconnect.sendBuffer().reset();
+							m_interconnect.sendBuffer().clear();
 
 						} else {
 
@@ -62,7 +62,7 @@ public:
 							// Check if an "OK" exists later in the buffer, and if so then clear everything to that point
 							int i = findNextInReceiveBuffer("OK", 1);
 							if (i > 0) {
-								m_interconnect.receiveBuffer().pop(i);
+								m_interconnect.receiveBuffer().discard(i);
 							} else {
 								break;
 							}
@@ -79,7 +79,7 @@ public:
 
 					// If here then the Bluetooth is not connected and the first byte in the receive buffer is not an 'O'
 					// So clear any receive data because it is should just be junk from the Bluetooth module
-					m_interconnect.receiveBuffer().pop();
+					m_interconnect.receiveBuffer().read();
 				}
 			}
 		}
@@ -99,25 +99,22 @@ public:
 		// If not connected then just return true
 		return m_connected ? m_interconnect.send(header, payload) : true;
 	}
-
-	// Add data to the send queue
-	// This method will always send the message, but may block if the buffer is full
-	void sendForce(Interconnect::Type header) {
-		sendForce(header, nullptr);
-	}
-	void sendForce(Interconnect::Type header, const String& payload) {
-		sendForce(header, payload.c_str());
-	}
-	void sendForce(Interconnect::Type header, const char* payload) {
+	bool send(Interconnect::Type header, ByteQueue& payload) {
 
 		// Only send if connected
-		if (m_connected) m_interconnect.sendForce(header, payload);
+		// If not connected then just return true
+		return m_connected ? m_interconnect.send(header, payload) : true;
 	}
 
 	// Extract a received message from the interconnect
 	// Returns false if no waiting messages
 	// Returns true if a message was extracted and placed in the 'out' parameters (may block if message is longer than receive buffer)
 	bool receive(Interconnect::Type& outHeader, String& outPayload) {
+
+		// Only receive if connected
+		return m_connected ? m_interconnect.receive(outHeader, outPayload) : false;
+	}
+	bool receive(Interconnect::Type& outHeader, ByteQueue& outPayload) {
 
 		// Only receive if connected
 		return m_connected ? m_interconnect.receive(outHeader, outPayload) : false;
@@ -138,9 +135,9 @@ public:
 	}
 
 	// Constructor
-	BluetoothInterconnect(Stream& stream, RingBuffer::IndexType sendBufferSize, RingBuffer::IndexType recvBufferSize) :
+	BluetoothInterconnect(Stream& stream) :
 		m_connected(false),
-		m_interconnect(stream, sendBufferSize, recvBufferSize) {
+		m_interconnect(stream) {
 	}
 
 private:

@@ -1,7 +1,4 @@
 
-// TODO:
-// Review: https://github.com/arduino-libraries/NTPClient
-
 // This folder contains the code for both the Arduino and the ESP8266 (wifi chip)
 // Simply set the Arduino IDE to the correct board, via menu: Tools -> Board -> ...
 // The board selected should be one of:

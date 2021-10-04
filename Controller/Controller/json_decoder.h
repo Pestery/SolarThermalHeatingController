@@ -2,7 +2,7 @@
 #define JSON_DECODER_H
 
 // Include headers
-#include "misc.h"
+#include "byte_queue.h"
 
 // The JsonDecoder class is used to decode JSON strings.
 class JsonDecoder {
@@ -39,7 +39,7 @@ public:
 		while (m_index < m_length) {
 
 			// Get next character
-			const char c = m_source[m_index++];
+			const char c = source(m_index++);
 
 			// Check for start of value
 			if ((valueStart == 0) && foundSeparator && !isWhitespace(c)) {
@@ -84,8 +84,8 @@ public:
 
 								// Check the lengths of the name and value strings
 								if ((nameStart < nameEnd) && (valueStart < valueEnd)) {
-									m_name = Misc::makeString(m_source + nameStart, nameEnd - nameStart);
-									m_value = Misc::makeString(m_source + valueStart, valueEnd - valueStart);
+									m_name = makeString(nameStart, nameEnd - nameStart);
+									m_value = makeString(valueStart, valueEnd - valueStart);
 									m_index = m_length; // Reached end of data
 									return true;
 								}
@@ -135,8 +135,8 @@ public:
 
 							// Check the lengths of the name and value strings
 							if ((nameStart < nameEnd) && (valueStart < valueEnd)) {
-								m_name = Misc::makeString(m_source + nameStart, nameEnd - nameStart);
-								m_value = Misc::makeString(m_source + valueStart, valueEnd - valueStart);
+								m_name = makeString(nameStart, nameEnd - nameStart);
+								m_value = makeString(valueStart, valueEnd - valueStart);
 								return true;
 							}
 						}
@@ -197,23 +197,40 @@ public:
 	// The source must continue to exist while this class is using it
 	JsonDecoder(const String& source) : JsonDecoder(source.c_str()) {}
 	JsonDecoder(const char* source) :
-		m_source(source),
+		m_sourceArray(source),
+		m_sourceBuffer(nullptr),
 		m_length(source ? strlen(source) : 0),
 		m_index(0),
 		m_withinQuotes(false),
 		m_hadError(false),
 		m_name(),
 		m_value() {
+			initialise();
+	}
+	JsonDecoder(const ByteQueue& source) :
+		m_sourceArray(nullptr),
+		m_sourceBuffer(&source),
+		m_length(source.available()),
+		m_index(0),
+		m_withinQuotes(false),
+		m_hadError(false),
+		m_name(),
+		m_value() {
+			initialise();
+	}
+
+private:
+
+	// Initialise this class
+	void initialise() {
 
 		// Loop through start of source and check for '{' character
 		// Skip everything up to and including this character
 		skipWhiteSpaces();
-		if ((m_index < m_length) && (m_source[m_index] == '{')) {
+		if ((m_index < m_length) && (source(m_index) == '{')) {
 			m_index++;
 		}
 	}
-
-private:
 
 	// A shorthand method to flag an error
 	inline void errorOccured() __attribute__((always_inline)) {
@@ -223,11 +240,25 @@ private:
 
 	// Move the index forward to skip white space characters
 	inline void skipWhiteSpaces() __attribute__((always_inline)) {
-		while ((m_index < m_length) && isWhitespace(m_source[m_index])) m_index++;
+		while ((m_index < m_length) && isWhitespace(source(m_index))) m_index++;
+	}
+
+	// Get a character from the source array
+	inline char source(unsigned i) __attribute__((always_inline)) {
+		return m_sourceArray ? m_sourceArray[i] : (char)m_sourceBuffer->peek(i);
+	}
+
+	// Create a string from the source buffer
+	String makeString(unsigned startAt, unsigned length) {
+		String result;
+		result.reserve(length);
+		while (length--) result += source(startAt++);
+		return result;
 	}
 
 	// Private data
-	const char* m_source;
+	const char* m_sourceArray;
+	const ByteQueue* m_sourceBuffer;
 	unsigned m_length;
 	unsigned m_index;
 	bool m_withinQuotes;

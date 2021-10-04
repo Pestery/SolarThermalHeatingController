@@ -30,6 +30,9 @@ namespace SunBatherAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ControllerReply>> Post(ControllerPost param)
         {
+            // Make sure that something was posted
+            if (param == null) return NoContent();
+
             //var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == 3);
             //System.Diagnostics.Debug.WriteLine("GUID: " + temp.ProductId);
 
@@ -52,22 +55,29 @@ namespace SunBatherAPI.Controllers
             {
                 foreach (var record in param.Records)
                 {
-                    _context.RecordEvent.Add(
-                        new RecordEvent()
-                        {
-                            //Id = record.Id,
-                            SystemIdentityID = systemId.Id,
-                            TemperatureValueInput = record.Tin,
-                            TemperatureValueOutput = record.Tout,
-                            TemperatureValueRoof = record.Troof,
-                            SolarIrradiance = 0,
-                            Cost = 0,
-                            Emissions = 0,
-                            EnergyAdsorbed = 0,
-                            ReadDateTime = record.Date,
-                            SystemIdentity = systemId
-                        }
-                    );
+                    // Convert the received unix time to a DateTime value
+                    DateTime dt = DateTime.SpecifyKind(DateTimeOffset.FromUnixTimeSeconds(record.Date).DateTime, DateTimeKind.Utc);
+
+                    // Check if the record already exists within the database
+                    if (!_context.RecordEvent.Where(p => (p.SystemIdentity == systemId) && (p.ReadDateTime == dt)).Any()) {
+
+                        // Add the new record
+                        _context.RecordEvent.Add(
+                            new RecordEvent()
+                            {
+                                SystemIdentityID = systemId.Id,
+                                TemperatureValueInput = record.Tin,
+                                TemperatureValueOutput = record.Tout,
+                                TemperatureValueRoof = record.Troof,
+                                SolarIrradiance = 0,
+                                Cost = 0,
+                                Emissions = 0,
+                                EnergyAdsorbed = 0,
+                                ReadDateTime = dt,
+                                SystemIdentity = systemId
+                            }
+                        );
+                    }
                 }
             }
 
@@ -82,12 +92,23 @@ namespace SunBatherAPI.Controllers
                 }
             }
 
+            // Get a set of all records which belong to this controller
+            var systemRecords = _context.RecordEvent.Where(p => p.SystemIdentity == systemId);
+            
+            // Get the unix time of the most recent record
+            // If no records exist then use a value of zero instead
+            long lastRecordReceived =
+                systemRecords.Any() ?
+                ((DateTimeOffset)DateTime.SpecifyKind(systemRecords.Max(p => p.ReadDateTime), DateTimeKind.Utc)).ToUnixTimeSeconds() :
+                0;
+
             // Generate a reply which can be sent to the controller
             ControllerReply reply = new()
             {
                 Auto = systemStatus.PumpMode,
                 SetTemp = systemStatus.SetTemperature,
-                PumpOn = systemStatus.ManualPumpOn
+                PumpOn = systemStatus.ManualPumpOn,
+                LastRecord = lastRecordReceived
             };
 
             // Save all changes to the database
