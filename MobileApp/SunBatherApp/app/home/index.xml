@@ -40,7 +40,7 @@
             </StackLayout>
             <StackLayout class="graph-data">
                 <StackLayout class="graph-data-header">
-                    <Label text="Energy Adsorbed" textWrap="true" />
+                    <Label text="Solar Irradiance" textWrap="true" />
                 </StackLayout>
                 <GridLayout rows="*, 25" class="graph-data-info">
                     <chart:RadCartesianChart id="cartesianChart">
