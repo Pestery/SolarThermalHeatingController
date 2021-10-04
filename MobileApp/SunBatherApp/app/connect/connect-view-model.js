@@ -15,7 +15,7 @@ var bluetooth = new Bluetooth();
 // Disconnect
 
 function connectPageIntialize(viewModel, blueToothList) {
-    viewModel.set('headerSelected', 4); // needed for underline in header
+    viewModel.set('headerSelected', 3); // needed for underline in header
     viewModel.set('findController', true);
     viewModel.set('stopController', false);
     viewModel.set('foundDevicesCount', 0);
