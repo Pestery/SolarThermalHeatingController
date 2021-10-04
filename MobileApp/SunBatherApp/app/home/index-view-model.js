@@ -37,6 +37,8 @@ export function UserViewModel() {
     indexPageIntialize(viewModel);
 
     Http.getJSON(apiCall.getSystemStatus).then(result => {
+      console.log(result);
+      console.log(commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
     }, error => {
