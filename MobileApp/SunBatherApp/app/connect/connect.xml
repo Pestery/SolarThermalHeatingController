@@ -47,8 +47,10 @@
                 <GridLayout rows="*" columns="*" class="search-logo" > 
                     <ActivityIndicator busy="{{ isConnectingWifi }}" />
                 </GridLayout>
-                <GridLayout rows="*" columns="*" class="success-logo" >
-                    <Label text="&#xf057;" class="fas" />                    
+                <GridLayout rows="*" columns="*" class="success-logo"  visibility="{{ showWriteLogo ? 'visible' : 'hidden' }}" > 
+                    <Label col="0" text="&#xf059;" class="fas" visibility="{{ isSendingLogo ? 'visible' : 'collapse' }}" />
+                    <Label col="0" text="&#xf058;" class="fas" visibility="{{ isSuccessLogo ? 'visible' : 'collapse' }}" />     
+                    <Label col="0" text="&#xf057;" class="fas" visibility="{{ isFailedLogo ? 'visible' : 'collapse' }}" />                    
                 </GridLayout>
                 <GridLayout rows="*" columns="*" class="button-disconnect" visibility="{{ showWifiInput ? 'visible' : 'collapse'}}" > 
                     <Label col="0" text="Disconnect From Device" textWrap="true" tap="{{ disConnect }}"/>
