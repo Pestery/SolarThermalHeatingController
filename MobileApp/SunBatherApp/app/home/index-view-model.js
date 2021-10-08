@@ -15,7 +15,7 @@ function indexPageIntialize(viewModel) {
     viewModel.set('graphOptions', graphOptionList);
   
     // turn live data to true when testing live data, else it uses sample data from API 
-    var liveData = false;
+    var liveData = true; //was false
     var dateNow;
     var dateYesterday;
   
@@ -38,11 +38,11 @@ export function UserViewModel() {
 
     Http.getJSON(apiCall.getSystemStatus).then(result => {
       console.log(result);
-      console.log(commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
     }, error => {
       console.log(error);
+      
     });
 
     Http.getJSON(apiCall.getRecordEventLatest).then(result => {
