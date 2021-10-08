@@ -1,0 +1,11 @@
+<StackLayout rows="auto" class="footer">
+    <GridLayout class="fas" >
+        <GridLayout rows="auto" columns="*,*,*,*" width="100%" class="footer-buttons" >
+            <Label col="0" text="&#xf015;" class="{{ headerSelected == 0 ? 'active' : 'nonActive'}}" tap="onNavigateHome" />
+            <Label col="1" text="&#xf1fe;" class="{{ headerSelected == 1 ? 'active' : 'nonActive'}}" tap="onNavigateGraphs" />
+            <Label col="2" text="&#xf201;" class="{{ headerSelected == 2 ? 'active' : 'nonActive'}}" tap="onNavigateCompare" />
+            <Label col="3" text="&#xf013;" class="{{ headerSelected == 3 ? 'active' : 'nonActive'}}" tap="onNavigateController" />
+        </GridLayout>
+    </GridLayout>
+</StackLayout>
+
