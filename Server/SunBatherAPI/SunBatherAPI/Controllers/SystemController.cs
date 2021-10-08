@@ -30,11 +30,11 @@ namespace SunBatherAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ControllerReply>> Post(ControllerPost param)
         {
-            // Make sure that something was posted
-            if (param == null) return NoContent();
-
             //var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == 3);
             //System.Diagnostics.Debug.WriteLine("GUID: " + temp.ProductId);
+
+            // Make sure that something was posted
+            if (param == null) return NoContent();
 
             // Verify GUID of controller
             // Also get the system identifier data
@@ -46,8 +46,9 @@ namespace SunBatherAPI.Controllers
                 return NoContent();
             }
 
-            // Get a reference to the current controller settings and status data
-            var systemStatus = _context.SystemStatus.FirstOrDefault(i => i.Id == systemId.Id);
+            // Get system status, via a task
+            // It will be needed later and can be started now
+            var systemStatusTask = _context.SystemStatus.FirstOrDefaultAsync(i => i.Id == systemId.Id);
 
             // Check if new record events data were provided
             // If so then add all to the database
@@ -81,6 +82,10 @@ namespace SunBatherAPI.Controllers
                 }
             }
 
+            // Get a reference to the current controller settings and status data
+            //var systemStatus = _context.SystemStatus.FirstOrDefault(i => i.Id == systemId.Id);
+            var systemStatus = await systemStatusTask;
+
             // Check if controller status data was provided
             // If so then update the database accordingly
             if (param.Status != null)
@@ -91,6 +96,10 @@ namespace SunBatherAPI.Controllers
                     systemStatus.PumpStatus = (bool)param.Status.PumpOn;
                 }
             }
+
+            // Save all changes to the database
+            // After this point, all database access is read-only
+            _context.SaveChanges();
 
             // Get a set of all records which belong to this controller
             var systemRecords = _context.RecordEvent.Where(p => p.SystemIdentity == systemId);
@@ -110,9 +119,6 @@ namespace SunBatherAPI.Controllers
                 PumpOn = systemStatus.ManualPumpOn,
                 LastRecord = lastRecordReceived
             };
-
-            // Save all changes to the database
-            await _context.SaveChangesAsync();
 
             // Send reply to controller
             return reply;

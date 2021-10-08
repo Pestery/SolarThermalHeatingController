@@ -122,19 +122,6 @@ public:
 		return m_targetTemperature;
 	}
 
-	// Automatic data upload
-	// True if the controller will try to send data to the server, or false if not
-	void autoUpload(bool newValue) {
-		if (m_autoUpload != newValue) {
-			m_autoUpload = newValue;
-			m_unsavedSettings = true;
-		}
-
-	}
-	bool autoUpload() const {
-		return m_autoUpload;
-	}
-
 	// Generate a JSON-string representation of the data within this class
 	ByteQueue toJson(bool getAll = false) const {
 		ByteQueue result;
@@ -160,10 +147,6 @@ public:
 
 			outAppend.print(F(",\"guid\":\""));
 			outAppend.print(m_systemGuid);
-			outAppend.print('\"');
-
-			outAppend.print(F(",\"upload\":\""));
-			outAppend.print(m_autoUpload);
 			outAppend.print('\"');
 		}
 
@@ -211,8 +194,7 @@ public:
 		m_modeAutomatic(false),
 		m_manualPumpOn(false),
 		m_isServerInformed(false),
-		m_unsavedSettings(false),
-		m_autoUpload(true) {
+		m_unsavedSettings(false) {
 	}
 
 
@@ -258,7 +240,6 @@ private:
 	bool  m_modeAutomatic;
 	bool  m_manualPumpOn;
 	float m_targetTemperature;
-	bool  m_autoUpload;
 
 	// Settings which do NOT need to be saved to EEPROM
 	bool m_pumpStatus; // This value MUST be first in the not-saved values. If changed then update init() and save()
