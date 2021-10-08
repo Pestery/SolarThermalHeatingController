@@ -17,6 +17,7 @@
 #include "settings.h"
 #include "bluetooth_interconnect.h"
 #include "time_keeper.h"
+#include "strategy.h"
 
 // Current controller settings and status
 Settings settings;
@@ -68,6 +69,9 @@ void setup() {
 	// Setup serial port for Bluetooth module connection
 	SERIAL_BLUETOOTH.begin(9600); // For Bluetooth module
 	while (!SERIAL_BLUETOOTH) {}
+
+	// Setup for Pump Control Pin
+	pinMode(Strategy::pumpPin, OUTPUT);
 
 	// Initialise settings data
 	Serial.print(F("Loading settings..."));
