@@ -7,8 +7,9 @@
 #include "sensor_record.h"
 #include "time_keeper.h"
 #include "byte_queue.h"
+#include "ring_buffer.h"
 
-// Holds information about all sensors at a single moment in time.
+// Manages sensor records stored on the controller
 class SensorLog {
 public:
 
@@ -66,52 +67,66 @@ public:
 		r.readAll();
 		r.dateTime = timeKeeper.current();
 
-		// Save record on SD card
-		String fileName = fileNameFromId(m_fileId);
-		File f = SD.open(fileName, O_READ | O_WRITE | O_CREAT);
-		if (f) {
+		// Check if using the memory buffer or the SD card
+		if (m_buffer) {
 
-			// Check if the file has reached the maximum size allowed
-			if (f.size() > maxFileSize) {
+			// Add buffer to record
+			// If buffer is full then erase the oldest record
+			if (m_buffer->isFull()) m_buffer->pop();
+			m_buffer->push(r);
 
-				// Close this file
-				f.close();
+			// Record time of new record
+			// Return success
+			m_lastCreated = r.dateTime;
+			return true;
 
-				// Increment file ID and open a new file
-				fileName = fileNameFromId(++m_fileId);
-				f = SD.open(fileName, O_READ | O_WRITE | O_CREAT);
-			}
+		} else {
 
-			// Check that file is still open
-			// Might have got closed in previous section
+			// Save record on SD card
+			String fileName = fileNameFromId(m_fileId);
+			File f = SD.open(fileName, O_READ | O_WRITE | O_CREAT);
 			if (f) {
 
-				// Check if the file is empty or the last record is invalid
-				// In either case, assume the whole file is garbage and start again
-				if ((f.size() == 0) || !getRecordLast(f)) {
+				// Check if the file has reached the maximum size allowed
+				if (f.size() > maxFileSize) {
 
-					// Move to start of file and write headers
-					f.seek(0);
-					f.println(SensorRecord::toCsvHeaders());
+					// Close this file
+					f.close();
+
+					// Increment file ID and open a new file
+					fileName = fileNameFromId(++m_fileId);
+					f = SD.open(fileName, O_READ | O_WRITE | O_CREAT);
 				}
 
-				// Save the sensor record
-				f.println(r.toCsv());
+				// Check that file is still open
+				// Might have got closed in previous section
+				if (f) {
 
-				// Close file
-				f.close();
+					// Check if the file is empty or the last record is invalid
+					// In either case, assume the whole file is garbage and start again
+					if ((f.size() == 0) || !getRecordLast(f)) {
 
-				// Record time of new record
-				// Return success
-				m_lastCreated = r.dateTime;
-				return true;
+						// Move to start of file and write headers
+						f.seek(0);
+						f.println(SensorRecord::toCsvHeaders());
+					}
+
+					// Save the sensor record
+					f.println(r.toCsv());
+
+					// Close file
+					f.close();
+
+					// Record time of new record
+					// Return success
+					m_lastCreated = r.dateTime;
+					return true;
+				}
 			}
-		} else {
-			Serial.println("Failed to open file");
-		}
 
-		// If here the return failure
-		return false;
+			// If here the return failure
+			return false;
+		}
 	}
 
 	// Get a number of records from the SD card
@@ -120,41 +135,66 @@ public:
 	// Returns the number of records fetched
 	unsigned fetch(DateTime startAt, SensorRecord* buffer, unsigned count) {
 		if (count < 1) return 0;
-
-		// Define working variables
-		uint32_t fileId;
-		String s;
-		File f;
 		int found = 0;
 
-		// Find the file which contains the first record
-		f = getRecordFile(startAt, &fileId);
-		if (!f) return 0;
 
-		// Find the first record of the requested records within the file
-		getRecord(f, startAt, *buffer);
-		found++;
 
-		// Loop to get any subsequent requested records
-		while (--count > 0) {
-			buffer++;
+		// Check if using the memory buffer or the SD card
+		if (m_buffer) {
 
-			// Get next record from same file, if able
-			if ((f.position() == f.size()) || !buffer->fromCsv(readLine(f))) {
+			// Define working variables
+			unsigned i = 0, iMax = m_buffer->size();
 
-				// Move to next file, if any
-				f.close();
-				f = SD.open(fileNameFromId(++fileId), FILE_READ);
-				if (!f) return found;
-
-				// Get first record from new file
-				*buffer = getRecordFirst(f);
+			// If there are more records available than requested
+			// then move to the first one which matches the request
+			while ((iMax - i) > count) {
+				if (m_buffer->peek(i).dateTime < startAt) i++; else break;
 			}
-			found++;
-		}
 
-		// Finish up
-		f.close();
+			// Copy results to output buffer
+			while ((i < iMax) && (count > 0)) {
+				*buffer = m_buffer->peek(i++);
+				buffer++;
+				found++;
+				count--;
+			}
+
+		} else {
+
+			// Define working variables
+			uint32_t fileId;
+			String s;
+			File f;
+
+			// Find the file which contains the first record
+			f = getRecordFile(startAt, &fileId);
+			if (!f) return 0;
+
+			// Find the first record of the requested records within the file
+			getRecord(f, startAt, *buffer);
+			found++;
+
+			// Loop to get any subsequent requested records
+			while (--count > 0) {
+				buffer++;
+
+				// Get next record from same file, if able
+				if ((f.position() == f.size()) || !buffer->fromCsv(readLine(f))) {
+
+					// Move to next file, if any
+					f.close();
+					f = SD.open(fileNameFromId(++fileId), FILE_READ);
+					if (!f) return found;
+
+					// Get first record from new file
+					*buffer = getRecordFirst(f);
+				}
+				found++;
+			}
+
+			// Finish up
+			f.close();
+		}
 		return found;
 	}
 
@@ -225,56 +265,77 @@ public:
 	// Initialise the sensor log
 	// This will try to read from the SD card
 	// Returns true on success, or false on failure
-	bool begin() {
+	bool begin(bool useSdCard) {
+		if (useSdCard) {
 
-		// Make sure the target directory exists
-		if (!makeRecordDirectory()) return false;
+			// Make sure the target directory exists
+			if (!makeRecordDirectory()) return false;
 
-		// Get the latest record file
-		// New records will be added to this file
-		m_fileId = latestFileId();
+			// Get the latest record file
+			// New records will be added to this file
+			m_fileId = latestFileId();
 
-		// Get the last record from within the file, if any
-		// If the file does not contain any records then erase it and move to the previous file, if any
-		while(true) {
+			// Get the last record from within the file, if any
+			// If the file does not contain any records then erase it and move to the previous file, if any
+			while(true) {
 
-			// Try to get record from latest file
-			SensorRecord sr = getRecordLast(m_fileId);
-			if (sr) {
+				// Try to get record from latest file
+				SensorRecord sr = getRecordLast(m_fileId);
+				if (sr) {
 
-				// Record exists
-				// Record time and exit loop
-				m_lastCreated = sr.dateTime;
-				break;
-
-			} else {
-
-				// File does not contain any records, so delete it
-				SD.remove(fileNameFromId(m_fileId));
-				if (m_fileId > 1) {
-
-					// Move to the previous file
-					m_fileId--;
+					// Record exists
+					// Record time and exit loop
+					m_lastCreated = sr.dateTime;
+					break;
 
 				} else {
 
-					// There are no previous files
-					// Use a default time and exit loop
-					m_lastCreated = 0;
-					break;
+					// File does not contain any records, so delete it
+					SD.remove(fileNameFromId(m_fileId));
+					if (m_fileId > 1) {
+
+						// Move to the previous file
+						m_fileId--;
+
+					} else {
+
+						// There are no previous files
+						// Use a default time and exit loop
+						m_lastCreated = 0;
+						break;
+					}
 				}
 			}
-		}
 
-		// Return success
-		return true;
+			// Return success
+			return true;
+
+		} else {
+
+			// Create buffer and return result
+			typedef RingBuffer<SensorRecord,4> Type;
+			m_buffer = (Type*)malloc(sizeof(Type));
+			if (m_buffer) {
+				m_buffer->reset();
+				return true;
+			} else {
+				return false;
+			}
+		}
 	}
 
 	// Default constructor
 	SensorLog() :
 		m_lastUploaded(0),
 		m_lastCreated(0),
-		m_fileId(1) {
+		m_fileId(1),
+		m_buffer(nullptr) {
+	}
+	~SensorLog() {
+		if (m_buffer) {
+			free(m_buffer);
+			m_buffer = nullptr;
+		}
 	}
 
 private:
@@ -629,6 +690,7 @@ private:
 	DateTime m_lastUploaded;
 	DateTime m_lastCreated;
 	uint32_t m_fileId;
+	RingBuffer<SensorRecord,4>* m_buffer;
 };
 
 #endif

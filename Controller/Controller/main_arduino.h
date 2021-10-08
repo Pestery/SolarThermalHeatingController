@@ -2,7 +2,7 @@
 #define MAIN_ARDUINO_H
 
 // Debug toggle of verbose interlink comments
-#define VERBOSE_INTERLINK 0
+#define VERBOSE_INTERLINK 1
 
 // Include headers
 #include <SoftwareSerial.h>
@@ -21,19 +21,14 @@
 // Current controller settings and status
 Settings settings;
 
-// Sensor log
+// Sensor log (which stores sensor data)
 SensorLog sensorLog;
-
-// Sensor record buffer
-constexpr int           sensorRecordMax = 8;
-int                     sensorRecordCount = 0;
-SensorRecord            sensorRecord[sensorRecordMax];
 
 // Controller timers
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
-Timer timerReadSensors(5 * 1000);
-Timer timerSendToDatabase(10 * 1000);
-Timer timerUpdateCurrentTime(1 * 1000);
+Timer timerReadSensors(10 * 1000);
+Timer timerSendToDatabase(20 * 1000);
+Timer timerUpdateCurrentTime(2 * 1000);
 
 // A record of the current Epoch time
 TimeKeeper timeKeeper;
@@ -81,17 +76,17 @@ void setup() {
 
 	// Setup SD card functionality
 	Serial.print(F("Initialising SD card..."));
-	if (!SD.begin(SD_PIN_CS)) {
+	bool sdBegin = SD.begin(SD_PIN_CS);
+	if (!sdBegin) {
 		Serial.println(F("Failed"));
-		Serial.println(F("Is a card inserted? Is the wiring and pin select correct?"));
-		while (true) {}
+		//Serial.println(F("Is a card inserted? Is the wiring and pin select correct?"));
 	} else {
 		Serial.println(F("Done"));
 	}
 
 	// Setup the sensor log
 	Serial.print(F("Initialising sensor log..."));
-	if (!sensorLog.begin()) {
+	if (!sensorLog.begin(sdBegin)) {
 		Serial.println(F("Failed"));
 		while (true) {}
 	} else {
@@ -128,14 +123,10 @@ void loop() {
 	// Check if it is time to send data to the database
 	// Also check if there is actually any data to send
 	if (timerSendToDatabase.triggered(currentTime)) {
-		if (sensorLog.isUploadRequired() || !settings.isServerInformed()) {
-			if (settings.autoUpload()) {
-				linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
-				#if VERBOSE_INTERLINK
-				linkPC.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
-				#endif
-			}
-		}
+		linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+		#if VERBOSE_INTERLINK
+		linkPC.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
+		#endif
 	}
 
 	// Check if it is time to update the reference for the current time
@@ -161,81 +152,7 @@ void loop() {
 
 	// Process any received message
 	if (sender != LinkId::None) {
-		Serial.print("Header:");
-		Serial.println((char)header);
 		switch (header) {
-
-
-
-			case Interconnect::ListFiles:
-				sensorLog.listAllFiles();
-				break;
-			case Interconnect::ReadFile:
-				if (payload.available()) {
-					String s(payload.convertToString());
-					Serial.print(F("Read file: "));
-					Serial.print(s);
-					Serial.println(F("..."));
-					bool success = false;
-					File f = SD.open(s, FILE_READ);
-					if (f) {
-						while (f.available()) Serial.write(f.read());
-						f.close();
-					}
-					Serial.println();
-					Serial.println(F(" --- End of file ---"));
-				} else {
-					Serial.print(F("Usage: "));
-					Serial.print((char)header);
-					Serial.println(F("[filename]"));
-				}
-				break;
-			case Interconnect::DeleteFile:
-				if (payload.available()) {
-					String s(payload.convertToString());
-					Serial.print(F("Removing file: "));
-					Serial.print(s);
-					Serial.print(F("..."));
-					bool success = false;
-					File f = SD.open(s);
-					if (f) {
-						if (f.isDirectory()) {
-							f.close();
-							success = SD.rmdir(s);
-						} else {
-							f.close();
-							success = SD.remove(s);
-						}
-					}
-					Serial.println(success ? F("Done") : F("Failed"));
-				} else {
-					Serial.print(F("Usage: "));
-					Serial.print((char)header);
-					Serial.println(F("[filename]"));
-				}
-				break;
-			case Interconnect::GetRecord:
-				if (payload.available()) {
-					DateTime dt(payload.convertToString());
-					SensorRecord r[4];
-					unsigned found = sensorLog.fetch(dt, r, 4);
-					Serial.print(F("Found records: "));
-					Serial.println(found);
-					for (unsigned i=0; i<found; i++) {
-						Serial.print(" r[");
-						Serial.print(i);
-						Serial.print("]: ");
-						Serial.println(r[i].toCsv());
-					}
-				} else {
-					Serial.print(F("Usage: "));
-					Serial.print((char)header);
-					Serial.println(F("[dateTime]"));
-				}
-				break;
-
-
-
 
 			case Interconnect::SendToDatabaseAllow:
 				if (sender == LinkId::Wifi) {
@@ -247,42 +164,38 @@ void loop() {
 						// Increment synchronisation key for next time
 						sendToDatabaseSyncKey = '0' + ((sendToDatabaseSyncKey + 1 - '0') % ('Z' - '0'));
 
-						// Make sure there is actually data to send
-						if (sensorLog.isUploadRequired() || !settings.isServerInformed()) {
+						// Generate JSON payload
+						// This will contain the controller status and/or a list of sensor records
+						payload.clear();
 
-							// Generate JSON payload
-							// This will contain the controller status and/or a list of sensor records
-							payload.clear();
+						// Add the system GUID
+						payload.print(F("{\"Guid\":\""));
+						payload.print(settings.systemGuid());
+						payload.print('\"');
 
-							// Add the system GUID
-							payload.print(F("{\"Guid\":\""));
-							payload.print(settings.systemGuid());
-							payload.print('\"');
+						// Add the system status, if required
+						if (!settings.isServerInformed()) {
+							payload.print(F(",\"Status\":"));
+							settings.toJson(payload);
+						}
 
-							// Add the system status, if required
-							if (!settings.isServerInformed()) {
-								payload.print(F(",\"Status\":"));
-								settings.toJson(payload);
-							}
+						// Add any records which need to be uploaded
+						if (sensorLog.isUploadRequired() && sensorLog.lastUploadedIsSet()) {
+							payload.print(F(",\"Records\":"));
+							sensorLog.fetchForUpload(payload, 16);
+						}
 
-							// Add any records which need to be uploaded
-							if (sensorLog.isUploadRequired() && sensorLog.lastUploadedIsSet()) {
-								payload.print(F(",\"Records\":"));
-								sensorLog.fetchForUpload(payload, 16);
-							}
+						// Finish up
+						payload.print('}');
 
-							// Finish up
-							payload.print('}');
+						// Output a copy of the data to the console, if required
+						#if VERBOSE_INTERLINK
+						{ByteQueue temp(payload.duplicate()); linkPC.send(header, temp);}
+						#endif
 
-							// Output a copy of the data to the console, if required
-							#if VERBOSE_INTERLINK
-							{ByteQueue temp(payload.duplicate()); linkPC.send(header, temp);}
-							#endif
-
-							// Send data to ESP8266, so that it can forward it to the database
-							if (linkWifi.send(Interconnect::SendToDatabase, payload)) {
-								settings.setServerInformed();
-							}
+						// Send data to ESP8266, so that it can forward it to the database
+						if (linkWifi.send(Interconnect::SendToDatabase, payload)) {
+							settings.setServerInformed();
 						}
 					}
 				}
@@ -319,17 +232,8 @@ void loop() {
 			case Interconnect::SendToDatabaseFailure:
 				if (sender == LinkId::Wifi) {
 
-					// TODO: Improve this. Add better error handling or something
-					String msg(F("SendFailure: "));
-					msg += payload.convertToString();
-					linkPC.send(Interconnect::GeneralNotification, msg);
-
-					// Output a copy of the data to the console, if required
-					#if VERBOSE_INTERLINK
-					linkPC.send(header, msg);
-				} else {
+					// Forward message to console
 					linkPC.send(header, payload);
-					#endif
 				}
 				break;
 
@@ -413,40 +317,6 @@ void loop() {
 				payload.clear();
 				payload.print(F("GUID:"));
 				payload.print(settings.systemGuid());
-				switch (sender) {
-					case LinkId::PC: linkPC.send(header, payload); break;
-					case LinkId::BT: linkBT.send(header, payload); break;
-					#if VERBOSE_INTERLINK
-					default: linkPC.send(header, payload); break;
-					#endif
-				}
-				break;
-
-			case Interconnect::SetAutoUpload: {
-
-				// Save new auto-upload state
-				// Send reply
-				char c = (payload.available() > 0) ? payload.read() : 0;
-				settings.autoUpload((c != '0') && (c != 'f') && (c != 'F'));
-				settings.save();
-				payload.clear();
-				payload.print(F("Ok"));
-				switch (sender) {
-					case LinkId::PC: linkPC.send(header, payload); break;
-					case LinkId::BT: linkBT.send(header, payload); break;
-					#if VERBOSE_INTERLINK
-					default: linkPC.send(header, payload); break;
-					#endif
-				}
-				break;
-			}
-
-			case Interconnect::GetAutoUnload:
-
-				// Current auto-upload state was requested
-				payload.clear();
-				payload.print(F("AutoUpload:"));
-				payload.print(settings.autoUpload());
 				switch (sender) {
 					case LinkId::PC: linkPC.send(header, payload); break;
 					case LinkId::BT: linkBT.send(header, payload); break;

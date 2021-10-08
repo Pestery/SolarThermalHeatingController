@@ -99,23 +99,11 @@ public:
 		// Payload is the current Epoch time as a string
 		SetTime = 'e',
 
-		// A debug command used to toggle automatic uploading of data to database
-		// Payload should be either a '0' or '1', to represent either false or true respectively
-		SetAutoUpload = 'u',
-		GetAutoUnload = 'U',
-
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
 		// Payload is the (probably JSON) message to be sent to the server
 		DebugSendToServerKeepHeaders = 'T',
 		DebugSendToServer = 't',
-
-
-		ListFiles = 'l',
-		ReadFile = 'L',
-		DeleteFile = 'D',
-		GetRecord = 'R',
-
 
 		// A debug command used to echo back data to the source
 		// Payload is the test message
