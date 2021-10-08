@@ -70,7 +70,7 @@ namespace SunBatherAPI.Controllers
                                 TemperatureValueInput = record.Tin,
                                 TemperatureValueOutput = record.Tout,
                                 TemperatureValueRoof = record.Troof,
-                                SolarIrradiance = 0,
+                                SolarIrradiance = record.Solar,
                                 Cost = 0,
                                 Emissions = 0,
                                 EnergyAdsorbed = 0,

@@ -25,9 +25,12 @@ Settings settings;
 // Sensor log (which stores sensor data)
 SensorLog sensorLog;
 
+// Strategy class (brain)
+Strategy strategy(settings);
+
 // Controller timers
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
-Timer timerReadSensors(10 * 1000);
+Timer timerReadSensors(5 * 1000);
 Timer timerSendToDatabase(20 * 1000);
 Timer timerUpdateCurrentTime(2 * 1000);
 
@@ -70,8 +73,8 @@ void setup() {
 	SERIAL_BLUETOOTH.begin(9600); // For Bluetooth module
 	while (!SERIAL_BLUETOOTH) {}
 
-	// Setup for Pump Control Pin
-	pinMode(Strategy::pumpPin, OUTPUT);
+	// Setup for Strategy
+	strategy.begin();
 
 	// Initialise settings data
 	Serial.print(F("Loading settings..."));
@@ -140,6 +143,9 @@ void loop() {
 		linkPC.send(Interconnect::GetTime);
 		#endif
 	}
+
+	// Update controller strategy
+	strategy.update();
 
 	// Update interconnects
 	linkWifi.update();
@@ -288,7 +294,7 @@ void loop() {
 
 				// Settings data was requested
 				payload.clear();
-				settings.toJson(payload);
+				settings.toJson(payload, true);
 				switch (sender) {
 					case LinkId::PC: linkPC.send(header, payload); break;
 					case LinkId::BT: linkBT.send(header, payload); break;
