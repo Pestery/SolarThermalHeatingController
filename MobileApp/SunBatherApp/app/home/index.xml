@@ -14,8 +14,8 @@
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="system-datafield">
                     <Label col="0" text="&#xf011;" textWrap="true" class="fas"/>
-                    <Label col="1" text="&#xf140;" textWrap="true" class="fa"/>
-                    <Label col="2" text="&#xf2c7;" textWrap="true" class="fa"  />
+                    <Label col="1" text="&#xf140;" textWrap="true" class="fas"/>
+                    <Label col="2" text="&#xf2c7;" textWrap="true" class="fas"  />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="system-datafield-data">
                     <Label col="0" text="{{ pumpStatus }}" textWrap="true" />                     
@@ -24,8 +24,8 @@
                 </GridLayout>
 
                 <GridLayout rows="*" columns="*,*" class="system-datafield">
-                    <Label col="0" text="Current Roof Temperature" textWrap="true" class="system-data-sub-header" />
-                    <Label col="1" text="&#xf185;" textWrap="true" class="fas" />
+                    <Label col="0" text="&#xf185;" textWrap="true" class="fas" />
+                    <Label col="1" text="&#xf5ba;" textWrap="true" class="fas" />
                   
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*" class="system-datafield-data">
@@ -35,7 +35,7 @@
             </StackLayout>
             <StackLayout class="graph-data">
                 <StackLayout class="graph-data-header">
-                    <Label text="Energy Adsorbed" textWrap="true" />
+                    <Label text="Solar Irradiance" textWrap="true" />
                 </StackLayout>
                 <GridLayout rows="*, 25" class="graph-data-info">
                     <chart:RadCartesianChart id="cartesianChart">
@@ -46,12 +46,12 @@
                             <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}" class="vertical-Axis" />
                         </chart:RadCartesianChart.verticalAxis>
                         <chart:RadCartesianChart.series>
-                            <chart:LineSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}"/>
+                            <chart:AreaSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}"></chart:AreaSeries>
                         </chart:RadCartesianChart.series>
                         <chart:RadCartesianChart.palettes>
                             <chart:Palette >
                                 <chart:Palette.entries>
-                                    <chart:PaletteEntry  strokeColor="#1e73be" />
+                                    <chart:PaletteEntry  fillColor="#d8e3f2" strokeColor="#1e73be" />
                                 </chart:Palette.entries>
                             </chart:Palette>
                         </chart:RadCartesianChart.palettes>

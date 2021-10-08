@@ -104,32 +104,6 @@ function searchBluetoothViewModel(viewModel) {
     viewModel.set('showWriteLogo', false);
 }
 
-// for initiallising connect page, determines if device is already connect
-function connectPageIntialize(viewModel, isConnected) {
-    var getPUUID = isConnected.getString("pUUID"); // gets stored string
-    viewModel.set('headerSelected', 4); // needed for underline in header
-
-    // only try and see if connected if getPUUID has any value
-    // if finds a device alreaady connected, then go straight to wifi details page, else go to normal page
-    if (getPUUID != undefined && getPUUID != "") {
-        bluetooth.isConnected({ 
-            UUID: getPUUID
-            }).then(connected => {
-                console.log("Connected? " + connected)
-                if (connected) {
-                    wifiDetailsView(viewModel);
-                } else {
-                    searchBluetoothViewModel(viewModel);
-                }
-            }, error => {
-                console.log(error);
-                searchBluetoothViewModel(viewModel);
-            });
-    } else {
-        searchBluetoothViewModel(viewModel);
-    }
-}
-
 function startScanningFunction(viewModel) {
     // first check if bluetooth is enabled
     bluetooth.isBluetoothEnabled().then(enabled => {
@@ -261,6 +235,32 @@ function sendWifiDetails(viewModel, appSet) {
             console.log("write error: " + err);
             updateWifiLoadView(viewModel, false, true, false, false);
     });
+}
+
+// for initiallising connect page, determines if device is already connect
+function connectPageIntialize(viewModel, isConnected) {
+    var getPUUID = isConnected.getString("pUUID"); // gets stored string
+    viewModel.set('headerSelected', 3); // needed for underline in header
+
+    // only try and see if connected if getPUUID has any value
+    // if finds a device alreaady connected, then go straight to wifi details page, else go to normal page
+    if (getPUUID != undefined && getPUUID != "") {
+        bluetooth.isConnected({ 
+            UUID: getPUUID
+            }).then(connected => {
+                console.log("Connected? " + connected)
+                if (connected) {
+                    wifiDetailsView(viewModel);
+                } else {
+                    searchBluetoothViewModel(viewModel);
+                }
+            }, error => {
+                console.log(error);
+                searchBluetoothViewModel(viewModel);
+            });
+    } else {
+        searchBluetoothViewModel(viewModel);
+    }
 }
 
 export function ConnectViewModel() {

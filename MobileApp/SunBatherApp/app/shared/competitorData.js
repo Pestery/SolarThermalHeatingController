@@ -35,6 +35,10 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
     thermalPowerAbsorbed = getThermalPower(arrayData[0]);
     arrayData[0][databaseField] = min = max = average = (thermalPowerAbsorbed*energyConstant)/heaterConstant;
     arrayData[0].readDateTime = new Date(arrayData[0].readDateTime).getTime();
+    console.log();
+    console.log("Energy Constant: " + energyConstant);
+    console.log("Heater Constant: " + heaterConstant);
+    console.log("Before Value: " + arrayData[10][databaseField]);
 
     for (i = 1; i < arrayData.length; i++){
         arrayData[i].readDateTime = new Date(arrayData[i].readDateTime).getTime();
@@ -44,6 +48,7 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
         max = commonFunction.findMax(arrayData[i][databaseField], max);
         average = average + arrayData[i][databaseField];
     }
+    console.log("After Value: " + arrayData[10][databaseField]);
 
     arrayDataInfo.graphDataArray = arrayData;
     arrayDataInfo.min = min;  
