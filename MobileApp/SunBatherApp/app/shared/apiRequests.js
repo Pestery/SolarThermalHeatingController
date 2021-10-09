@@ -86,3 +86,49 @@ export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, gra
         console.log(error);
     });
 } 
+
+// peforms put requests for the database of updated system status
+export function putSystemStatus(updatedPumpMode, updatedManualPumpStatus, updatePumpStatus, updateSetTemperature) {
+    var keyID = apiCall.keyID; // this has to be here
+    Http.request({
+      url: apiCall.putSystemStatus,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      content: JSON.stringify({
+        Id: keyID,
+        SystemIdentityID: keyID,
+        PumpMode: updatedPumpMode,
+        SetTemperature: updateSetTemperature,
+        ManualPumpOn: updatedManualPumpStatus,
+        PumpStatus: updatePumpStatus,
+      }),
+    }).then(response => {
+      var result = response.content.toJSON();
+      console.log(result)
+    }, error => { 
+        console.error(error);
+    });
+}
+
+// peforms get requests for the database of current system status
+export function getSystemStatus(viewModel) {
+    Http.getJSON(apiCall.getSystemStatus).then(result => {
+        viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
+        viewModel.set('setTemp', result.setTemperature);       
+        viewModel.set('manualPumpStatus', commonFunction.convertOnOff(result.manualPumpOn));
+        viewModel.set('pumpMode', commonFunction.convertAutoManual(result.pumpMode));
+        viewModel.set('showDetails', !result.pumpMode);
+    }, error => {
+        console.log(error);
+    });
+}
+
+// gets the latest recorded temperature
+export function getRecordEventLatest(viewModel) {
+    Http.getJSON(apiCall.getRecordEventLatest).then(result => {
+        viewModel.set('livePoolTemp', commonFunction.addCelcius(result.temperatureValueInput));
+    }, error => {
+        console.log(error);
+    });
+}
+

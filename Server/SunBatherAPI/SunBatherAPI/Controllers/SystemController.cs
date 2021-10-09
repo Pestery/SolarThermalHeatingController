@@ -30,8 +30,8 @@ namespace SunBatherAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ControllerReply>> Post(ControllerPost param)
         {
-            //var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == 3);
-            //System.Diagnostics.Debug.WriteLine("GUID: " + temp.ProductId);
+            var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == 1);
+            System.Diagnostics.Debug.WriteLine("GUID: " + temp.ProductId);
 
             // Make sure that something was posted
             if (param == null) return NoContent();
