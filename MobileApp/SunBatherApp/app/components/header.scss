@@ -14,4 +14,9 @@
     padding-right: 20;
   }
 
+  .header-buttons Label.active{
+    border-bottom-color:  #ff8c00;
+    border-bottom-width: 3;
+    height: 34;
+  }
 }

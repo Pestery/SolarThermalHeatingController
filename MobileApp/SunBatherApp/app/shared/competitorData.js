@@ -10,8 +10,8 @@ var electricityCostpkW = 0.4;   //default cost of 40pc per kW
 //constants
 const MASSFLOWRATE = 1.7448; //kg/s
 const WATERHEATCAPACITY = 4.184; //kJ/kg.K
-const GASEMISSION = 499; // default 499 CO2e/kWH
-const COALEMISSION = 888; //defualt is 888 measurement in CO2e/kWh
+const GASEMISSION = 0.499; // default 499 CO2e/kWH (g) changed to c02e/KWh(kg)
+const COALEMISSION = 0.888; //defualt is 888 measurement in CO2e/kWh
 
 //COP's for the 4 kinds of heaters
 const ELECTRICHEATER1 = 5.58 //RTHP026-1
@@ -20,9 +20,15 @@ const GASHEATER1 = 0.79 //P0127
 const GASHEATER2 = 0.75 //127 Premium
 
 function getThermalPower(data) {
+    //console.log(data);
+    
     var inletTemp = data.temperatureValueInput; //Degrees Celcius
     var outletTemp = data.temperatureValueOutput; //Degrees Celcius
-    var deltaTemp = outletTemp - inletTemp; //Degrees Celcius
+    var deltaTemp = outletTemp - inletTemp; //Degrees Celcius 
+    if(deltaTemp < 0) {
+        deltaTemp = 0;
+    }
+
     return deltaTemp*WATERHEATCAPACITY*MASSFLOWRATE; //KW
 }
 
@@ -31,7 +37,6 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
     var arrayDataInfo = {};
     var min, max, average;
     var thermalPowerAbsorbed;
-
     thermalPowerAbsorbed = getThermalPower(arrayData[0]);
     arrayData[0][databaseField] = min = max = average = (thermalPowerAbsorbed*energyConstant)/heaterConstant;
     arrayData[0].readDateTime = new Date(arrayData[0].readDateTime).getTime();
@@ -48,6 +53,7 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
         max = commonFunction.findMax(arrayData[i][databaseField], max);
         average = average + arrayData[i][databaseField];
     }
+    console.log("hello");
     console.log("After Value: " + arrayData[10][databaseField]);
 
     arrayDataInfo.graphDataArray = arrayData;

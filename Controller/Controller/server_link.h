@@ -25,6 +25,7 @@ Content-Length: 81
 #include <EEPROM.h>
 #include "server_address.h"
 #include "timer.h"
+#include "byte_queue.h"
 
 // A class used to manage communication with the server/database
 class ServerLink {
@@ -38,11 +39,12 @@ public:
 	// Any reply from the server is stored in the 'reply' parameter
 	// In the case of an error, the error message maybe stored in the 'reply' parameter
 	// Returns true on success, or false on failure
-	bool sendJson(const String& payload, String& reply, bool keepHeaders = false) {
+	bool sendJson(const String& payload, ByteQueue& reply, bool keepHeaders = false) {
 
 		// Make sure the wifi is currently connected
 		if (WiFi.status() != WL_CONNECTED) {
-			reply = F("Wifi not connected");
+			reply.clear();
+			reply.print(F("Wifi not connected"));
 			return false;
 		}
 
@@ -83,7 +85,8 @@ public:
 
 		// If here then failed to connect to server
 		// Return failed to send data
-		reply = F("Failed to connect to server");
+		reply.clear();
+		reply.print(F("Failed to connect to server"));
 		return false;
 	}
 
@@ -129,7 +132,7 @@ private:
 	// A POST request is used as the container, and the data must be in JSON format
 	// This method is used internally by sendJson() to manage sending and receiving data from the server
 	// Returns true on success, or false on failure
-	bool internalSendJson(WiFiClient& client, const String& payload, String& reply, bool keepHeaders) {
+	bool internalSendJson(WiFiClient& client, const String& payload, ByteQueue& reply, bool keepHeaders) {
 		bool result = false;
 
 		// Send POST request
@@ -155,33 +158,35 @@ private:
 	// A POST request is used as the container, and the data must be in JSON format
 	// This method is used internally by sendJson() to manage sending data to the server
 	void sendPostRequestJson(WiFiClient& client, const String& payload) {
+		String header;
 
 		// POST /echo/post/json HTTP/1.1
-		client.print(F("POST "));
-		client.print(m_address.path());
-		client.print(F(" HTTP/1.1\r\n"));
+		header = F("POST ");
+		header += m_address.path();
+		header += F(" HTTP/1.1\r\n");
 
 		// Host: website.com
-		client.print(F("Host: "));
-		client.print(m_address.host());
-		client.print(':');
-		client.print(m_address.port());
-		client.print(F("\r\n"));
+		header += F("Host: ");
+		header += m_address.host();
+		header += ':';
+		header += m_address.port();
+		header += F("\r\n");
 
 		// Accept: application/json
 		// Content-Type: application/json
-		client.print(F("Accept: application/json\r\n"));
-		client.print(F("Content-Type: application/json\r\n"));
+		header += F("Accept: application/json\r\n");
+		header += F("Content-Type: application/json\r\n");
 
 		// Content-Length: (some length)
-		client.print(F("Content-Length: "));
-		client.print(payload.length());
-		client.print(F("\r\n"));
+		header += F("Content-Length: ");
+		header += payload.length();
+		header += F("\r\n");
 
 		// Empty line which marks the end of the header
-		client.print(F("\r\n"));
+		header += F("\r\n");
 
-		// Payload
+		// Send header and payload
+		client.print(header);
 		client.print(payload);
 		client.print(F("\r\n"));
 	}
@@ -189,22 +194,22 @@ private:
 	// Process the reply after sending JSON data via sendJson()
 	// A POST request is used as the container, and the data must be in JSON format
 	// Returns true on success, or false on failure
-	bool processReplyJson(WiFiClient& client, int& statusCode, String& reply, bool keepHeaders) {
+	bool processReplyJson(WiFiClient& client, int& statusCode, ByteQueue& reply, bool keepHeaders) {
 		unsigned contentLength = 0;
 		bool chunkedReply = false;
 		String temp;
 		temp.reserve(100);
-		reply = String();
+		reply.clear();
 
 		// Get the status line of the response
 		// This is the first line returned
 		temp = getNextLine(client);
-		if (keepHeaders) {reply = temp; reply += '\n';}
+		if (keepHeaders) reply.println(temp);
 
 		// Get status code, from the status line
 		statusCode = getStatusCode(temp.c_str());
 		if (!statusCode) {
-			if (!keepHeaders) reply = F("Failed to get status-code from reply");
+			if (!keepHeaders) reply.print(F("Failed to get status-code from reply"));
 			return false;
 		}
 
@@ -214,7 +219,7 @@ private:
 
 			// Get next line from header section
 			temp = getNextLine(client);
-			if (keepHeaders) {reply += temp; reply += '\n';}
+			if (keepHeaders) reply.println(temp);
 
 			// Check for empty line, which marks the end of the header section
 			if (temp.length() == 0) break;
@@ -240,7 +245,7 @@ private:
 					if (temp == F("chunked")) {
 						chunkedReply = true;
 					} else {
-						if (!keepHeaders) reply = F("Server sent unrecognised format in reply");
+						if (!keepHeaders) reply.print(F("Server sent unrecognised format in reply"));
 						return false;
 					}
 				}
@@ -253,19 +258,17 @@ private:
 
 			// Check if keeping headers
 			if (keepHeaders) {
-				reply += getNextLength(client, contentLength);
-				reply += '\n';
+				reply.println(getNextLength(client, contentLength));
 			} else {
-				reply = getNextLength(client, contentLength);
+				reply.print(getNextLength(client, contentLength));
 			}
 		} else if (chunkedReply) {
 
 			// Check if keeping headers
 			if (keepHeaders) {
-				reply += getNextChunked(client);
-				reply += '\n';
+				reply.println(getNextChunked(client));
 			} else {
-				reply = getNextChunked(client);
+				reply.print(getNextChunked(client));
 			}
 		}
 		return true;

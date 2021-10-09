@@ -9,7 +9,7 @@
 // Include headers
 #include <string>
 
-// A minimal replacement for the String class within the
+// A minimal replacement for the Print class within the Arduino SDK
 class Stream {
 	std::string m_writeBuffer;
 	std::string m_readBuffer;

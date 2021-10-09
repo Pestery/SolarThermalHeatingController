@@ -14,19 +14,17 @@
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="system-datafield">
                     <Label col="0" text="&#xf011;" textWrap="true" class="fas"/>
-                    <Label col="1" text="&#xf140;" textWrap="true" class="fas"/>
-                    <Label col="2" text="&#xf2c7;" textWrap="true" class="fas"  />
+                    <Label col="1" text="&#xf05b;" textWrap="true" class="fas"/>
+                    <Label col="2" text="&#xf5c5;" textWrap="true" class="fas"  />
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*,*" class="system-datafield-data">
                     <Label col="0" text="{{ pumpStatus }}" textWrap="true" />                     
                     <Label col="1" text="{{ setTemp }}" textWrap="true" /> 
                     <Label col="2" text="{{ poolTemp }}" textWrap="true" />            
                 </GridLayout>
-
                 <GridLayout rows="*" columns="*,*" class="system-datafield">
                     <Label col="0" text="&#xf185;" textWrap="true" class="fas" />
                     <Label col="1" text="&#xf5ba;" textWrap="true" class="fas" />
-                  
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*" class="system-datafield-data">
                     <Label col="0" text="{{ roofTemp }}" textWrap="true" />
