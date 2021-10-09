@@ -45,26 +45,22 @@ struct SensorRecord {
 			// Get temperatureInlet
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			temperatureInlet = s.toFloat();
+			temperatureInlet = (s.length() > 0) ? s.toFloat() : 0;
 
 			// Get temperatureOutlet
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			temperatureOutlet = s.toFloat();
+			temperatureOutlet = (s.length() > 0) ? s.toFloat() : 0;
 
 			// Get temperatureRoof
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			temperatureRoof = s.toFloat();
+			temperatureRoof = (s.length() > 0) ? s.toFloat() : 0;
 
 			// Get solarIrradiance
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			solarIrradiance = s.toFloat();
+			solarIrradiance = (s.length() > 0) ? s.toFloat() : 0;
 
 			// If here then success
 			return true;
