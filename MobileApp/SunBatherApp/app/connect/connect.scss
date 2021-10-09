@@ -44,6 +44,13 @@
         background-color: #1e73be;
     }
 
+    .button-disconnect {
+        @extend .field-header;
+        margin-top: 200;
+        margin-bottom: 1;
+        background-color: #1e73be;
+    }
+
     .opaque {
         @extend .field-header;
         margin-top: 10;
@@ -56,6 +63,13 @@
     .search-logo {
         margin-top: 10;
         height: 20;
+    }
+
+    .success-logo {
+        margin-top: 10;
+        font-size: 35;
+        color: black;
+        height: 42;
     }
 
     .list-data {

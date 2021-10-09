@@ -11,7 +11,7 @@
     .graph-data-page-selected {
         font-size: 18;
         margin-top: 2;
-        height: 300; 
+        height: 306; 
     }
 
     .field-header {
@@ -99,15 +99,16 @@
     .list-data {
         font-size: 15;
         margin-top: 6;
+        margin-bottom: -2;
         background-color: #1e73be;
-
+        color: white;
+        height: 194;
     }
 
     .list-data Label.active {
         font-size: 15;
         margin-top: 6;
         background-color: #1e73be;
-        
     }
 
     .horizontal-Axis {

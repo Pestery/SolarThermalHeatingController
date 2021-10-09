@@ -53,7 +53,7 @@ namespace Misc {
 	// Returns the string section beginning at 'startAt', and ending just before the next 'separator' or the end of the string, whichever is found first
 	String getNextSubString(const String& source, int& startAt, char separator = ',') {
 		String result;
-		if (startAt >= 0) {
+		if ((startAt >= 0) && (startAt < source.length())) {
 
 			// Find next comma
 			int finish = source.indexOf(separator, startAt);

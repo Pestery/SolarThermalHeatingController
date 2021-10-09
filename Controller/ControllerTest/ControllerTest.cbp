@@ -37,6 +37,7 @@
 		<Unit filename="../Controller/server_link.h" />
 		<Unit filename="../Controller/settings.h" />
 		<Unit filename="../Controller/state_flags.h" />
+		<Unit filename="../Controller/strategy.h" />
 		<Unit filename="../Controller/time_keeper.h" />
 		<Unit filename="../Controller/timer.h" />
 		<Unit filename="../Controller/wifi_helper.h" />

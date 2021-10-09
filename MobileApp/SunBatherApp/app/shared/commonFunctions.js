@@ -90,8 +90,8 @@ function loopThroughData(arrayData, databaseField) {
   }
 
   arrayDataInfo.graphDataArray = arrayData;
-  arrayDataInfo.min = min;  
-  arrayDataInfo.max = max;  
+  arrayDataInfo.min = min.toFixed(2);  
+  arrayDataInfo.max = max.toFixed(2);  
   arrayDataInfo.average = averageRound(average, arrayData.length); 
 
   return arrayDataInfo;

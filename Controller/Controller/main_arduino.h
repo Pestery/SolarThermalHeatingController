@@ -17,6 +17,7 @@
 #include "settings.h"
 #include "bluetooth_interconnect.h"
 #include "time_keeper.h"
+#include "strategy.h"
 
 // Current controller settings and status
 Settings settings;
@@ -24,9 +25,12 @@ Settings settings;
 // Sensor log (which stores sensor data)
 SensorLog sensorLog;
 
+// Strategy class (brain)
+Strategy strategy(settings);
+
 // Controller timers
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
-Timer timerReadSensors(10 * 1000);
+Timer timerReadSensors(5 * 1000);
 Timer timerSendToDatabase(20 * 1000);
 Timer timerUpdateCurrentTime(2 * 1000);
 
@@ -68,6 +72,9 @@ void setup() {
 	// Setup serial port for Bluetooth module connection
 	SERIAL_BLUETOOTH.begin(9600); // For Bluetooth module
 	while (!SERIAL_BLUETOOTH) {}
+
+	// Setup for Strategy
+	strategy.begin();
 
 	// Initialise settings data
 	Serial.print(F("Loading settings..."));
@@ -136,6 +143,9 @@ void loop() {
 		linkPC.send(Interconnect::GetTime);
 		#endif
 	}
+
+	// Update controller strategy
+	strategy.update();
 
 	// Update interconnects
 	linkWifi.update();
@@ -284,7 +294,7 @@ void loop() {
 
 				// Settings data was requested
 				payload.clear();
-				settings.toJson(payload);
+				settings.toJson(payload, true);
 				switch (sender) {
 					case LinkId::PC: linkPC.send(header, payload); break;
 					case LinkId::BT: linkBT.send(header, payload); break;
@@ -309,6 +319,9 @@ void loop() {
 					default: linkPC.send(header, payload); break;
 					#endif
 				}
+
+				// Reset values which should be re-fetched from the database
+				sensorLog.lastUploaded(0);
 				break;
 
 			case Interconnect::GetGuid:
@@ -356,11 +369,17 @@ void loop() {
 				}
 				break;
 
+			case Interconnect::SetServerAddress:
+
+				// Reset values which should be re-fetched from the database
+				// Then fall through to other code (do not break;)
+				sensorLog.lastUploaded(0);
+
 			case Interconnect::EchoESP8266:
 			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer:
-			case Interconnect::SetServerAddress:
 			case Interconnect::GetServerAddress:
+			case Interconnect::SetWifiInfo:
 			case Interconnect::GetWifiInfo:
 
 				// Received a command which needs to be forwarded to the ESP8266

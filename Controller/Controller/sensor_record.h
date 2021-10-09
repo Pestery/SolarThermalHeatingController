@@ -14,6 +14,7 @@ struct SensorRecord {
 	float temperatureInlet;
 	float temperatureOutlet;
 	float temperatureRoof;
+	float solarIrradiance;
 
 	// Reset all values to default
 	void reset() {
@@ -21,6 +22,7 @@ struct SensorRecord {
 		temperatureInlet = 0;
 		temperatureOutlet = 0;
 		temperatureRoof = 0;
+		solarIrradiance = 0;
 	}
 
 	// Initialise this class by decoding a CSV-string representation of the data.
@@ -43,20 +45,22 @@ struct SensorRecord {
 			// Get temperatureInlet
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			temperatureInlet = s.toFloat();
+			temperatureInlet = (s.length() > 0) ? s.toFloat() : 0;
 
 			// Get temperatureOutlet
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			temperatureOutlet = s.toFloat();
+			temperatureOutlet = (s.length() > 0) ? s.toFloat() : 0;
 
 			// Get temperatureRoof
 			s = Misc::getNextSubString(data, start, ',');
 			s.trim();
-			if (s.length() == 0) break;
-			temperatureRoof = s.toFloat();
+			temperatureRoof = (s.length() > 0) ? s.toFloat() : 0;
+
+			// Get solarIrradiance
+			s = Misc::getNextSubString(data, start, ',');
+			s.trim();
+			solarIrradiance = (s.length() > 0) ? s.toFloat() : 0;
 
 			// If here then success
 			return true;
@@ -83,6 +87,8 @@ struct SensorRecord {
 		result += String(temperatureOutlet);
 		result += ',';
 		result += String(temperatureRoof);
+		result += ',';
+		result += String(solarIrradiance);
 		return result;
 	}
 
@@ -110,6 +116,9 @@ struct SensorRecord {
 		outAppend.print(F(",\"Troof\":"));
 		outAppend.print(temperatureRoof);
 
+		outAppend.print(F(",\"Solar\":"));
+		outAppend.print(solarIrradiance);
+
 		outAppend.print('}');
 	}
 
@@ -117,8 +126,13 @@ struct SensorRecord {
 	// This will also increment the index value
 	void readAll() {
 		temperatureInlet = readThermistor(A0); // A0 seems to be defined
-		temperatureOutlet = 0;
-		temperatureRoof = 0;
+		temperatureOutlet = temperatureInlet;
+
+		// TODO: For testing only!!!
+		float t = 0.5f * (1.0f + sinf(3.14159265359f * ((float)millis() / (120.0f * 1000.0f))));
+
+		temperatureRoof = 20 + (t * 10);
+		solarIrradiance = 2000 * t;
 	}
 
 	// Convert the raw analogue input from a thermistor temperature sensor to a temperature value in Celsius
@@ -155,6 +169,7 @@ struct SensorRecord {
 			temperatureInlet = rhs.temperatureInlet;
 			temperatureOutlet = rhs.temperatureOutlet;
 			temperatureRoof = rhs.temperatureRoof;
+			solarIrradiance = rhs.solarIrradiance;
 		}
 		return *this;
 	}

@@ -35,6 +35,11 @@ namespace SunBatherAPI.Models
             /// Temperature of roof.
             /// </summary>
             public float Troof { get; set; }
+
+            /// <summary>
+            /// Solar irradiance level.
+            /// </summary>
+            public float Solar { get; set; }
         }
 
         /// <summary>

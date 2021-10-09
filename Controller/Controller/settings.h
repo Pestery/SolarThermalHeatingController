@@ -93,7 +93,6 @@ public:
 			m_pumpStatus = newValue;
 			m_isServerInformed = false;
 		}
-
 	}
 	bool pumpStatus() const {
 		return m_pumpStatus;

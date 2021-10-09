@@ -26,7 +26,7 @@ namespace SunBatherAPI
                 try
                 {
                     var context = services.GetRequiredService<DataContext>();
-                    DBInitializer.Initialize(context);
+                    //DBInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {

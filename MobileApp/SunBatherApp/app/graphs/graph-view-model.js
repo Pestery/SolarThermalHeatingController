@@ -39,7 +39,7 @@ function graphPageIntialize(viewModel) {
   viewModel.set('graphOptions', graphOptionList);
 
   // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done
-  var liveData = false;
+  var liveData = true; //was false 
   var dateInfo = commonFunction.isLiveData(liveData);
 
   // for getRequest
