@@ -46,9 +46,13 @@ export function UserViewModel() {
     });
 
     Http.getJSON(apiCall.getRecordEventLatest).then(result => {
-      viewModel.set('poolTemp', commonFunction.addCelcius(result.temperatureValueInput));
-      viewModel.set('roofTemp', commonFunction.addCelcius(result.temperatureValueRoof));
-      viewModel.set('currentUV', commonFunction.addUV(result.solarIrradiance));
+      console.log(result);
+      var temp = result.temperatureValueInput.toFixed(2);
+      var roofTemp = result.temperatureValueOutput.toFixed(2); 
+      var currentUV = result.solarIrradiance.toFixed(2);
+      viewModel.set('poolTemp', commonFunction.addCelcius(temp));
+      viewModel.set('roofTemp', commonFunction.addCelcius(roofTemp));
+      viewModel.set('currentUV', commonFunction.addUV(currentUV));
     }, error => {
       console.log(error);
     });
