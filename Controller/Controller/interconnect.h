@@ -244,7 +244,8 @@ public:
 
 	// Extract a received message from the interconnect
 	// Returns false if no waiting messages
-	// Returns true if a message was extracted and placed in the 'out' parameters
+
+	// Returns true if a message was extracted and placed in the 'out' parameters (may block if message is longer than receive buffer)
 	bool receive(Type& outHeader, ByteQueue& outPayload) {
 
 		// Check if any messages are waiting

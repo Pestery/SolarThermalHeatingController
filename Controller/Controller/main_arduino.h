@@ -361,6 +361,7 @@ void loop() {
 			case Interconnect::DebugSendToServer:
 			case Interconnect::SetServerAddress:
 			case Interconnect::GetServerAddress:
+			case Interconnect::SetWifiInfo:
 			case Interconnect::GetWifiInfo:
 
 				// Received a command which needs to be forwarded to the ESP8266
