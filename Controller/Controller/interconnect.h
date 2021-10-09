@@ -255,7 +255,6 @@ public:
 
 		// Get the message header
 		uint8_t c = m_recv.pop();
-		//Serial.println(c);
 		if (c == '\n') {
 			m_receivedMessages--;
 			return false;
