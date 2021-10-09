@@ -61,10 +61,8 @@
             </StackLayout>
             <StackLayout class="view-other">
                 <Label text="View Other Graphs" tap="onNavigateGraphs" />
-            </StackLayout> 
-              
+            </StackLayout>   
         </StackLayout>
-           
     </GridLayout>
 </Page>
 
