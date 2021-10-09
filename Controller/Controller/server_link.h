@@ -202,14 +202,20 @@ private:
 		reply.clear();
 
 		// Get the status line of the response
-		// This is the first line returned
-		temp = getNextLine(client);
-		if (keepHeaders) reply.println(temp);
+		// This should be the first line returned, but try a few times if the line is blank
+		for (int i=0; i<4; i++) {
+			temp = getNextLine(client);
+			if (keepHeaders) reply.println(temp);
+			if (temp.length() > 0) break;
+		}
 
 		// Get status code, from the status line
 		statusCode = getStatusCode(temp.c_str());
 		if (!statusCode) {
-			if (!keepHeaders) reply.print(F("Failed to get status-code from reply"));
+			if (!keepHeaders) {
+				reply.print(F("Failed to get status-code from reply from:"));
+				reply.print(temp);
+			}
 			return false;
 		}
 
@@ -301,7 +307,6 @@ private:
 	// Any carriage-return characters '\r' are ignored
 	String getNextLine(WiFiClient& client) {
 		String temp;
-		temp.reserve(100);
 		Timer timeOut(15 * 1000, millis());
 
 		// Loop forever
@@ -317,7 +322,6 @@ private:
 
 			// Get next byte
 			int b = client.read();
-
 			switch (b) {
 
 			case -1:
@@ -339,7 +343,6 @@ private:
 				break;
 			}
 		}
-
 		return temp;
 	}
 

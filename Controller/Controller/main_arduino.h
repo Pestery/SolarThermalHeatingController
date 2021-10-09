@@ -319,6 +319,9 @@ void loop() {
 					default: linkPC.send(header, payload); break;
 					#endif
 				}
+
+				// Reset values which should be re-fetched from the database
+				sensorLog.lastUploaded(0);
 				break;
 
 			case Interconnect::GetGuid:
@@ -366,10 +369,15 @@ void loop() {
 				}
 				break;
 
+			case Interconnect::SetServerAddress:
+
+				// Reset values which should be re-fetched from the database
+				// Then fall through to other code (do not break;)
+				sensorLog.lastUploaded(0);
+
 			case Interconnect::EchoESP8266:
 			case Interconnect::DebugSendToServerKeepHeaders:
 			case Interconnect::DebugSendToServer:
-			case Interconnect::SetServerAddress:
 			case Interconnect::GetServerAddress:
 			case Interconnect::GetWifiInfo:
 
