@@ -1,4 +1,4 @@
-export function compareOptions() {
+function compareOptions() {
   var compareOptionsList = [
     { name: "Cost", nameAbbreviated: "Cost", databaseField: "cost", isSelected: false },
     { name: "Emissions", nameAbbreviated: "Emissions", databaseField: "emissions", isSelected: false },
@@ -7,3 +7,4 @@ export function compareOptions() {
   return compareOptionsList;
 }
 
+module.exports = { compareOptions }

@@ -1,5 +1,5 @@
-const CF = require('../SunBatherApp/app/shared/commonFunctionsMod');
-const graphModel = require("../SunBatherApp/app/models/graphModelMod");
+const CF = require('../SunBatherApp/app/shared/commonFunctions');
+const graphModel = require("../SunBatherApp/app/models/graphModel");
 
 test('Test Convert to Bool', () => {
   expect(CF.convertToBool("autO")).toBe(true);
