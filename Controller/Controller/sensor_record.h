@@ -5,6 +5,7 @@
 #include "misc.h"
 #include "date_time.h"
 #include "byte_queue.h"
+#include "time_keeper.h"
 
 // Holds information about all sensors at a single moment in time.
 struct SensorRecord {
@@ -73,7 +74,7 @@ struct SensorRecord {
 
 	// Generate the headers for the CSV-string representation of the data within this class
 	static String toCsvHeaders() {
-		return String(F("DateTime,TempInlet,TempOutlet,TempRoof"));
+		return String(F("DateTime,TempInlet,TempOutlet,TempRoof,Solar"));
 	}
 
 	// Generate a CSV-string representation of the data within this class
@@ -124,13 +125,18 @@ struct SensorRecord {
 
 	// Read the value of all connected sensors and store it within this class
 	// This will also increment the index value
-	void readAll() {
-		temperatureInlet = readThermistor(A0); // A0 seems to be defined
-		temperatureOutlet = temperatureInlet;
+	void readAll(TimeKeeper* timeKeeper = nullptr) {
+
+		// Record current time within record
+		if (timeKeeper) dateTime = timeKeeper->current();
 
 		// TODO: For testing only!!!
-		float t = 0.5f * (1.0f + sinf(3.14159265359f * ((float)millis() / (120.0f * 1000.0f))));
+		// Sin wave with period of 12 hours (Pi every 6 hours)
+		float t = 0.5f * (1.0f + sinf(3.14159265359f * (float)dateTime.data() / (float)(6ul * 60ul * 60ul)));
 
+		// Record sensor values
+		temperatureInlet = readThermistor(A0); // A0 seems to be defined
+		temperatureOutlet = temperatureInlet;
 		temperatureRoof = 20 + (t * 10);
 		solarIrradiance = 2000 * t;
 	}

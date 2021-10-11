@@ -64,8 +64,7 @@ public:
 
 		// Record data
 		SensorRecord r;
-		r.readAll();
-		r.dateTime = timeKeeper.current();
+		r.readAll(&timeKeeper);
 
 		// Check if using the memory buffer or the SD card
 		if (m_buffer) {
