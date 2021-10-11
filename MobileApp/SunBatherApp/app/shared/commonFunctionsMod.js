@@ -98,52 +98,46 @@ function loopThroughData(arrayData, databaseField) {
   return arrayDataInfo;
 }
 
-// if else can be optimized - JACK
+// finds graph interval length eg. 1 day. This needs to be scaled on the graph, otherwise the x axis can be clutered
 function timePeriod(dateFrom, dateTo, graphDataInfo) {
-  if (dateFrom < dateTo) {
-    var dateFromConverted = new Date(dateFrom);
-    var dateToConvert = new Date(dateTo);
-    var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
-    var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
+  var dateFromConverted = new Date(dateFrom);
+  var dateToConvert = new Date(dateTo);
+  var dateDifference = dateToConvert.getDate() - dateFromConverted.getDate();
+  var monthDifference = dateToConvert.getMonth() - dateFromConverted.getMonth() + (12 * (dateToConvert.getFullYear() - dateFromConverted.getFullYear()));
 
-    if(dateToConvert.getDate() < dateFromConverted.getDate()){
-      monthDifference--;
-    }
+  if(dateToConvert.getDate() < dateFromConverted.getDate()){
+    monthDifference--;
+  }
 
-    if (dateDifference < 0) {
-      dateDifference += 30;
-    }
+  if (dateDifference < 0) {
+    dateDifference += 30;
+  }
 
-    if ((dateDifference <= 1) && (monthDifference <= 0)) {
-      graphDataInfo.xAxisInterval = 6;
-      graphDataInfo.xAxisUnit = "Hour";
-      graphDataInfo.xAxisFormat = "HH:mm";
-    } else if ((dateDifference > 1) && (dateDifference <= 3) && (monthDifference <= 0)) {
-      graphDataInfo.xAxisInterval = 12;
-      graphDataInfo.xAxisUnit = "Hour";
-      graphDataInfo.xAxisFormat = "dd/MM HH:mm";
-    } else if ((dateDifference > 3) && (dateDifference <= 10) && (monthDifference <= 0)){
-      graphDataInfo.xAxisInterval = 2;
-      graphDataInfo.xAxisUnit = "Day";
-      graphDataInfo.xAxisFormat = "dd/MM";
-    } else if ((dateDifference > 10) && (monthDifference <= 0)){
-      graphDataInfo.xAxisInterval = 5;
-      graphDataInfo.xAxisUnit = "Day";
-      graphDataInfo.xAxisFormat = "dd/MM";
-    } else if (monthDifference == 1) {
-      graphDataInfo.xAxisInterval = 6;
-      graphDataInfo.xAxisUnit = "Day";
-      graphDataInfo.xAxisFormat = "dd/MM";
-    } else if (monthDifference > 1) {
-      graphDataInfo.xAxisInterval = 15;
-      graphDataInfo.xAxisUnit = "Day";
-      graphDataInfo.xAxisFormat = "dd/MM";
-    } 
-  } else {
+  if ((dateDifference <= 1) && (monthDifference <= 0)) {
     graphDataInfo.xAxisInterval = 6;
     graphDataInfo.xAxisUnit = "Hour";
     graphDataInfo.xAxisFormat = "HH:mm";
-  }
+  } else if ((dateDifference > 1) && (dateDifference <= 3) && (monthDifference <= 0)) {
+    graphDataInfo.xAxisInterval = 12;
+    graphDataInfo.xAxisUnit = "Hour";
+    graphDataInfo.xAxisFormat = "dd/MM HH:mm";
+  } else if ((dateDifference > 3) && (dateDifference <= 10) && (monthDifference <= 0)){
+    graphDataInfo.xAxisInterval = 2;
+    graphDataInfo.xAxisUnit = "Day";
+    graphDataInfo.xAxisFormat = "dd/MM";
+  } else if ((dateDifference > 10) && (monthDifference <= 0)){
+    graphDataInfo.xAxisInterval = 5;
+    graphDataInfo.xAxisUnit = "Day";
+    graphDataInfo.xAxisFormat = "dd/MM";
+  } else if (monthDifference == 1) {
+    graphDataInfo.xAxisInterval = 6;
+    graphDataInfo.xAxisUnit = "Day";
+    graphDataInfo.xAxisFormat = "dd/MM";
+  } else if (monthDifference > 1) {
+    graphDataInfo.xAxisInterval = 15;
+    graphDataInfo.xAxisUnit = "Day";
+    graphDataInfo.xAxisFormat = "dd/MM";
+  } 
 
   return graphDataInfo;
 }

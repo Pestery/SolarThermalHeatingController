@@ -108,7 +108,7 @@ function startScanningFunction(viewModel) {
     // first check if bluetooth is enabled
     bluetooth.isBluetoothEnabled().then(enabled => {
         if (!enabled) {
-            alert("Please Turn on Bluetooth")
+            alert("Please Turn on Bluetooth");
         } else {
             // if bluetooth enabled, switch to the scanning page and start search
             scanStartedView(viewModel);

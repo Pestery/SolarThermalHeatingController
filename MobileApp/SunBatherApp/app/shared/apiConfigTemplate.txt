@@ -16,7 +16,8 @@ var localAPIPort = "5001"; // set port of API, modify if you have modified on we
 module.exports = {
   systemID: "71823731239",
   keyID: 1,
-  
+  isLiveData: false, // used to set live data on graphs, or the generated data via the API
+
   // Local only example
   localUrlGet: "http://10.0.2.2:5000/api/TemperatureSensors/1", // find id 1
   localUrlGetLatest: "http://10.0.2.2:5000/api/TemperatureSensors/GetLatest", // finds latest id (max)

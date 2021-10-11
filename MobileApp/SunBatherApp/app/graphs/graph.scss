@@ -62,14 +62,14 @@
 
     .options-data {
         @extend .field-data;
-        background-color: white;
     }
 
-    .options-data TextField {
+    .options-data Label {
         font-size: 14;
-        margin-top: -1;
+        margin-top: 2;
         color: black;
-        height: 30;
+        height: 30; 
+        text-decoration: underline;
     }
 
     .submit-button {
