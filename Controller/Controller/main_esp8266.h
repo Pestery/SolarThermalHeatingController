@@ -121,13 +121,15 @@ void loop() {
 				linkArduino.send(Interconnect::GeneralNotification, String(F("Wifi info: ")) + WifiHelper::getInfoAsJson());
 				break;
 
-			case Interconnect::SetServerAddress:
-				if (linkServer.changeAddress(payload.convertToString())) {
-					linkArduino.send(Interconnect::GeneralNotification, String(F("Server address changed to: ")) + payload.convertToString());
+			case Interconnect::SetServerAddress: {
+				String s = payload.convertToString();
+				if (linkServer.changeAddress(s)) {
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Server address changed to: ")) + s);
 				} else {
-					linkArduino.send(Interconnect::GeneralNotification, String(F("Error changing server address to: ")) + payload.convertToString());
+					linkArduino.send(Interconnect::GeneralNotification, String(F("Error changing server address to: ")) + s);
 				}
 				break;
+			}
 
 			case Interconnect::GetServerAddress:
 				linkArduino.send(Interconnect::GeneralNotification, String(F("Server address: ")) + linkServer.getAddress());
@@ -140,10 +142,6 @@ void loop() {
 			case Interconnect::EchoESP8266: {
 				String msg(F("Echo: "));
 				msg += payload.convertToString();
-				msg += " : expectSendToDatabase=";
-				msg += expectSendToDatabase;
-				msg += ", ntpClientValid=";
-				msg += ntpClientValid;
 				linkArduino.send(Interconnect::GeneralNotification, msg);
 				break;
 			}

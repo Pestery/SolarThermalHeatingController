@@ -10,4 +10,6 @@ struct SoftwareSerial {
 	SoftwareSerial(int,int) {}
 };
 
+unsigned millis() {return 0;}
+
 #endif

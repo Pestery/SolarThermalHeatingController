@@ -30,9 +30,9 @@ Strategy strategy(settings);
 
 // Controller timers
 // The constructor parameter takes milliseconds, hence the *1000 to convert to seconds
-Timer timerReadSensors(5 * 1000);
-Timer timerSendToDatabase(20 * 1000);
-Timer timerUpdateCurrentTime(2 * 1000);
+Timer timerReadSensors(30ul * 1000ul);
+Timer timerSendToDatabase(60ul * 1000ul);
+Timer timerUpdateCurrentTime(2ul * 1000ul);
 
 // A record of the current Epoch time
 TimeKeeper timeKeeper;
@@ -123,6 +123,9 @@ void loop() {
 	// Also check if there is enough buffer space to make a new sensor record
 	if (timerReadSensors.triggered(currentTime)) {
 		if (timeKeeper.isValid()) {
+			#if VERBOSE_INTERLINK
+			linkPC.send(Interconnect::GeneralNotification, String(F("Read sensors")));
+			#endif
 			sensorLog.record(timeKeeper);
 		}
 	}
