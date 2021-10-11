@@ -17,7 +17,6 @@ function graphMinMax(viewModel, min, max) {
     if (diff < 1) { 
         diff = 1;
     }
-
     viewModel.set('graphMin', (min - diff).toFixed(0));
     viewModel.set('graphMax', (max + diff));
 }
@@ -63,28 +62,36 @@ export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, gra
     var dataTypeOption = "Option";
     var dataTypeCompare = "Compare";
 
-    Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
-        const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
-        graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataTypeOption);
+    // make sure date from is before date to 
+    if (new Date(dateFrom).getTime() >= new Date(dateTo).getTime()) {
+        alert("Date From needs to be less than a Date To");
+    } else {
+        Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
+            const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
+            graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataTypeOption);
 
-        fieldData(viewModel, graphDataInfo.min, graphDataInfo.max, graphDataInfo.average, dataTypeOption);
-        graphFormat(viewModel, graphDataInfo.xAxisInterval, graphDataInfo.yAxisInterval, graphDataInfo.xAxisUnit, graphDataInfo.xAxisFormat);
+            fieldData(viewModel, graphDataInfo.min, graphDataInfo.max, graphDataInfo.average, dataTypeOption);
+            graphFormat(viewModel, graphDataInfo.xAxisInterval, graphDataInfo.yAxisInterval, graphDataInfo.xAxisUnit, graphDataInfo.xAxisFormat);
 
-        if (graphPage) {
-            graphTitleOption(viewModel, graphOption.name, graphOption.nameAbbreviated);
-            graphMinMax(viewModel, graphDataInfo.min, graphDataInfo.max);
-            graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
+            if (graphPage) {
+                graphTitleOption(viewModel, graphOption.name, graphOption.nameAbbreviated);
+                graphMinMax(viewModel, graphDataInfo.min, graphDataInfo.max);
+                graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
 
-        } else {
-            const graphDataInfoComparison = competitorData.findGraphDataCompare(result, graphOption, competitor);
-            graphDataOption(viewModel, graphOption.databaseField, graphDataInfoComparison.graphDataArray, dataTypeCompare);
-            graphTitleCompare(viewModel, graphOption.name, graphOption.nameAbbreviated, competitor.name, competitor.nameAbbreviated);
-            graphMinMax(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max);
-            fieldData(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max, graphDataInfoComparison.average, dataTypeCompare);
-        }
-    }, error => {
-        console.log(error);
-    });
+            } else {
+                const graphDataInfoComparison = competitorData.findGraphDataCompare(result, graphOption, competitor);
+                graphDataOption(viewModel, graphOption.databaseField, graphDataInfoComparison.graphDataArray, dataTypeCompare);
+                graphTitleCompare(viewModel, graphOption.name, graphOption.nameAbbreviated, competitor.name, competitor.nameAbbreviated);
+                // ensure min and max of both data sets are correct, otherwise one line may not show up
+                var min = commonFunction.findMin(graphDataInfo.min, graphDataInfoComparison.min);
+                var max = commonFunction.findMax(graphDataInfo.max, graphDataInfoComparison.max); 
+                graphMinMax(viewModel, min, max);
+                fieldData(viewModel, graphDataInfoComparison.min, graphDataInfoComparison.max, graphDataInfoComparison.average, dataTypeCompare);
+            }
+        }, error => {
+            console.log(error);
+        });
+    }
 } 
 
 // peforms put requests for the database of updated system status
@@ -132,3 +139,23 @@ export function getRecordEventLatest(viewModel) {
     });
 }
 
+export function getMainPageData(viewModel) {
+    Http.getJSON(apiCall.getSystemStatus).then(result => {
+        viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
+        viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
+    }, error => {
+        console.log(error);
+        
+    });
+
+    Http.getJSON(apiCall.getRecordEventLatest).then(result => {
+        var temp = result.temperatureValueInput.toFixed(2);
+        var roofTemp = result.temperatureValueOutput.toFixed(2); 
+        var currentUV = result.solarIrradiance.toFixed(2);
+        viewModel.set('poolTemp', commonFunction.addCelcius(temp));
+        viewModel.set('roofTemp', commonFunction.addCelcius(roofTemp));
+        viewModel.set('currentUV', commonFunction.addUV(currentUV));
+    }, error => {
+        console.log(error);
+    });
+}

@@ -1,6 +1,6 @@
-import { Http, Observable } from '@nativescript/core'
-var apiCall = require("../shared/apiConfig");
+import { Observable } from '@nativescript/core'
 var commonFunction = require("../shared/commonFunctions");
+var apiCall = require("../shared/apiConfig");
 var apiRequests = require("../shared/apiRequests");
 import { graphOptions }  from "../models/graphModel";
 
@@ -8,54 +8,26 @@ function indexPageIntialize(viewModel) {
     // needed for underline in header
     viewModel.set('headerSelected', 0); 
   
-    // graph options list, default value loaded in screen is roof temp
-    var defualtSetting = 3;
+    // graph options list, default value loaded in screen is solar irridiance, refer to graphModel.js under Models folder
+    var defaultSetting = 3;
     var graphOptionList = graphOptions();
-    graphOptionList[defualtSetting].isSelected = true;
+    graphOptionList[defaultSetting].isSelected = true;
     viewModel.set('graphOptions', graphOptionList);
   
     // turn live data to true when testing live data, else it uses sample data from API 
-    var liveData = true; //was false
-    var dateNow;
-    var dateYesterday;
-  
-     // iso string is good and prevents time zone hassle when converting to C#
-    if (liveData) {
-      dateNow = new Date().toISOString();
-      dateYesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-    } else {
-      dateNow = new Date("07/11/2021 12:00").toISOString();
-      dateYesterday = new Date("07/10/2021 12:00").toISOString();
-    }
+    var liveData = apiCall.isLiveData; 
+    var dateInfo = commonFunction.isLiveData(liveData);
     
-    // populates data on graph
-    apiRequests.getRecordEventList(dateYesterday, dateNow, viewModel, graphOptionList[defualtSetting], true);
+    // populates data on graph and info
+    apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[defaultSetting], true);
+    apiRequests.getMainPageData(viewModel);
 }
 
 export function UserViewModel() {
     const viewModel = new Observable();
+
+    // initialise page
     indexPageIntialize(viewModel);
-
-    Http.getJSON(apiCall.getSystemStatus).then(result => {
-      console.log(result);
-      viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
-      viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
-    }, error => {
-      console.log(error);
-      
-    });
-
-    Http.getJSON(apiCall.getRecordEventLatest).then(result => {
-      console.log(result);
-      var temp = result.temperatureValueInput.toFixed(2);
-      var roofTemp = result.temperatureValueOutput.toFixed(2); 
-      var currentUV = result.solarIrradiance.toFixed(2);
-      viewModel.set('poolTemp', commonFunction.addCelcius(temp));
-      viewModel.set('roofTemp', commonFunction.addCelcius(roofTemp));
-      viewModel.set('currentUV', commonFunction.addUV(currentUV));
-    }, error => {
-      console.log(error);
-    });
 
     return viewModel
 } 

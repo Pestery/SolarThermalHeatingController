@@ -1,6 +1,6 @@
-const CD = require('../SunBatherApp/app/shared/competitorDataMod');
-const compareModel = require("../SunBatherApp/app/models/compareModelMod");
-const competitorModelMod = require("../SunBatherApp/app/models/competitorModelMod");
+const CD = require('../SunBatherApp/app/shared/competitorData');
+const compareModel = require("../SunBatherApp/app/models/compareModel");
+const competitorModelMod = require("../SunBatherApp/app/models/competitorModel");
 
 test('Test getThermalPower calculator', () => {
   // Initialise Array

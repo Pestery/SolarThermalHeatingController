@@ -1,7 +1,7 @@
 .compare-page-styles {
     .graph-data-page {
         font-size: 18;
-        height: 320; 
+        height: 324; 
     }
 
     .graph-data-info {
@@ -46,7 +46,7 @@
 
     .graph-stats-title {
         @extend .sub-headings;
-        margin-top: 3;
+        margin-top: -1;
         margin-bottom: 1;
         background-color: #1e73be;
         font-size: 18;
@@ -80,11 +80,12 @@
         background-color: white;
     }
 
-    .options-data TextField {
+    .options-data Label {
         font-size: 12;
-        margin-top: -1;
+        margin-top: 2;
         color: black;
         height: 30;
+        text-decoration: underline;
     }
 
     .submit-button {
@@ -102,13 +103,13 @@
         margin-bottom: -2;
         background-color: #1e73be;
         color: white;
-        height: 194;
+        height: 190;
     }
 
     .list-data Label.active {
         font-size: 15;
         margin-top: 6;
-        background-color: #1e73be;
+        background-color: #2599ff;
     }
 
     .horizontal-Axis {

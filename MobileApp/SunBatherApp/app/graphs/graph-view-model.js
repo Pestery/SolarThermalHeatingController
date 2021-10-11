@@ -1,4 +1,5 @@
 import { Observable } from '@nativescript/core'
+var apiCall = require("../shared/apiConfig");
 var apiRequests = require("../shared/apiRequests");
 var commonFunction = require("../shared/commonFunctions");
 import { graphOptions }  from "../models/graphModel";
@@ -39,16 +40,17 @@ function graphPageIntialize(viewModel) {
   viewModel.set('graphOptions', graphOptionList);
 
   // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done
-  var liveData = true; //was false 
+  var liveData = apiCall.isLiveData; //was false 
   var dateInfo = commonFunction.isLiveData(liveData);
 
   // for getRequest
   viewModel.set('storedDateFrom', dateInfo.dateYesterday); 
   viewModel.set('storedDateTo', dateInfo.dateNow);
 
-  // display dates (MONTH must have + 1 for since months are done 0-11, not 1-12)
+  // display dates (MONTH must have + 1 for since months are done 0-11, not 1-12), also stops picker from selecting future dates
   viewModel.set('displayDateFrom', dateInfo.dateYesterdayConvert.getDate() + '/' + (dateInfo.dateYesterdayConvert.getMonth() + 1) + '/' + dateInfo.dateYesterdayConvert.getFullYear());
   viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
+  viewModel.set('maxDate', dateInfo.dateNow);
 
   // populates data on graph
   apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], true, "Null");
