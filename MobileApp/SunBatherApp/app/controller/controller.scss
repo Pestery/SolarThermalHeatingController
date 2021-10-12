@@ -36,7 +36,6 @@
     .system-datafield-controller-id {
         @extend .system-datafield-controller;
         height: 42;
-        
     }
 
     .system-datafield-controller-settings {
@@ -59,8 +58,10 @@
 
     .visible {
         font-size: 16;
+        padding-top: 6;
         background-color: #1e73be;
-        height: 40;
+        color: white;
+        height: 42;
     }
 
     .opaque {

@@ -22,11 +22,9 @@
                     <Label col="1" text="{{ setTemp }}" textWrap="true" /> 
                     <Label col="2" text="{{ poolTemp }}" textWrap="true" />            
                 </GridLayout>
-
                 <GridLayout rows="*" columns="*,*" class="system-datafield">
                     <Label col="0" text="&#xf185;" textWrap="true" class="fas" />
                     <Label col="1" text="&#xf5ba;" textWrap="true" class="fas" />
-                  
                 </GridLayout>
                 <GridLayout rows="*" columns="*,*" class="system-datafield-data">
                     <Label col="0" text="{{ roofTemp }}" textWrap="true" />
@@ -46,12 +44,12 @@
                             <chart:LinearAxis labelLayoutMode="Outer" majorStep="{{ graphYAxisInterval }}" minimum="{{ graphMin }}" maximum="{{ graphMax }}" class="vertical-Axis" />
                         </chart:RadCartesianChart.verticalAxis>
                         <chart:RadCartesianChart.series>
-                            <chart:LineSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}"/>
+                            <chart:AreaSeries items="{{ graphDataOption }}" categoryProperty="{{ xAxisDataOption }}" valueProperty="{{ yAxisDataOption }}"></chart:AreaSeries>
                         </chart:RadCartesianChart.series>
                         <chart:RadCartesianChart.palettes>
                             <chart:Palette >
                                 <chart:Palette.entries>
-                                    <chart:PaletteEntry  strokeColor="#1e73be" />
+                                    <chart:PaletteEntry  fillColor="#d8e3f2" strokeColor="#1e73be" />
                                 </chart:Palette.entries>
                             </chart:Palette>
                         </chart:RadCartesianChart.palettes>
@@ -61,10 +59,8 @@
             </StackLayout>
             <StackLayout class="view-other">
                 <Label text="View Other Graphs" tap="onNavigateGraphs" />
-            </StackLayout> 
-              
+            </StackLayout>   
         </StackLayout>
-           
     </GridLayout>
 </Page>
 

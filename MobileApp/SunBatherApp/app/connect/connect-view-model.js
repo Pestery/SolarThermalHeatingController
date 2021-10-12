@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Observable, ApplicationSettings } from '@nativescript/core'
 import { getBluetoothInstance } from '@nativescript-community/ble';
 var bluetooth = getBluetoothInstance();
@@ -35,6 +36,11 @@ function connectPageIntialize(viewModel, blueToothList) {
     viewModel.set('isConnectingWifi', false);
 }
 >>>>>>> 2cf402ff2135d566573229e753fc0164032e1f0b
+=======
+import { Observable, ApplicationSettings } from '@nativescript/core'
+import { getBluetoothInstance } from '@nativescript-community/ble';
+var bluetooth = getBluetoothInstance();
+>>>>>>> 1c41c95d5d07fccecae5f793bd734b786a373fe4
 
 // This function has some uneccesary steps in it such as the for loop putting the array into another arry
 // for some reason the only way to get the list to refresh is to create a new object array, this function does that
@@ -136,32 +142,6 @@ function searchBluetoothViewModel(viewModel) {
     viewModel.set('isConnecting', false);
     viewModel.set('isConnectingWifi', false);
     viewModel.set('showWriteLogo', false);
-}
-
-// for initiallising connect page, determines if device is already connect
-function connectPageIntialize(viewModel, isConnected) {
-    var getPUUID = isConnected.getString("pUUID"); // gets stored string
-    viewModel.set('headerSelected', 4); // needed for underline in header
-
-    // only try and see if connected if getPUUID has any value
-    // if finds a device alreaady connected, then go straight to wifi details page, else go to normal page
-    if (getPUUID != undefined && getPUUID != "") {
-        bluetooth.isConnected({ 
-            UUID: getPUUID
-            }).then(connected => {
-                console.log("Connected? " + connected)
-                if (connected) {
-                    wifiDetailsView(viewModel);
-                } else {
-                    searchBluetoothViewModel(viewModel);
-                }
-            }, error => {
-                console.log(error);
-                searchBluetoothViewModel(viewModel);
-            });
-    } else {
-        searchBluetoothViewModel(viewModel);
-    }
 }
 
 function startScanningFunction(viewModel) {
@@ -295,6 +275,32 @@ function sendWifiDetails(viewModel, appSet) {
             console.log("write error: " + err);
             updateWifiLoadView(viewModel, false, true, false, false);
     });
+}
+
+// for initiallising connect page, determines if device is already connect
+function connectPageIntialize(viewModel, isConnected) {
+    var getPUUID = isConnected.getString("pUUID"); // gets stored string
+    viewModel.set('headerSelected', 3); // needed for underline in header
+
+    // only try and see if connected if getPUUID has any value
+    // if finds a device alreaady connected, then go straight to wifi details page, else go to normal page
+    if (getPUUID != undefined && getPUUID != "") {
+        bluetooth.isConnected({ 
+            UUID: getPUUID
+            }).then(connected => {
+                console.log("Connected? " + connected)
+                if (connected) {
+                    wifiDetailsView(viewModel);
+                } else {
+                    searchBluetoothViewModel(viewModel);
+                }
+            }, error => {
+                console.log(error);
+                searchBluetoothViewModel(viewModel);
+            });
+    } else {
+        searchBluetoothViewModel(viewModel);
+    }
 }
 
 export function ConnectViewModel() {

@@ -1,5 +1,6 @@
 <StackLayout rows="auto" class="footer">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <GridLayout rows="auto" columns="*,*,*,*,*" width="100%" class="footer-buttons" >
         <Label col="0" text="&#xf015;" class="fas {{ headerSelected == 0 ? 'active' : 'nonActive'}}" tap="onNavigateHome" />
         <Label col="1" text="&#xf1fe;" class="fas {{ headerSelected == 1 ? 'active' : 'nonActive'}}" tap="onNavigateGraphs" />
@@ -7,6 +8,8 @@
         <Label col="3" text="&#xf013;" class="fas {{ headerSelected == 3 ? 'active' : 'nonActive'}}" tap="onNavigateController" />
         <Label col="4" text="&#xf1eb;" class="fas {{ headerSelected == 4 ? 'active' : 'nonActive'}}" tap="onNavigateConnect" />
 =======
+=======
+>>>>>>> 1c41c95d5d07fccecae5f793bd734b786a373fe4
     <GridLayout class="fas" >
         <GridLayout rows="auto" columns="*,*,*,*" width="100%" class="footer-buttons" >
             <Label col="0" text="&#xf015;" class="{{ headerSelected == 0 ? 'active' : 'nonActive'}}" tap="onNavigateHome" />
@@ -14,7 +17,10 @@
             <Label col="2" text="&#xf201;" class="{{ headerSelected == 2 ? 'active' : 'nonActive'}}" tap="onNavigateCompare" />
             <Label col="3" text="&#xf013;" class="{{ headerSelected == 3 ? 'active' : 'nonActive'}}" tap="onNavigateController" />
         </GridLayout>
+<<<<<<< HEAD
 >>>>>>> 2cf402ff2135d566573229e753fc0164032e1f0b
+=======
+>>>>>>> 1c41c95d5d07fccecae5f793bd734b786a373fe4
     </GridLayout>
 </StackLayout>
 

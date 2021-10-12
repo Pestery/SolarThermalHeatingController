@@ -2,29 +2,19 @@
 #define INTERCONNECT_H
 
 // Include headers
-#include "ring_buffer.h"
-
-// Bit-rate for Arduino-ESP8266 serial communication
-#define SERIAL_BITRATE_ARDUINO_ESP8266 74880
-
-// Bit-rate for Arduino-PC serial communication
-#define SERIAL_BITRATE_ARDUINO_PC 9600
-
-// Interconnect buffer sizes for different connections and direction of connections
-// This should be set to reflect the expected maximum size of message to be sent on that link
-#define INTERCONNECT_BUFFER_ARDUINO_TO_ESP8266   250
-#define INTERCONNECT_BUFFER_ARDUINO_TO_BLUETOOTH 32
-#define INTERCONNECT_BUFFER_ARDUINO_TO_PC        32
-#define INTERCONNECT_BUFFER_ESP8266_TO_ARDUINO   64
-#define INTERCONNECT_BUFFER_BLUETOOTH_TO_ARDUINO 32
-#define INTERCONNECT_BUFFER_PC_TO_ARDUINO        32
+#include "board_config.h"
+#include "byte_queue.h"
 
 // Used to make communication between the Arduino and ESP8266 a bit easier
 class Interconnect {
 public:
 
 	// A list of possible command types
-	// Note: An upper-case 'O' must not be used for any command letter, as it is used for Bluetooth module messages
+	// Notes:
+	//  - An upper-case 'O' must not be used for any command letter, as it is used for Bluetooth module messages
+	//  - All messages must begin with the command letter, optionally have a payload message, and end with a new line character '\n'
+	//  - A carriage return character '\b' is used to ask the other side to pause sending data because this side may not be able to receive it
+	//  - Any new line characters '\n' ands carriage return character '\b' must be escaped (slash followed by letter, instead of actual value)
 	enum Type : uint8_t {
 
 		// A small request send from the Arduino to the ESP8266
@@ -101,6 +91,14 @@ public:
 		// No payload
 		GetGuid = 'G',
 
+		// Request the current time
+		// No payload
+		GetTime = 'E',
+
+		// Set the current time
+		// Payload is the current Epoch time as a string
+		SetTime = 'e',
+
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
 		// Payload is the (probably JSON) message to be sent to the server
@@ -112,6 +110,9 @@ public:
 		EchoArduino = 'x',
 		EchoESP8266 = 'y',
 
+		// A header used to mark an error
+		Error = '*',
+
 		// Used to indicate no message
 		None = 0
 	};
@@ -121,32 +122,39 @@ public:
 	void update() {
 
 		// Receive data
-		while (m_stream.available() && !m_recv.isFull()) {
+		// Check if any data is available
+		while (m_stream.available()) {
+
+			// Try to add the data to the buffer
 			uint8_t c = m_stream.read();
-			m_recv.push(c);
+			if (!m_recv.write(c)) {
+
+				// Failed to add data
+				// Erase what is there and record the error
+				m_recv.clear();
+				m_recv.write(Interconnect::Error);
+				if (c == '\n') m_recv.write(c);
+			}
+
+			// Check for control characters
 			if (c == '\n') m_receivedMessages++;
 			m_receivedAnything = true;
 		}
 
 		// Send data
-		while (!m_send.isEmpty() && (m_stream.availableForWrite() > 0)) {
-			m_stream.write(m_send.pop());
+		while (m_send.available() && (m_stream.availableForWrite() > 0)) {
+			m_stream.write(m_send.read());
 		}
-	}
-
-	// Returns true if the receive buffer is full and should be emptied
-	int fullReceiveBuffer() const {
-		return m_recv.isFull();
 	}
 
 	// Return true if the send buffer is empty
 	int emptySendBuffer() const {
-		return m_send.isEmpty();
+		return !m_send.available();
 	}
 
-	// Returns true if there are any received messages within the receive buffer
+	// Returns the number of received messages within the receive buffer
 	int waitingMessages() const {
-		return (m_receivedMessages > 0);
+		return m_receivedMessages;
 	}
 
 	// Returns true if anything has been received since the last time this method was called
@@ -169,133 +177,124 @@ public:
 	}
 	bool send(Type header, const char* payload) {
 
-		// Get the length of the payload string
-		const int payloadLength = payload ? strlen(payload) : 0;
-
-		// Count the number of characters which need to be escaped
-		int escapedCharacters = 0;
-		for (int i=0; i<payloadLength; i++) {
-			if (getEscapedVersion(payload[i])) escapedCharacters++;
-		}
-
-		// Make sure there is enough space in the send buffer
-		if (m_send.freeSpace() < (2 + payloadLength + escapedCharacters)) {
-			return false;
-		} else {
-
-			// Add message header
-			m_send.push(header);
-
-			// Add message body, if any
-			uint8_t c, e;
-			for (int i=0; i<payloadLength; i++) {
-				c = payload[i];
-				e = getEscapedVersion(c);
-				if (e) {
-					m_send.push('\\');
-					m_send.push(e);
-				} else {
-					m_send.push(c);
-				}
-			}
-
-			// Add message tail
-			m_send.push('\n');
-			return true;
-		}
-	}
-
-	// Add data to the send queue
-	// This method will always send the message, but may block if the buffer is full
-	void sendForce(Type header) {
-		sendForce(header, nullptr);
-	}
-	void sendForce(Type header, const String& payload) {
-		sendForce(header, payload.c_str());
-	}
-	void sendForce(Type header, const char* payload) {
-
-		// Send whatever data can be sent
-		while (!m_send.isEmpty() && (m_stream.availableForWrite() > 0)) {
-			m_stream.write(m_send.pop());
-		}
+		// Set a roll-back point
+		ByteQueue::Rollback rollback(m_send);
 
 		// Add message header
-		while (!m_send.push(header)) m_stream.write(m_send.pop());
+		if (!m_send.write(header)) {
+			rollback.rollback();
+			return false;
+		}
 
 		// Add message body, if any
-		uint8_t c, e;
-		const int payloadLength = payload ? strlen(payload) : 0;
-		for (int i=0; i<payloadLength; i++) {
-			c = payload[i];
-			e = getEscapedVersion(c);
-			if (e) {
-				while (!m_send.push('\\')) m_stream.write(m_send.pop());
-				while (!m_send.push(e)) m_stream.write(m_send.pop());
-			} else {
-				while (m_send.freeSpace() < 1) m_stream.write(m_send.pop());
-				while (!m_send.push(c)) m_stream.write(m_send.pop());
+		if (payload) {
+			uint8_t c, e;
+			while (*payload) {
+				c = *(payload++);
+				e = getEscapedVersion(c);
+				if (e) {
+					m_send.write('\\');
+					m_send.write(e);
+				} else {
+					m_send.write(c);
+				}
 			}
 		}
 
 		// Add message tail
-		while (!m_send.push('\n')) m_stream.write(m_send.pop());
+		if (!m_send.write('\n')) {
+			rollback.rollback();
+			return false;
+		}
+		return true;
+	}
+	bool send(Type header, ByteQueue& payload) {
+
+		// Set a roll-back point
+		ByteQueue::Rollback rollback(m_send);
+
+		// Add message header
+		if (!m_send.write(header)) {
+			rollback.rollback();
+			return false;
+		}
+
+		// Add message body, if any
+		if (payload.available()) {
+			uint8_t c, e;
+			while (payload.available()) {
+				c = payload.read();
+				e = getEscapedVersion(c);
+				if (e) {
+					m_send.write('\\');
+					m_send.write(e);
+				} else {
+					m_send.write(c);
+				}
+			}
+		}
+
+		// Add message tail
+		if (!m_send.write('\n')) {
+			rollback.rollback();
+			return false;
+		}
+		return true;
 	}
 
 	// Extract a received message from the interconnect
 	// Returns false if no waiting messages
+
 	// Returns true if a message was extracted and placed in the 'out' parameters (may block if message is longer than receive buffer)
-	bool receive(Type& outHeader, String& outPayload) {
+	bool receive(Type& outHeader, ByteQueue& outPayload) {
+
 		// Check if any messages are waiting
-		// Also check if the receive buffer is full
-		if ((m_receivedMessages == 0) && !m_recv.isFull()) return false;
+		if (m_receivedMessages == 0) return false;
 
 		// Reset the output payload parameter before continuing
-		outPayload = String();
+		outPayload.clear();
 
 		// Get the message header
-		uint8_t c = m_recv.pop();
-		//Serial.println(c);
+		uint8_t c = m_recv.read();
 		if (c == '\n') {
 			m_receivedMessages--;
 			return false;
 		}
 		outHeader = Type(c);
 
-		// Find the end marker and get the expected length of payload
-		int payloadLength = 0;
-		while ((payloadLength < m_recv.size()) && (m_recv.peek(payloadLength) != '\n')) payloadLength++;
-
 		// Get the message body
-		if (payloadLength > 0) {
-			bool escaped = false;
-			outPayload.reserve(payloadLength);
-			while (true) {
+		bool escaped = false;
+		while (true) {
 
-				// Check if the receive buffer is empty
-				// If so then wait for more data to come in, because the end of this message has not been reached yet
-				while (m_recv.isEmpty()) update();
+			// Get next character from buffer
+			// If this is the tail character then exit here
+			c = m_recv.read();
+			if (c == '\n') {
+				m_receivedMessages--;
+				break;
+			}
 
-				// Get next character from buffer
-				// If this is the tail character then exit here
-				c = m_recv.pop();
-				if (c == '\n') {
-					m_receivedMessages--;
-					break;
-				}
-
-				// Check for escape status
-				if (escaped) {
-					escaped = false;
-					outPayload += (char)getNonEscapedVersion(c);
-				} else if (c == '\\') {
-					escaped = true;
-				} else {
-					outPayload += (char)c;
-				}
+			// Check for escape status
+			if (escaped) {
+				escaped = false;
+				outPayload.write(getNonEscapedVersion(c));
+			} else if (c == '\\') {
+				escaped = true;
+			} else {
+				outPayload.write(c);
 			}
 		}
 		return true;
+	}
+	bool receive(Type& outHeader, String& outPayload) {
+		ByteQueue queue;
+		if (receive(outHeader, queue)) {
+			outPayload = String();
+			while (queue.available()) outPayload += (char)queue.read();
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	// Check if the receive buffer starts with the 'testString'
@@ -307,32 +306,33 @@ public:
 
 		// Loop through testString
 		int i = 0;
-		const int iMax = m_recv.size();
+		const int iMax = m_recv.available();
 		while (true) {
 			const char c = testString[i];
 			if (!c) break; // End of testString
 			if (c != (char)m_recv.peek(i)) return false; // Data mismatch
 			if (++i >= iMax) return false; // End of receive buffer
 		}
+		if (i > 0) m_recv.discard(i);
 		return true;
 	}
 
 	// Access receive buffer directly
-	RingBuffer& receiveBuffer() {return m_recv;}
+	ByteQueue& receiveBuffer() {return m_recv;}
 
 	// Access receive buffer directly
-	const RingBuffer& receiveBuffer() const {return m_recv;}
+	const ByteQueue& receiveBuffer() const {return m_recv;}
 
 	// Access send buffer directly
-	RingBuffer& sendBuffer() {return m_send;}
+	ByteQueue& sendBuffer() {return m_send;}
 
 	// Access send buffer directly
-	const RingBuffer& sendBuffer() const {return m_send;}
+	const ByteQueue& sendBuffer() const {return m_send;}
 
 	// Default constructor
-	Interconnect(Stream& stream, RingBuffer::IndexType sendBufferSize, RingBuffer::IndexType recvBufferSize) :
-		m_send(sendBufferSize),
-		m_recv(recvBufferSize),
+	Interconnect(Stream& stream) :
+		m_send(),
+		m_recv(),
 		m_receivedMessages(0),
 		m_receivedAnything(false),
 		m_stream(stream) {
@@ -341,13 +341,14 @@ public:
 private:
 
 	// Convert a character to its escaped version
-	// The result character should follow a backslash when placed in a byte stream ('\r' for example)
+	// The result character should follow a backslash when placed in a byte stream ('\n' for example)
 	// Returns the escaped replacement for the input character, or zero if the character does not need to be escaped
 	uint8_t getEscapedVersion(uint8_t character) {
 		switch (character) {
 			case '\\': return '\\';
 			case '\n': return 'n';
 			case '\r': return 'r';
+			case 0:    return '0';
 			default:   return 0;
 		}
 	}
@@ -359,16 +360,17 @@ private:
 			case '\\': return '\\';
 			case 'n':  return '\n';
 			case 'r':  return '\r';
+			case '0':  return 0;
 			default:   return escapedCharacter;
 		}
 	}
 
 	// Private data
-	RingBuffer m_send;
-	RingBuffer m_recv;
-	uint8_t    m_receivedMessages;
-	bool       m_receivedAnything;
-	Stream& m_stream;
+	ByteQueue m_send;
+	ByteQueue m_recv;
+	uint8_t   m_receivedMessages;
+	bool      m_receivedAnything;
+	Stream&   m_stream;
 };
 
 

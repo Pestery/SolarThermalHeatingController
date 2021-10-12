@@ -11,7 +11,7 @@ If can be downloaded [here](https://www.arduino.cc/en/software).
 ### Arduino IDE Libraries
 Libraries can be added to the Arduino IDE via **Tools->Manage Libraries...** menu.
 The required libraries are:
-- NTPClient, by Fabrice Weinberg *(might get removed, as its not currently used)*.
+- NTPClient, by Fabrice Weinberg.
 
 ## Arduino Board
 This project was developed using an *Arduino Mega with Wifi*, however it should also work with an *Arduino Uno with Wifi*.
