@@ -51,7 +51,7 @@ function comparePageIntialize(viewModel) {
     viewModel.set('displayDateFrom', dateInfo.dateYesterdayConvert.getDate() + '/' + (dateInfo.dateYesterdayConvert.getMonth() + 1) + '/' + dateInfo.dateYesterdayConvert.getFullYear());
     viewModel.set('displayDateTo', dateInfo.dateNowConvert.getDate() + '/' + (dateInfo.dateNowConvert.getMonth() + 1) + '/' + dateInfo.dateNowConvert.getFullYear());
     viewModel.set('maxDate', dateInfo.dateNow);
-
+    console.log("hello");
     // populates data on graph
     apiRequests.getRecordEventList(dateInfo.dateYesterday, dateInfo.dateNow, viewModel, graphOptionList[viewModel.get('graphOptionSelected')], false, compareOptionList[viewModel.get('compareOptionSelected')]);
 }

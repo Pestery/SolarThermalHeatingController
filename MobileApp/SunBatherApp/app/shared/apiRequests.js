@@ -61,7 +61,7 @@ function graphDataOption(viewModel, databaseField, graphDataArray, dataType) {
 export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, graphPage, competitor) {
     var dataTypeOption = "Option";
     var dataTypeCompare = "Compare";
-
+    
     // make sure date from is before date to 
     if (new Date(dateFrom).getTime() >= new Date(dateTo).getTime()) {
         alert("Date From needs to be less than a Date To");
@@ -69,7 +69,7 @@ export function getRecordEventList(dateFrom, dateTo, viewModel, graphOption, gra
         Http.getJSON(apiCall.getRecordEventListToFrom + '/' + dateFrom + '/' + dateTo).then(result => {
             const graphDataInfo = commonFunction.findGraphData(dateFrom, dateTo, result, graphOption);
             graphDataOption(viewModel, graphOption.databaseField, graphDataInfo.graphDataArray, dataTypeOption);
-
+            
             fieldData(viewModel, graphDataInfo.min, graphDataInfo.max, graphDataInfo.average, dataTypeOption);
             graphFormat(viewModel, graphDataInfo.xAxisInterval, graphDataInfo.yAxisInterval, graphDataInfo.xAxisUnit, graphDataInfo.xAxisFormat);
 
@@ -133,7 +133,7 @@ export function getSystemStatus(viewModel) {
 // gets the latest recorded temperature
 export function getRecordEventLatest(viewModel) {
     Http.getJSON(apiCall.getRecordEventLatest).then(result => {
-        viewModel.set('livePoolTemp', commonFunction.addCelcius(result.temperatureValueInput));
+        viewModel.set('livePoolTemp', commonFunction.addCelcius(result.temperatureValueInput.toFixed(2)));
     }, error => {
         console.log(error);
     });
