@@ -132,7 +132,7 @@ void loop() {
 
 	// Check if it is time to send data to the database
 	// Also check if there is actually any data to send
-	if (timerSendToDatabase.triggered(currentTime)) {
+	if (settings.autoUpload() && timerSendToDatabase.triggered(currentTime)) {
 		linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
 		#if VERBOSE_INTERLINK
 		linkPC.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
@@ -372,11 +372,89 @@ void loop() {
 				}
 				break;
 
+			case Interconnect::SetAutoUpload: {
+
+				// Get the payload value
+				int c = payload.peek();
+				if ((c == '1') || (c == 't') || (c == 'T')) {
+					c = 1;
+				} else if ((c == '0') || (c == 'f') || (c == 'F')) {
+					c = 0;
+				} else {
+					c = -1;
+				}
+
+				// Output a copy of the data to the console, if required
+				#if VERBOSE_INTERLINK
+				linkPC.send(header, payload);
+				#endif
+
+				// Update the auto-upload setting
+				if (c >= 0) {
+					settings.autoUpload(c == 1);
+					settings.save();
+					payload.clear();
+					payload.print(F("Ok"));
+					switch (sender) {
+						case LinkId::PC: linkPC.send(header, payload); break;
+						case LinkId::BT: linkBT.send(header, payload); break;
+					}
+				}
+				break;
+			}
+
+			case Interconnect::GetAutoUpload:
+
+				// Get the current auto-upload setting
+				payload.clear();
+				payload.print(F("AutoUpload="));
+				payload.print(settings.autoUpload());
+				switch (sender) {
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
+				}
+				break;
+
+			case Interconnect::GetRecord: {
+
+				// Get time-stamp from payload
+				DateTime dt(payload.convertToString());
+
+				// Get saved records
+				SensorRecord sr;
+				unsigned found = sensorLog.fetch(dt, &sr, 1);
+
+				// Generate response
+				payload.clear();
+				if (found == 0) {
+					payload.print(F("null"));
+				} else {
+					sr.toJson(payload);
+				}
+
+				// Send response
+				switch (sender) {
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
+				}
+				break;
+			}
+
 			case Interconnect::SetServerAddress:
 
 				// Reset values which should be re-fetched from the database
 				// Then fall through to other code (do not break;)
 				sensorLog.lastUploaded(0);
+
+				// Turn on auto-uploading of records
+				settings.autoUpload(true);
+				settings.save();
 
 			case Interconnect::EchoESP8266:
 			case Interconnect::DebugSendToServerKeepHeaders:

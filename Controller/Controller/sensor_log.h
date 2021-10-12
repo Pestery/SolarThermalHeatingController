@@ -136,8 +136,6 @@ public:
 		if (count < 1) return 0;
 		int found = 0;
 
-
-
 		// Check if using the memory buffer or the SD card
 		if (m_buffer) {
 

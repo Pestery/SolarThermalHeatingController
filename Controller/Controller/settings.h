@@ -61,6 +61,18 @@ public:
 		return m_systemGuid;
 	}
 
+	// Automatic uploading of saved records to database
+	// True if the controller should try to upload results, or false if not
+	void autoUpload(bool newValue) {
+		if (m_autoUpload != newValue) {
+			m_autoUpload = newValue;
+			m_unsavedSettings = true;
+		}
+	}
+	bool autoUpload() const {
+		return m_autoUpload;
+	}
+
 	// Controller automatic-manual mode toggle
 	// True if the controller should be running in automatic mode
 	void modeAutomatic(bool newValue) {
@@ -141,6 +153,9 @@ public:
 			outAppend.print(F(",\"auto\":"));
 			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
 
+			outAppend.print(F(",\"upload\":"));
+			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
+
 			outAppend.print(F(",\"setTemp\":"));
 			outAppend.print(m_targetTemperature);
 
@@ -166,6 +181,9 @@ public:
 		} else if (key == F("\"setTemp\"")) {
 			targetTemperature(value.toFloat());
 
+		} else if (key == F("\"upload\"")) {
+			autoUpload(value == F("true"));
+
 		} else {
 			return false;
 		}
@@ -189,9 +207,10 @@ public:
 
 	// Default constructor
 	Settings() :
-		m_targetTemperature(26),
 		m_modeAutomatic(false),
 		m_manualPumpOn(false),
+		m_targetTemperature(26),
+		m_autoUpload(true),
 		m_isServerInformed(false),
 		m_unsavedSettings(false) {
 	}
@@ -239,6 +258,7 @@ private:
 	bool  m_modeAutomatic;
 	bool  m_manualPumpOn;
 	float m_targetTemperature;
+	bool  m_autoUpload;
 
 	// Settings which do NOT need to be saved to EEPROM
 	bool m_pumpStatus; // This value MUST be first in the not-saved values. If changed then update init() and save()
