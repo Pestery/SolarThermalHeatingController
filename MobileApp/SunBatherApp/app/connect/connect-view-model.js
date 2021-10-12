@@ -1,6 +1,40 @@
+<<<<<<< HEAD
 import { Observable, ApplicationSettings } from '@nativescript/core'
 import { getBluetoothInstance } from '@nativescript-community/ble';
 var bluetooth = getBluetoothInstance();
+=======
+import { Observable } from '@nativescript/core'
+import { Bluetooth } from '@nativescript-community/ble';
+import { selectedIndexProperty } from '@nativescript/core/ui/list-picker/list-picker-common';
+var bluetooth = new Bluetooth();
+
+// TODO 
+// Add found counter
+// Prioritise Arduino devices
+// List devices
+// IF Device found stay
+// de-saible connect and disconnet if no results
+// disable connect button
+// Enter WIFI stuff
+// write to device
+// Disconnect
+
+function connectPageIntialize(viewModel, blueToothList) {
+    viewModel.set('headerSelected', 3); // needed for underline in header
+    viewModel.set('findController', true);
+    viewModel.set('stopController', false);
+    viewModel.set('foundDevicesCount', 0);
+    viewModel.set('showBluetoothList', false);
+    viewModel.set('devicesFound', blueToothList);
+    viewModel.set('searchedDevices', false);
+    viewModel.set('deviceSelected', false);
+    viewModel.set('showWifiInput', false);
+    viewModel.set('isConnecting', false);
+    viewModel.set('WifiName', "");
+    viewModel.set('WifiPassword', "");
+    viewModel.set('isConnectingWifi', false);
+}
+>>>>>>> 2cf402ff2135d566573229e753fc0164032e1f0b
 
 // This function has some uneccesary steps in it such as the for loop putting the array into another arry
 // for some reason the only way to get the list to refresh is to create a new object array, this function does that

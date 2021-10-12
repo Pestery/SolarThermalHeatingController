@@ -9,7 +9,7 @@ function indexPageIntialize(viewModel) {
     viewModel.set('headerSelected', 0); 
   
     // graph options list, default value loaded in screen is roof temp
-    var defualtSetting = 1;
+    var defualtSetting = 3;
     var graphOptionList = graphOptions();
     graphOptionList[defualtSetting].isSelected = true;
     viewModel.set('graphOptions', graphOptionList);
@@ -37,6 +37,8 @@ export function UserViewModel() {
     indexPageIntialize(viewModel);
 
     Http.getJSON(apiCall.getSystemStatus).then(result => {
+      console.log(result);
+      console.log(commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('pumpStatus', commonFunction.convertOnOff(result.pumpStatus));
       viewModel.set('setTemp', commonFunction.addCelcius(result.setTemperature));         
     }, error => {
