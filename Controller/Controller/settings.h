@@ -153,6 +153,9 @@ public:
 			outAppend.print(F(",\"auto\":"));
 			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
 
+			outAppend.print(F(",\"manualOn\":"));
+			outAppend.print(m_manualPumpOn ? F("true") : F("false"));
+
 			outAppend.print(F(",\"upload\":"));
 			outAppend.print(m_autoUpload ? F("true") : F("false"));
 

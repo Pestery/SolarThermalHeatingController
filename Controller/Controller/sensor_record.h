@@ -125,7 +125,9 @@ struct SensorRecord {
 
 	// Read the value of all connected sensors and store it within this class
 	// This will also increment the index value
-	void readAll(TimeKeeper* timeKeeper = nullptr) {
+	void readAll() {readAll(nullptr);}
+	void readAll(TimeKeeper& timeKeeper) {readAll(&timeKeeper);}
+	void readAll(TimeKeeper* timeKeeper) {
 
 		// Record current time within record
 		if (timeKeeper) dateTime = timeKeeper->current();

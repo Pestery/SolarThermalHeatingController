@@ -154,7 +154,7 @@ void loop() {
 	}
 
 	// Update controller strategy
-	strategy.update();
+	strategy.update(timeKeeper);
 
 	// Update interconnects
 	linkWifi.update();
@@ -239,8 +239,11 @@ void loop() {
 						}
 					}
 
+					// Save any changes made
+					settings.save();
+
 					// Check if there is more data to be uploaded
-					if (sensorLog.isUploadRequired()) timerSendToDatabase.reset(millis());
+					if (sensorLog.isUploadRequired() || !settings.isServerInformed()) timerSendToDatabase.reset(millis());
 
 					// Output a copy of the data to the console, if required
 					#if VERBOSE_INTERLINK
