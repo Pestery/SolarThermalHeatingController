@@ -31,6 +31,5 @@ namespace SunBatherAPI.Models
         /// The DateTime of the last received record.
         /// </summary>
         public long? LastRecord { get; set; }
-
     }
 }

@@ -154,7 +154,7 @@ public:
 			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
 
 			outAppend.print(F(",\"upload\":"));
-			outAppend.print(m_modeAutomatic ? F("true") : F("false"));
+			outAppend.print(m_autoUpload ? F("true") : F("false"));
 
 			outAppend.print(F(",\"setTemp\":"));
 			outAppend.print(m_targetTemperature);
@@ -195,7 +195,9 @@ public:
 	bool fromJson(const ByteQueue& in) {
 		JsonDecoder decoder(in);
 		while (decoder.fetch()) {
-			updateWithKeyValue(decoder.name(), decoder.value());
+			if (!decoder.isValueNull()) {
+				updateWithKeyValue(decoder.name(), decoder.value());
+			}
 		}
 		if (decoder.hadError()) {
 			return false;

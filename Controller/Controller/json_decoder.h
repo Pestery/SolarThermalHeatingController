@@ -18,6 +18,11 @@ public:
 	// Returns true if there was an error, or false if no errors
 	bool hadError() const {return m_hadError;}
 
+	// Check if the value component is null
+	bool isValueNull() const {
+		return (m_value == F("null")) || (m_value == F("NULL"));
+	}
+
 	// Get the next name-value pair within the JSON string
 	// Returns true on success, or false if the end of the data was reached
 	bool fetch() {

@@ -144,14 +144,14 @@ private:
 
 		// Check the status code
 		// Return result
-		switch (statusCode) {
-			case 200:
-				return result;
-			case 204: // TODO: This could probably be handled better
-				result = F("{}");
-				return result;
+		if ((statusCode == 200) || (statusCode == 0)) {
+			return result;
+		} else {
+			if (!keepHeaders) reply.clear();
+			reply.print(F("StatusCode:"));
+			reply.print(statusCode);
+			return false;
 		}
-		return false;
 	}
 
 	// Send some data to the database
@@ -198,14 +198,13 @@ private:
 		unsigned contentLength = 0;
 		bool chunkedReply = false;
 		String temp;
-		temp.reserve(100);
 		reply.clear();
 
 		// Get the status line of the response
 		// This should be the first line returned, but try a few times if the line is blank
 		for (int i=0; i<4; i++) {
 			temp = getNextLine(client);
-			if (keepHeaders) reply.println(temp);
+			reply.println(temp);
 			if (temp.length() > 0) break;
 		}
 
@@ -217,6 +216,8 @@ private:
 				reply.print(temp);
 			}
 			return false;
+		} else if (!keepHeaders) {
+			reply.clear();
 		}
 
 		// Loop through headers

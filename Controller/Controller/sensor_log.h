@@ -45,6 +45,13 @@ public:
 		return m_lastUploaded > 0;
 	}
 
+	// Reset the last-uploaded value
+	// This will prevent any further uploads until the last-upload is next supplied by the database
+	// This should be used when the GUID or server is changed
+	void lastUploadedReset() {
+		m_lastUploaded = 0;
+	}
+
 	// Update the sensor log using a key and value pair
 	// Returns true if the key-value was used, or false if it does not apply to this class
 	bool updateWithKeyValue(String& key, String& value) {
