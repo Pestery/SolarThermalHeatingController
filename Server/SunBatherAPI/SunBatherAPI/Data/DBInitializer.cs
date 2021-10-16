@@ -16,6 +16,7 @@ namespace SunBatherAPI.Data
             {
                 return; // DB has already been seeded
             }
+            Console.WriteLine("SeedingData");
 
             var temperature = new TemperatureSensor[]{
                 new TemperatureSensor{Id=1,Value=19.21,ReadDate=DateTime.Parse("01/09/2005 12:10")},
@@ -45,7 +46,7 @@ namespace SunBatherAPI.Data
             context.SaveChanges();
 
             RecordEvent[] recordEvent;
-            int numberOfRecords = 3360;
+            int numberOfRecords = 43000;
             int timeInterval = 15; // in minutes 
             bool dateTimeNow = false;
             DateTime testingTime;

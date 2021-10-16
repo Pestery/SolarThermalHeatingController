@@ -15,18 +15,25 @@ namespace SunBatherAPI
     {
         public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
+            string environmentName; // for transformations for json
+            environmentName = "Debug";
+            #if DEVELOPMENT
+                            environmentName = "Development";
+            #elif RELEASE
+                            environmentName = "Release";
+            #endif
+
+            var host = CreateHostBuilder(args).UseEnvironment(environmentName).Build();
 
             // seeds the database
             using (var scope = host.Services.CreateScope())
             {
-
                 var services = scope.ServiceProvider;
 
                 try
                 {
                     var context = services.GetRequiredService<DataContext>();
-                    //DBInitializer.Initialize(context);
+                    DBInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {

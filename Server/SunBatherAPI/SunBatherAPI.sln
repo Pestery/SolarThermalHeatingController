@@ -3,16 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31105.61
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunBatherAPI", "SunBatherAPI\SunBatherAPI.csproj", "{A95CCBBA-6786-4B77-AAAC-839EE3097A79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SunBatherAPI", "SunBatherAPI\SunBatherAPI.csproj", "{A95CCBBA-6786-4B77-AAAC-839EE3097A79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Production|Any CPU = Production|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A95CCBBA-6786-4B77-AAAC-839EE3097A79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A95CCBBA-6786-4B77-AAAC-839EE3097A79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A95CCBBA-6786-4B77-AAAC-839EE3097A79}.Production|Any CPU.ActiveCfg = Release|Any CPU
 		{A95CCBBA-6786-4B77-AAAC-839EE3097A79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A95CCBBA-6786-4B77-AAAC-839EE3097A79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

@@ -55,7 +55,6 @@ function averageRound(average, count) {
   }
 }
 
-
 // finds min value 
 function findMin(newMin, originalMin) {
   if (newMin < originalMin) {

@@ -26,17 +26,20 @@ function comparePageIntialize(viewModel) {
     viewModel.set('showDatePicker', false);
     viewModel.set('showData', true);
     viewModel.set('showGraphPicker', false);
+    var initialSelected = 1; // initiale graph selected
 
     // graph options list, default value loaded in screen is emissions
-    viewModel.set('graphOptionSelected', 1)
+    viewModel.set('graphOptionSelected', initialSelected)
     var graphOptionList = compareOptions();
     graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
+    viewModel.set('graphSelected', graphOptionList[initialSelected].nameAbbreviated); // needed so a default graph type is selected
     viewModel.set('graphOptions', graphOptionList);
 
     // compare options list, default value loaded in screen is 
-    viewModel.set('compareOptionSelected', 1)
+    viewModel.set('compareOptionSelected', initialSelected)
     var compareOptionList = competitorOptions();
     compareOptionList[viewModel.get('compareOptionSelected')].isSelected = true;
+    viewModel.set('competitorSelected', compareOptionList[initialSelected].nameAbbreviated); // needed so a default graph type is selected
     viewModel.set('compareOptions', compareOptionList);
 
     // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done

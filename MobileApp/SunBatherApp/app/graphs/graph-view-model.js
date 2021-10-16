@@ -31,12 +31,13 @@ function graphPageIntialize(viewModel) {
   viewModel.set('showDatePicker', false);
   viewModel.set('showData', true);
   viewModel.set('showGraphPicker', false);
+  var initialSelected = 1; // initiale graph selected
 
   // graph options list, default value loaded in screen is roof temp
-  viewModel.set('graphOptionSelected', 1)
+  viewModel.set('graphOptionSelected', initialSelected)
   var graphOptionList = graphOptions();
   graphOptionList[viewModel.get('graphOptionSelected')].isSelected = true;
-  //viewModel.set('graphSelected', graphOptionList[1].nameAbbreviated); // needed so a default graph type is selected
+  viewModel.set('graphSelected', graphOptionList[initialSelected].nameAbbreviated); // needed so a default graph type is selected
   viewModel.set('graphOptions', graphOptionList);
 
   // turn live data to true when testing live data, else it uses sample data from API, this can be removed when product done
