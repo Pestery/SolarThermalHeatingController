@@ -10,10 +10,10 @@ class ServerAddress {
 public:
 
 	// Maximum length of a server address (http://server-address/page-address/more/page/address)
-	static constexpr int maxHostLength = 45 + 1; // Maximum length of IPv6 address (45), plus null character (+1)
+	static constexpr int maxHostLength = 100; // Maximum length of server address, plus a null character
 
 	// Maximum length of a web page address (http://server-address/page-address/more/page/address)
-	static constexpr int maxPathLength = 96 - 4 - maxHostLength;
+	static constexpr int maxPathLength = 60;
 
 	// Check if the connection should be secured (HTTPS or HTTP)
 	// Returns true for secured (HTTPS), or false for unsecured (HTTP)

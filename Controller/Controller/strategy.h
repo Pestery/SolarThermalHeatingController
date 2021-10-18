@@ -5,6 +5,7 @@
 #include "settings.h"
 #include "timer.h"
 #include "sensor_record.h"
+#include "time_keeper.h"
 
 // Show pump status using buzzer
 #define USE_BUZZER_PUMP_STATUS 0
@@ -60,7 +61,7 @@ public:
   }
 
   // Update the controller strategy
-  void update() {
+  void update(TimeKeeper& timeKeeper) {
 
     // Get current time in milliseconds
     // This value will overflow (go back to zero) roughly every 50 days
@@ -72,7 +73,7 @@ public:
 
       SensorRecord sr;
 
-      sr.readAll(); //getting all sensor data
+      sr.readAll(timeKeeper); //getting all sensor data
 
       /*
       Serial.print("modeAutomatic: ");
@@ -93,6 +94,8 @@ public:
       Serial.print("solarValue: ");
       Serial.println(solarValue);
       //*/
+
+      // roof temp to inlet temp, > 7oC diff turn on, < 2oC diff turn off
 
       // m_settings.pumpStatus() //reads current pump status
       if(m_settings.modeAutomatic()) {// if mode is in AUTO

@@ -125,7 +125,9 @@ struct SensorRecord {
 
 	// Read the value of all connected sensors and store it within this class
 	// This will also increment the index value
-	void readAll(TimeKeeper* timeKeeper = nullptr) {
+	void readAll() {readAll(nullptr);}
+	void readAll(TimeKeeper& timeKeeper) {readAll(&timeKeeper);}
+	void readAll(TimeKeeper* timeKeeper) {
 
 		// Record current time within record
 		if (timeKeeper) dateTime = timeKeeper->current();
@@ -136,9 +138,9 @@ struct SensorRecord {
 
 		// Record sensor values
 		temperatureInlet = readThermistor(A0); // A0 seems to be defined
-		temperatureOutlet = temperatureInlet;
-		temperatureRoof = 20 + (t * 10);
-		solarIrradiance = 2000 * t;
+		temperatureOutlet = temperatureInlet - 0.5f + (t * 5.0f);
+		temperatureRoof = 20.0f + (t * 10.0f);
+		solarIrradiance = 2000.0f * t;
 	}
 
 	// Convert the raw analogue input from a thermistor temperature sensor to a temperature value in Celsius

@@ -25,13 +25,24 @@ namespace SunBatherAPI.Controllers
             //System.Diagnostics.Debug.WriteLine("SystemController() constructor");
         }
 
-        // POST: api/TemperatureSensors
+        // GET: api/System/GetSystemGuid/{systemId}
+        // This method will return the GUID for a given system ID
+        // TODO: This method is for debugging only and should be removed in future
+        [Route("[action]/{systemId}")]
+        [HttpGet]
+        public async Task<ActionResult<Guid>> GetSystemGuid(int systemId)
+        {
+            var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == systemId);
+            return (temp == null) ?
+                NotFound() :
+                temp.ProductId;
+        }
+
+        // POST: api/System
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ControllerReply>> Post(ControllerPost param)
         {
-            var temp = await _context.SystemID.FirstOrDefaultAsync(p => p.Id == 1);
-            System.Diagnostics.Debug.WriteLine("GUID: " + temp.ProductId);
 
             // Make sure that something was posted
             if (param == null) return NoContent();
