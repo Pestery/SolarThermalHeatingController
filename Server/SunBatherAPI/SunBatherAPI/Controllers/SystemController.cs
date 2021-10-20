@@ -127,7 +127,7 @@ namespace SunBatherAPI.Controllers
             {
                 Auto = systemStatus.PumpMode,
                 SetTemp = systemStatus.SetTemperature,
-                PumpOn = systemStatus.ManualPumpOn,
+                ManualOn = systemStatus.ManualPumpOn,
                 LastRecord = lastRecordReceived
             };
 
