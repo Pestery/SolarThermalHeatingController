@@ -178,7 +178,7 @@ public:
 		if (key == F("\"auto\"")) {
 			modeAutomatic(value == F("true"));
 
-		} else if (key == F("\"pumpOn\"")) {
+		} else if (key == F("\"manualOn\"")) {
 			manualPumpOn(value == F("true"));
 
 		} else if (key == F("\"setTemp\"")) {
