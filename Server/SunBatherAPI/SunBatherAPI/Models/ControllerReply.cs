@@ -25,12 +25,11 @@ namespace SunBatherAPI.Models
         /// Manual mode pump-on status.
         /// If the controller is set to manual mode then if this value will set the pump to always on or off.
         /// </summary>
-        public bool? PumpOn { get; set; }
+        public bool? ManualOn { get; set; }
 
         /// <summary>
         /// The DateTime of the last received record.
         /// </summary>
         public long? LastRecord { get; set; }
-
     }
 }

@@ -105,8 +105,14 @@ void setup() {
 	//SensorLog::listAllFiles();
 	//Serial.println();
 
-	// Final message
-	Serial.println(F("Arduino setup finished."));
+	// Pause for a moment to try and wait for the Wifi chip to finish its setup
+	// Then clear any serial data already sent
+	Serial.print(F("Finishing..."));
+	delay(1000);
+	while (SERIAL_PC.available()) SERIAL_PC.read();
+	while (SERIAL_WIFI.available()) SERIAL_WIFI.read();
+	while (SERIAL_BLUETOOTH.available()) SERIAL_BLUETOOTH.read();
+	Serial.println(F("Done"));
 	Serial.println();
 }
 
@@ -132,7 +138,7 @@ void loop() {
 
 	// Check if it is time to send data to the database
 	// Also check if there is actually any data to send
-	if (timerSendToDatabase.triggered(currentTime)) {
+	if (settings.autoUpload() && timerSendToDatabase.triggered(currentTime)) {
 		linkWifi.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
 		#if VERBOSE_INTERLINK
 		linkPC.send(Interconnect::SendToDatabaseRequest, String(sendToDatabaseSyncKey));
@@ -148,7 +154,7 @@ void loop() {
 	}
 
 	// Update controller strategy
-	strategy.update();
+	strategy.update(timeKeeper);
 
 	// Update interconnects
 	linkWifi.update();
@@ -227,12 +233,17 @@ void loop() {
 					// Loop through the data and try to apply it
 					JsonDecoder decoder(payload);
 					while (decoder.fetch()) {
-						settings.updateWithKeyValue(decoder.name(), decoder.value()) ||
-						sensorLog.updateWithKeyValue(decoder.name(), decoder.value());
+						if (!decoder.isValueNull()) {
+							settings.updateWithKeyValue(decoder.name(), decoder.value()) ||
+							sensorLog.updateWithKeyValue(decoder.name(), decoder.value());
+						}
 					}
 
+					// Save any changes made
+					settings.save();
+
 					// Check if there is more data to be uploaded
-					if (sensorLog.isUploadRequired()) timerSendToDatabase.reset(millis());
+					if (sensorLog.isUploadRequired() || !settings.isServerInformed()) timerSendToDatabase.reset(millis());
 
 					// Output a copy of the data to the console, if required
 					#if VERBOSE_INTERLINK
@@ -324,7 +335,7 @@ void loop() {
 				}
 
 				// Reset values which should be re-fetched from the database
-				sensorLog.lastUploaded(0);
+				sensorLog.lastUploadedReset();
 				break;
 
 			case Interconnect::GetGuid:
@@ -372,11 +383,90 @@ void loop() {
 				}
 				break;
 
+			case Interconnect::SetAutoUpload: {
+
+				// Get the payload value
+				int c = payload.peek();
+				if ((c == '1') || (c == 't') || (c == 'T')) {
+					c = 1;
+				} else if ((c == '0') || (c == 'f') || (c == 'F')) {
+					c = 0;
+					sensorLog.lastUploadedReset();
+				} else {
+					c = -1;
+				}
+
+				// Output a copy of the data to the console, if required
+				#if VERBOSE_INTERLINK
+				linkPC.send(header, payload);
+				#endif
+
+				// Update the auto-upload setting
+				if (c >= 0) {
+					settings.autoUpload(c == 1);
+					settings.save();
+					payload.clear();
+					payload.print(F("Ok"));
+					switch (sender) {
+						case LinkId::PC: linkPC.send(header, payload); break;
+						case LinkId::BT: linkBT.send(header, payload); break;
+					}
+				}
+				break;
+			}
+
+			case Interconnect::GetAutoUpload:
+
+				// Get the current auto-upload setting
+				payload.clear();
+				payload.print(F("AutoUpload="));
+				payload.print(settings.autoUpload());
+				switch (sender) {
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
+				}
+				break;
+
+			case Interconnect::GetRecord: {
+
+				// Get time-stamp from payload
+				DateTime dt(payload.convertToString());
+
+				// Get saved records
+				SensorRecord sr;
+				unsigned found = sensorLog.fetch(dt, &sr, 1);
+
+				// Generate response
+				payload.clear();
+				if (found == 0) {
+					payload.print(F("null"));
+				} else {
+					sr.toJson(payload);
+				}
+
+				// Send response
+				switch (sender) {
+					case LinkId::PC: linkPC.send(header, payload); break;
+					case LinkId::BT: linkBT.send(header, payload); break;
+					#if VERBOSE_INTERLINK
+					default: linkPC.send(header, payload); break;
+					#endif
+				}
+				break;
+			}
+
 			case Interconnect::SetServerAddress:
 
 				// Reset values which should be re-fetched from the database
 				// Then fall through to other code (do not break;)
-				sensorLog.lastUploaded(0);
+				sensorLog.lastUploadedReset();
+
+				// Turn on auto-uploading of records
+				settings.autoUpload(true);
+				settings.save();
 
 			case Interconnect::EchoESP8266:
 			case Interconnect::DebugSendToServerKeepHeaders:

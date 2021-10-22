@@ -99,6 +99,15 @@ public:
 		// Payload is the current Epoch time as a string
 		SetTime = 'e',
 
+		// A debug command to get some records from the controller
+		// Payload is a Unix time stamp value (the number of seconds since 1/1/1970 at UTC)
+		GetRecord = 'R',
+
+		// Change if the controller should try or not to automatically upload recorded sensor data
+		// Payload should be '0' for false or '1' for true
+		SetAutoUpload = 'u',
+		GetAutoUpload = 'U',
+
 		// A debug command used to send data to server
 		// The response will be forwarded back through to the serial port
 		// Payload is the (probably JSON) message to be sent to the server

@@ -22,7 +22,7 @@ const GASHEATER2 = 0.75 //127 Premium
 function getThermalPower(data) {    
     var inletTemp = data.temperatureValueInput; //Degrees Celcius
     var outletTemp = data.temperatureValueOutput; //Degrees Celcius
-    var deltaTemp = outletTemp - inletTemp; //Degrees Celcius 
+    var deltaTemp = outletTemp - inletTemp + 1; //Degrees Celcius cant be 1.
     if(deltaTemp < 0) {
         deltaTemp = 0;
     }
@@ -47,6 +47,7 @@ function loopThroughData(arrayData, databaseField, energyConstant, heaterConstan
         max = commonFunction.findMax(arrayData[i][databaseField], max);
         average = average + arrayData[i][databaseField];
     }
+        console.log(getThermalPower(arrayData[1]));
 
     arrayDataInfo.graphDataArray = arrayData;
     arrayDataInfo.min = min;  
