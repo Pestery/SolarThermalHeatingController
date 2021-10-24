@@ -138,7 +138,7 @@ struct SensorRecord {
 
 		// Record sensor values
 		temperatureInlet = readThermistor(A0); // A0 seems to be defined
-		temperatureOutlet = temperatureInlet - 0.5f + (t * 5.0f);
+		temperatureOutlet = readThermistor(A1);
 		temperatureRoof = 20.0f + (t * 10.0f);
 		solarIrradiance = 2000.0f * t;
 	}

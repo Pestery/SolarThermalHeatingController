@@ -46,7 +46,7 @@ namespace SunBatherAPI.Data
             context.SaveChanges();
 
             RecordEvent[] recordEvent;
-            int numberOfRecords = 43000;
+            int numberOfRecords = 200;
             int timeInterval = 15; // in minutes 
             bool dateTimeNow = false;
             DateTime testingTime;
